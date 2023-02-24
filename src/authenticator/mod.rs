@@ -1,13 +1,11 @@
-use std::{convert::Infallible, net::SocketAddr, str::FromStr, thread};
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use std::{convert::Infallible, net::SocketAddr, str::FromStr};
+use tokio::sync::mpsc::channel;
 use url::form_urlencoded;
 
-use anyhow::Error;
 use hyper::{
     service::{make_service_fn, service_fn},
-    Body, Request, Response, Server,
+    Body, Response, Server,
 };
-use termion::color;
 
 pub struct Authenticator {
     client_id: String,
@@ -25,11 +23,12 @@ impl Authenticator {
     }
 
     pub(crate) async fn access_token(&mut self) -> Result<String, anyhow::Error> {
-        let (tx, mut rx) = channel::<()>(1);
+        let (tx, mut rx) = channel::<String>(1);
 
-        let addr = SocketAddr::from_str("127.0.0.1:8112");
+        let addr = SocketAddr::from_str("127.0.0.1:8112").unwrap();
 
-        format!("https://www.strava.com/oauth/authorize?client_id={}&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=read", self.client_id);
+
+        println!("https://www.strava.com/oauth/authorize?client_id={}&response_type=code&redirect_uri=http://{}/exchange_token&approval_prompt=force&scope=read", self.client_id, self.addr);
 
         let make_svc = make_service_fn(|_con| {
             let tx = tx.clone();
@@ -48,7 +47,7 @@ impl Authenticator {
                             }
                         }
 
-                        tx.send(()).await.unwrap();
+                        tx.send(code.clone()).await.unwrap();
                         Ok::<Response<Body>, Infallible>(Response::new(Body::from(code)))
                     }
                 }))
@@ -58,7 +57,8 @@ impl Authenticator {
         let server = Server::bind(&addr)
             .serve(make_svc)
             .with_graceful_shutdown(async {
-                rx.recv().await;
+                let code = rx.recv().await;
+                println!("{}", code.unwrap())
             });
 
         if let Err(e) = server.await {

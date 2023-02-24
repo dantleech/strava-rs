@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::fmt::format;
+
 
 use hyper::{Body, Client, Method, Request, Response, client::HttpConnector};
 use hyper_tls::HttpsConnector;
