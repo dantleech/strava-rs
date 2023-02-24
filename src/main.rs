@@ -5,6 +5,8 @@ use anyhow::Error;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
 use authenticator::Authenticator;
+use hyper::Client;
+use hyper_tls::HttpsConnector;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -17,8 +19,11 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<(), Error>{
+    let connector = HttpsConnector::new();
+    let client = Client::builder().build(connector);
     let args = Args::parse();
     let mut authenticator = Authenticator::new(
+        client,
         args.client_id,
         args.client_secret,
     );
@@ -29,6 +34,6 @@ async fn main() -> Result<(), Error>{
     };
     let client = new_strava_client(api_config);
 
-    client.athlete_activities().await?;
+    println!("{:#?}", client.athlete_activities().await?);
     Ok(())
 }
