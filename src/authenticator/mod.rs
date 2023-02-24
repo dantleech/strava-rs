@@ -47,7 +47,7 @@ impl Authenticator {
                             }
                         }
 
-                        tx.send(());
+                        tx.send(()).await.unwrap();
                         Ok::<Response<Body>, Infallible>(Response::new(Body::from(code)))
                     }
                 }))
