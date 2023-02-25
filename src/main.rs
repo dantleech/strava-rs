@@ -20,12 +20,20 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error>{
+    env_logger::Builder::new().filter(None, log::LevelFilter::Info).init();
+
     let connector = HttpsConnector::new();
     let client = Client::builder().build(connector);
     let args = Args::parse();
     let dirs: BaseDirectories = xdg::BaseDirectories::with_prefix("strava-rs").unwrap();
     let access_token_path = dirs.place_state_file("access_token.json").expect("Could not create state directory");
-    println!("State path: {}", access_token_path.display());
+
+    log::info!("Strava TUI");
+    log::info!("==========");
+    log::info!("");
+    log::info!("Token path: {}", access_token_path.display());
+    log::info!("");
+
     let mut authenticator = Authenticator::new(
         client,
         args.client_id,

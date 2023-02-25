@@ -26,7 +26,10 @@ impl AuthCodeFetcher {
 
         let addr = SocketAddr::from_str("127.0.0.1:8112").unwrap();
 
-        println!("https://www.strava.com/oauth/authorize?client_id={}&response_type=code&redirect_uri=http://{}/exchange_token&approval_prompt=force&scope=activity:read_all,read", self.client_id, self.addr);
+        println!("Visit the following URL to grant Strava TUI access to your Strava data:");
+        println!("");
+        println!("    https://www.strava.com/oauth/authorize?client_id={}&response_type=code&redirect_uri=http://{}/exchange_token&approval_prompt=force&scope=activity:read_all,read", self.client_id, self.addr);
+        println!("");
 
         let make_svc = make_service_fn(|_con| {
             let tx = tx.clone();
@@ -46,7 +49,15 @@ impl AuthCodeFetcher {
                         }
 
                         tx.send(code.clone()).await.unwrap();
-                        Ok::<Response<Body>, Infallible>(Response::new(Body::from(code)))
+                        Ok::<Response<Body>, Infallible>(Response::new(Body::from("
+                        <html>
+                            <head><title>Rust Authentication</title></head>
+                            <body>
+                                <h1>Strava TUI - access granted</h1>
+                                <p>Close this window and return to your terminal</p>
+                            </body>
+                        </html>
+                        ")))
                     }
                 }))
             }
