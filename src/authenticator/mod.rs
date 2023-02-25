@@ -36,14 +36,26 @@ impl Authenticator {
         }
         let auth_code = self.token_fetch.auth_code().await?;
         let access_token: AuthResponse = self.access_token_fetcher.access_token(auth_code).await?;
-        self.token_store.put(&access_token);
+        self.token_store.put(&access_token)?;
 
         return Ok(access_token.access_token);
-
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AuthResponse {
+    pub token_type: String,
+    pub expires_at: u64,
+    pub expires_in: u64,
+    pub refresh_token: String,
     pub access_token: String,
+    pub athlete: Athlete,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Athlete {
+    pub id: u64,
+    pub username: String,
+    pub firstname: String,
+    pub lastname: String,
 }
