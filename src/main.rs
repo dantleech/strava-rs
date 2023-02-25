@@ -25,6 +25,7 @@ async fn main() -> Result<(), anyhow::Error>{
     let args = Args::parse();
     let dirs: BaseDirectories = xdg::BaseDirectories::with_prefix("strava-rs").unwrap();
     let access_token_path = dirs.place_state_file("access_token.json").expect("Could not create state directory");
+    println!("State path: {}", access_token_path.display());
     let mut authenticator = Authenticator::new(
         client,
         args.client_id,

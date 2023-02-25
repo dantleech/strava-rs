@@ -1,4 +1,4 @@
-use std::{fs::{File}, path::Path};
+use std::{fs::{File}, path::Path, io::{Read, Write}};
 
 use super::{auth_code_fetcher::AuthCodeFetcher, AuthResponse};
 
@@ -11,15 +11,25 @@ impl TokenStore {
         Self{path}
     }
 
-    pub(crate) fn get(&self) -> Option<AuthResponse> {
+    pub(crate) fn get(&self) -> Result<Option<AuthResponse>, anyhow::Error> {
         if !Path::new(&self.path).exists() {
-            return None
+            return Ok(None)
         }
-        match File::open(&self.path) {
-            Ok(file) => {
-                Some(AuthResponse{access_token: "".to_string()})
-            }
-            Err(e) => None
+        let file = File::open(&self.path)?;
+        self.read_file(file)
+    }
+
+    fn read_file(&self, file: File) -> Result<Option<AuthResponse>, anyhow::Error> {
+        let token: AuthResponse = serde_json::from_reader(&file)?;
+        Ok(Some(token))
+    }
+
+    pub(crate) fn put(&self, token: &AuthResponse) -> Result<(), anyhow::Error> {
+        if !Path::new(&self.path).exists() {
+            let file: File = File::create(&self.path)?;
+            serde_json::to_writer(&file, token)?;
         }
+
+        Ok(())
     }
 }

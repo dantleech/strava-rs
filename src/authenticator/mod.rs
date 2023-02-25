@@ -30,11 +30,13 @@ impl Authenticator {
         }
     }
     pub(crate) async fn access_token(&mut self) -> Result<String, anyhow::Error> {
-        if let Some(result) = self.token_store.get() {
+        let token = self.token_store.get()?;
+        if let Some(result) = token {
             return Ok(result.access_token)
         }
         let auth_code = self.token_fetch.auth_code().await?;
         let access_token: AuthResponse = self.access_token_fetcher.access_token(auth_code).await?;
+        self.token_store.put(&access_token);
 
         return Ok(access_token.access_token);
 
