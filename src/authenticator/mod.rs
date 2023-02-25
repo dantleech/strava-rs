@@ -21,10 +21,11 @@ impl Authenticator {
         client: Client<HttpsConnector<HttpConnector>>,
         client_id: String,
         client_secret: String,
+        token_path: String,
     ) -> Self {
         Authenticator {
             token_fetch: AuthCodeFetcher::new(client_id.clone()),
-            token_store: TokenStore::new(),
+            token_store: TokenStore::new(token_path),
             access_token_fetcher: AccessTokenFetcher::new(client, client_id, client_secret)
         }
     }

@@ -7,6 +7,7 @@ use client::{new_strava_client, StravaConfig};
 use authenticator::Authenticator;
 use hyper::Client;
 use hyper_tls::HttpsConnector;
+use xdg::BaseDirectories;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -18,14 +19,17 @@ struct Args {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Error>{
+async fn main() -> Result<(), anyhow::Error>{
     let connector = HttpsConnector::new();
     let client = Client::builder().build(connector);
     let args = Args::parse();
+    let dirs: BaseDirectories = xdg::BaseDirectories::with_prefix("strava-rs").unwrap();
+    let access_token_path = dirs.place_state_file("access_token.json").expect("Could not create state directory");
     let mut authenticator = Authenticator::new(
         client,
         args.client_id,
         args.client_secret,
+        access_token_path.to_str().unwrap().to_string()
     );
 
     let api_config = StravaConfig {
