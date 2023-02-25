@@ -1,10 +1,8 @@
 use std::{convert::Infallible, net::SocketAddr, str::FromStr};
-use hyper::{client::HttpConnector, Client, service::{make_service_fn, service_fn}, Server, Request, Body, Response};
-use hyper_tls::HttpsConnector;
+use hyper::{service::{make_service_fn, service_fn}, Server, Body, Response};
+
 use tokio::sync::mpsc::channel;
 use url::form_urlencoded;
-
-use crate::authenticator::AuthResponse;
 
 pub struct AuthCodeFetcher {
     client_id: String,
@@ -26,10 +24,16 @@ impl AuthCodeFetcher {
 
         let addr = SocketAddr::from_str("127.0.0.1:8112").unwrap();
 
-        println!("Visit the following URL to grant Strava TUI access to your Strava data:");
-        println!("");
-        println!("    https://www.strava.com/oauth/authorize?client_id={}&response_type=code&redirect_uri=http://{}/exchange_token&approval_prompt=force&scope=activity:read_all,read", self.client_id, self.addr);
-        println!("");
+        let auth_url = format!("https://www.strava.com/oauth/authorize?client_id={}&response_type=code&redirect_uri=http://{}/exchange_token&approval_prompt=force&scope=activity:read_all,read", self.client_id, self.addr);
+
+        log::info!("trying to open URL: {}", auth_url);
+
+        if !open::that(&auth_url).is_ok() {
+            log::info!("Could not open browser, visit the following URL to grant Strava TUI access to your Strava data:");
+            log::info!("");
+            log::info!("    {}", auth_url);
+            log::info!("");
+        }
 
         let make_svc = make_service_fn(|_con| {
             let tx = tx.clone();
@@ -72,6 +76,7 @@ impl AuthCodeFetcher {
                 tx1.send(code.unwrap()).await.unwrap();
             });
 
+        log::info!("starting web server at {} and listening for auth code", self.addr);
         if let Err(e) = server.await {
             eprintln!("server error: {}", e);
         }

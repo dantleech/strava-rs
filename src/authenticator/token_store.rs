@@ -1,6 +1,6 @@
-use std::{fs::{File}, path::Path, io::{Read, Write}};
+use std::{fs::{File}, path::Path};
 
-use super::{auth_code_fetcher::AuthCodeFetcher, AuthResponse};
+use super::{AuthResponse};
 
 pub struct TokenStore {
     path: String,

@@ -1,7 +1,7 @@
 pub mod client;
 pub mod authenticator;
 
-use anyhow::Error;
+
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
 use authenticator::Authenticator;
