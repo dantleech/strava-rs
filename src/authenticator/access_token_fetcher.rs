@@ -38,7 +38,7 @@ impl AccessTokenFetcher {
         let res: Response<Body> = self.client.request(req).await?;
 
         if res.status() != 200 {
-            return Err(anyhow::Error::msg(format!("Got {} respponse for auth response", res.status())));
+            return Err(anyhow::Error::msg(format!("Got '{}' when trying to authenticate, check your client ID and secret", res.status())));
         }
 
         let bytes = hyper::body::to_bytes(res.into_body()).await?;
