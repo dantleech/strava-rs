@@ -1,20 +1,19 @@
-mod token_fetch;
+mod access_token_fetcher;
+mod auth_code_fetcher;
+mod token_store;
 use hyper_tls::HttpsConnector;
 use serde::{Deserialize, Serialize};
-use std::{convert::Infallible, fmt::format, net::SocketAddr, str::FromStr};
-use tokio::sync::mpsc::channel;
-use url::form_urlencoded;
 
 use hyper::{
-    client::HttpConnector,
-    service::{make_service_fn, service_fn},
-    Body, Client, Request, Response, Server,
+    client::HttpConnector, Client,
 };
 
-use self::token_fetch::TokenFetch;
+use self::{auth_code_fetcher::AuthCodeFetcher, token_store::TokenStore, access_token_fetcher::AccessTokenFetcher};
 
 pub struct Authenticator {
-    token_fetch: TokenFetch,
+    token_fetch: AuthCodeFetcher,
+    token_store: TokenStore,
+    access_token_fetcher: AccessTokenFetcher,
 }
 
 impl Authenticator {
@@ -24,11 +23,20 @@ impl Authenticator {
         client_secret: String,
     ) -> Self {
         Authenticator {
-            token_fetch: TokenFetch::new(client, client_id, client_secret),
+            token_fetch: AuthCodeFetcher::new(client_id.clone()),
+            token_store: TokenStore::new(),
+            access_token_fetcher: AccessTokenFetcher::new(client, client_id, client_secret)
         }
     }
     pub(crate) async fn access_token(&mut self) -> Result<String, anyhow::Error> {
-        self.token_fetch.access_token().await
+        if let Some(result) = self.token_store.get() {
+            return Ok(result.access_token)
+        }
+        let auth_code = self.token_fetch.auth_code().await?;
+        let access_token: AuthResponse = self.access_token_fetcher.access_token(auth_code).await?;
+
+        return Ok(access_token.access_token);
+
     }
 }
 

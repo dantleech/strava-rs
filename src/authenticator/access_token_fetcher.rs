@@ -1,0 +1,50 @@
+use std::{convert::Infallible, net::SocketAddr, str::FromStr};
+use hyper::{client::HttpConnector, Client, service::{make_service_fn, service_fn}, Server, Request, Body, Response};
+use hyper_tls::HttpsConnector;
+use tokio::sync::mpsc::channel;
+use url::form_urlencoded;
+
+use super::AuthResponse;
+
+pub struct AccessTokenFetcher {
+    client: Client<HttpsConnector<HttpConnector>>,
+    client_id: String,
+    client_secret: String,
+}
+
+impl AccessTokenFetcher {
+    pub(crate) fn new(
+        client: Client<HttpsConnector<HttpConnector>>,
+        client_id: String,
+        client_secret: String,
+    ) -> Self {
+        Self{
+            client,
+            client_id,
+            client_secret,
+        }
+    }
+
+    pub (crate) async fn access_token(&mut self, code: String) -> Result<AuthResponse, anyhow::Error> {
+        let req = Request::builder()
+            .uri("https://www.strava.com/oauth/token")
+            .method("POST")
+            .body(Body::from(format!(
+                "client_id={}&client_secret={}&code={}&grant_type=authorization_code",
+                self.client_id, self.client_secret, code
+            )))
+            .unwrap();
+
+        let res: Response<Body> = self.client.request(req).await?;
+
+        if res.status() != 200 {
+            return Err(anyhow::Error::msg(format!("Got {} respponse for auth response", res.status())));
+        }
+
+        let bytes = hyper::body::to_bytes(res.into_body()).await?;
+        let deserialized: AuthResponse  = serde_json::from_slice(&bytes)?;
+
+        return Ok(deserialized);
+    }
+}
+
