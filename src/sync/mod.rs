@@ -16,23 +16,31 @@ impl StravaSync<'_> {
         }
     }
     pub async fn sync(&mut self) -> Result<(), anyhow::Error> {
-        let s_activities: Vec<client::Activity> = self.client.athlete_activities().await.unwrap();
+        let mut page: u32 = 0;
+        const PAGE_SIZE: u32 = 10;
+        let mut offset: u64 = 0;
+        loop {
+            page+=1;
+            let s_activities: Vec<client::Activity> = self.client.athlete_activities(page, PAGE_SIZE).await.unwrap();
+            if s_activities.len() == 0 {
+                break
+            }
 
-        self.activity_store.clear();
-        let mut count: u64 = 0;
-        for s_activity in s_activities.iter() {
-            count+=1;
-            log::info!("sync: {}: {}", count, s_activity);
-            self.activity_store.add(Activity {
-                name: s_activity.name.clone(),
-                distance: s_activity.distance.clone(),
-                moving_time: s_activity.moving_time.clone(),
-                elapsed_time: s_activity.elapsed_time.clone(),
-                total_elevation_gain: s_activity.total_elevation_gain.clone(),
-                sport_type: s_activity.sport_type.clone(),
-            })
+            self.activity_store.clear();
+            for s_activity in s_activities.iter() {
+                offset+=1;
+                log::info!("sync: {}: {}", offset, s_activity);
+                self.activity_store.add(Activity {
+                    name: s_activity.name.clone(),
+                    distance: s_activity.distance.clone(),
+                    moving_time: s_activity.moving_time.clone(),
+                    elapsed_time: s_activity.elapsed_time.clone(),
+                    total_elevation_gain: s_activity.total_elevation_gain.clone(),
+                    sport_type: s_activity.sport_type.clone(),
+                })
+            }
+            self.activity_store.flush()?;
         }
-        self.activity_store.flush()?;
         Ok(())
     }
 }

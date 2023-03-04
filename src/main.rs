@@ -59,6 +59,5 @@ async fn main() -> Result<(), anyhow::Error>{
 
     StravaSync::new(&client,&mut activity_store).sync().await?;
 
-    println!("{:#?} Activites", client.athlete_activities().await?.len());
     Ok(())
 }
