@@ -25,10 +25,8 @@ impl TokenStore {
     }
 
     pub(crate) fn put(&self, token: &AuthResponse) -> Result<(), anyhow::Error> {
-        if !Path::new(&self.path).exists() {
-            let file: File = File::create(&self.path)?;
-            serde_json::to_writer(&file, token)?;
-        }
+        let file: File = File::create(&self.path)?;
+        serde_json::to_writer(&file, token)?;
 
         Ok(())
     }
