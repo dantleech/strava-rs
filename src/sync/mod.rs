@@ -19,8 +19,10 @@ impl StravaSync<'_> {
         let s_activities: Vec<client::Activity> = self.client.athlete_activities().await.unwrap();
 
         self.activity_store.clear();
+        let mut count: u64 = 0;
         for s_activity in s_activities.iter() {
-            log::info!("sync: {}", s_activity);
+            count+=1;
+            log::info!("sync: {}: {}", count, s_activity);
             self.activity_store.add(Activity {
                 name: s_activity.name.clone(),
                 distance: s_activity.distance.clone(),
