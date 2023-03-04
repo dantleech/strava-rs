@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use std::fmt::Display;
+
 use hyper::{client::HttpConnector, Body, Client, Method, Request, Response};
 use hyper_tls::HttpsConnector;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -29,12 +31,19 @@ pub struct StravaClient {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Activity {
+    pub id: u64,
     pub name: String,
     pub distance: f64,
     pub moving_time: u64,
     pub elapsed_time: u64,
     pub total_elevation_gain: f64,
     pub sport_type: String,
+}
+
+impl Display for Activity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} [{}] {}", self.id, self.sport_type, self.name)
+    }
 }
 
 impl StravaClient {

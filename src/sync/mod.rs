@@ -20,6 +20,7 @@ impl StravaSync<'_> {
 
         self.activity_store.clear();
         for s_activity in s_activities.iter() {
+            log::info!("sync: {}", s_activity);
             self.activity_store.add(Activity {
                 name: s_activity.name.clone(),
                 distance: s_activity.distance.clone(),
