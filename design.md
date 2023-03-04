@@ -11,12 +11,14 @@ Implementation
 Key Map
 -------
 
+- `⏎`: Select
 - `n`: Next tab
 - `p`: Previous tab
 - `j`: Down
-- `p`: Up
+- `k`: Up
+- `J`: Page down
+- `K`: Page up
 - ``: Return to activities view
-- `⏎`: Select
 
 Features
 --------
@@ -45,7 +47,7 @@ Activities
 +-----------------------------------------------+
 | Activities                                    |
 +-----------------------------------------------+
-| List                                          |
+| List | Routes |                               |
 +-----------------------------------------------+
 |  Date     Attempt Title   Dist   Time  Pace   |
 |  ----     ------- -----   ----   ----  ----   |
@@ -67,12 +69,21 @@ Activity
 +-----------------------------------------------+
 | Park Run Esplanade                            |
 +-----------------------------------------------+
-| Summary | Laps | Attempts                     |
+| Summary | Laps | Attempts |                   |
 +-----------------------------------------------+
 |                                               |
-| Time:      20:00  Distance:   3.1km           |
+| Time     : 20:00  Distance  : 3.1km           |
 | Avg. Pace: 7:04   Avg. Heart: 160bpm          |
 |                                               |
+| Pace Insights                                 |
+|                                               |
+| +-----------+-------+                         |
+| | Distance  | Time  |                         |
+| +-----------+-------+                         |
+| | 10k       | 43m   |                         |
+| | 13.2m     | 1h45m |                         |
+| | 26m       | 3h30m |                         |
+| +-----------+-------+                         |
 +-----------------------------------------------+
 | [k] Up [j] Down [⏎] Select |    [u] km/m |
 ```
