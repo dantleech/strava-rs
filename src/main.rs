@@ -3,8 +3,9 @@ pub mod client;
 pub mod store;
 pub mod sync;
 pub mod ui;
+pub mod util;
 
-use std::{fs, io};
+use std::io;
 
 use crossterm::terminal::{enable_raw_mode, disable_raw_mode};
 use authenticator::Authenticator;

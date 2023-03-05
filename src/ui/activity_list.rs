@@ -1,6 +1,6 @@
 use tui::{backend::Backend, Frame, widgets::{Cell, Table, Row}, text::Span, style::{Style, Color}, layout::Constraint};
 
-use crate::store::activity::ActivityStore;
+use crate::{store::activity::ActivityStore, util::time_format::{stopwatch_time, distance, DistanceUnit, pace}};
 
 
 pub struct ActivityList {
@@ -10,18 +10,20 @@ pub struct ActivityList {
 impl ActivityList {
     pub fn draw<B: Backend>(&self, f: &mut Frame<B>, area: tui::layout::Rect) -> Result<(), anyhow::Error> {
         let mut rows = vec![];
-        let header_names = ["Date", "Type", "Title", "Dst", "🕑", "💓", "🌄"];
+        let header_names = ["Date", "Type", "Title", "Dst", "🕑", "👣", "💓", "🌄"];
         let headers = header_names
             .iter()
             .map(|header| Cell::from(Span::styled(*header, Style::default().fg(Color::DarkGray))));
+        let unit =DistanceUnit::Metric;
 
         for activity in self.activity_store.activities() {
             rows.push(Row::new([
                 Cell::from(activity.start_date.format("%Y-%m-%d").to_string()),
                 Cell::from(activity.activity_type.clone()),
                 Cell::from(activity.name.clone()),
-                Cell::from(activity.distance.to_string()),
-                Cell::from(activity.elapsed_time.to_string()),
+                Cell::from(distance(activity.distance, &unit)),
+                Cell::from(stopwatch_time(activity.elapsed_time)),
+                Cell::from(pace(activity.elapsed_time, activity.distance, &unit)),
                 Cell::from(activity.average_heartrate.map_or_else(||"n/a".to_string(), |v|v.to_string())),
                 Cell::from(activity.total_elevation_gain.to_string()),
             ]));
