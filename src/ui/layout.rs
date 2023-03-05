@@ -1,8 +1,10 @@
 
 use tui::{backend::Backend, Frame, layout::{Constraint, Layout}, widgets::Paragraph};
 
-pub struct AppLayout {
+use super::activity_list::{ActivityList, self};
 
+pub struct AppLayout {
+    activities_list: ActivityList,
 }
 
 impl AppLayout {
@@ -17,6 +19,12 @@ impl AppLayout {
             .split(f.size());
         f.render_widget(Paragraph::new("Activities"), rows[0]);
 
+        self.activities_list.draw(f, rows[1])?;
+
         Ok(())
+    }
+
+    pub(crate) fn new(activities_list: ActivityList) -> AppLayout {
+        AppLayout { activities_list }
     }
 }

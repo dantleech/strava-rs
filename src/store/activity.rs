@@ -7,6 +7,7 @@ use super::JsonStorage;
 #[derive(Serialize, Deserialize)]
 pub struct Activity {
     pub name: String,
+    pub activity_type: String,
     pub distance: f64,
     pub moving_time: u64,
     pub elapsed_time: u64,
@@ -23,6 +24,9 @@ pub struct ActivityStore {
 }
 
 impl ActivityStore {
+    pub(crate) fn new(storage: JsonStorage) -> ActivityStore {
+        ActivityStore { activities: storage.load("activities".to_string()), storage }
+    }
 
     pub(crate) fn clear(&mut self) -> () {
         self.activities = Vec::new()
@@ -32,12 +36,12 @@ impl ActivityStore {
         self.activities.push(activity)
     }
 
-    pub(crate) fn new(storage: JsonStorage) -> ActivityStore {
-        ActivityStore { activities: Vec::new(), storage }
-    }
-
     pub(crate) fn flush(&self) -> Result<(), anyhow::Error> {
         self.storage.write("activities".to_string(), &self.activities)?;
         Ok(())
+    }
+
+    pub(crate) fn activities(&self) -> &Vec<Activity> {
+        &self.activities
     }
 }

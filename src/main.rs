@@ -17,7 +17,7 @@ use xdg::BaseDirectories;
 
 use crate::{
     store::{activity::ActivityStore, JsonStorage},
-    sync::StravaSync, ui::{layout::AppLayout, app::App},
+    sync::StravaSync, ui::{layout::AppLayout, app::App, activity_list::ActivityList},
 };
 
 #[derive(Parser, Debug)]
@@ -76,7 +76,9 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
-    let layout = AppLayout{};
+    let layout = AppLayout::new(
+        ActivityList::new(activity_store),
+    );
     App::new(layout).run(&mut terminal)?;
 
     disable_raw_mode()?;

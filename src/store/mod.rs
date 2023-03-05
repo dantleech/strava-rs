@@ -1,7 +1,6 @@
-use std::{fs::{File, self}, path::Path};
+use std::{fs::{File, self}, path::Path, io::BufReader};
 
-use anyhow::Ok;
-use serde::Serialize;
+use serde::{Serialize, de::DeserializeOwned};
 
 pub mod activity;
 
@@ -21,5 +20,16 @@ impl JsonStorage {
         let file: File = File::create(path)?;
         serde_json::to_writer(&file, &data)?;
         Ok(())
+    }
+
+    fn load<T: DeserializeOwned>(&self, name: String) -> Vec<T> {
+        let path = Path::new(&self.path).join(name);
+        let file = File::open(&path).expect("Could not open file");
+        let reader = BufReader::new(file);
+        let collection: Vec<T> = match serde_json::from_reader(reader) {
+            Ok(ok) => ok,
+            Err(_err) => Vec::new(),
+        };
+        collection
     }
 }

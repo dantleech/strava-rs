@@ -40,6 +40,7 @@ impl StravaSync<'_> {
                     average_heartrate: s_activity.average_heartrate,
                     max_heartrate: s_activity.max_heartrate,
                     start_date: s_activity.start_date,
+                    activity_type: s_activity.sport_type.clone(),
                 })
             }
 
