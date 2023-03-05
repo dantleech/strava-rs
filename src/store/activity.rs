@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use super::JsonStorage;
@@ -11,6 +12,9 @@ pub struct Activity {
     pub elapsed_time: u64,
     pub total_elevation_gain: f64,
     pub sport_type: String,
+    pub average_heartrate: Option<f64>,
+    pub max_heartrate: Option<f64>,
+    pub start_date: DateTime<Utc>,
 }
 
 pub struct ActivityStore {

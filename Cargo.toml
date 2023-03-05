@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.68"
+chrono = { version = "0.4.23", features = ["serde"] }
 clap = { version = "4.1.4", features = ["derive"] }
 env_logger = "0.10.0"
 futures-util = "0.3.25"

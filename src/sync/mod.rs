@@ -19,6 +19,7 @@ impl StravaSync<'_> {
         let mut page: u32 = 0;
         const PAGE_SIZE: u32 = 10;
         let mut offset: u64 = 0;
+        self.activity_store.clear();
         loop {
             page+=1;
             let s_activities: Vec<client::Activity> = self.client.athlete_activities(page, PAGE_SIZE).await.unwrap();
@@ -26,7 +27,6 @@ impl StravaSync<'_> {
                 break
             }
 
-            self.activity_store.clear();
             for s_activity in s_activities.iter() {
                 offset+=1;
                 log::info!("sync: {}: {}", offset, s_activity);
@@ -37,10 +37,14 @@ impl StravaSync<'_> {
                     elapsed_time: s_activity.elapsed_time.clone(),
                     total_elevation_gain: s_activity.total_elevation_gain.clone(),
                     sport_type: s_activity.sport_type.clone(),
+                    average_heartrate: s_activity.average_heartrate,
+                    max_heartrate: s_activity.max_heartrate,
+                    start_date: s_activity.start_date,
                 })
             }
-            self.activity_store.flush()?;
+
         }
+        self.activity_store.flush()?;
         Ok(())
     }
 }

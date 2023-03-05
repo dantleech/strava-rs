@@ -2,6 +2,7 @@
 
 use std::fmt::Display;
 
+use chrono::{DateTime, Utc};
 use hyper::{client::HttpConnector, Body, Client, Method, Request, Response};
 use hyper_tls::HttpsConnector;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -38,6 +39,9 @@ pub struct Activity {
     pub elapsed_time: u64,
     pub total_elevation_gain: f64,
     pub sport_type: String,
+    pub average_heartrate: Option<f64>,
+    pub max_heartrate: Option<f64>,
+    pub start_date: DateTime<Utc>,
 }
 
 impl Display for Activity {
