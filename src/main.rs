@@ -6,7 +6,7 @@ pub mod ui;
 
 use std::{fs, io};
 
-use crossterm::terminal::enable_raw_mode;
+use crossterm::terminal::{enable_raw_mode, disable_raw_mode};
 use authenticator::Authenticator;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
@@ -17,7 +17,7 @@ use xdg::BaseDirectories;
 
 use crate::{
     store::{activity::ActivityStore, JsonStorage},
-    sync::StravaSync,
+    sync::StravaSync, ui::{layout::AppLayout, app::App},
 };
 
 #[derive(Parser, Debug)]
@@ -70,11 +70,16 @@ async fn main() -> Result<(), anyhow::Error> {
         StravaSync::new(&client, &mut activity_store).sync().await?;
     }
 
-    let mut stdout = io::stdout();
+    let stdout = io::stdout();
     let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
+    let mut terminal: Terminal<CrosstermBackend<io::Stdout>> = Terminal::new(backend)?;
     enable_raw_mode()?;
     terminal.clear()?;
+
+    let layout = AppLayout{};
+    App::new(layout).run(&mut terminal)?;
+
+    disable_raw_mode()?;
 
     Ok(())
 }
