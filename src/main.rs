@@ -4,13 +4,15 @@ pub mod store;
 pub mod sync;
 pub mod ui;
 
-use std::fs;
+use std::{fs, io};
 
+use crossterm::terminal::enable_raw_mode;
 use authenticator::Authenticator;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
 use hyper::Client;
 use hyper_tls::HttpsConnector;
+use tui::{Terminal, backend::CrosstermBackend};
 use xdg::BaseDirectories;
 
 use crate::{
@@ -67,6 +69,12 @@ async fn main() -> Result<(), anyhow::Error> {
     if args.no_sync != true {
         StravaSync::new(&client, &mut activity_store).sync().await?;
     }
+
+    let mut stdout = io::stdout();
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+    enable_raw_mode()?;
+    terminal.clear()?;
 
     Ok(())
 }
