@@ -10,20 +10,24 @@ pub struct ActivityList {
 impl ActivityList {
     pub fn draw<B: Backend>(&self, f: &mut Frame<B>, area: tui::layout::Rect) -> Result<(), anyhow::Error> {
         let mut rows = vec![];
-        let header_names = ["Date", "Type", "Title", "Dst", "🕑", "👣", "💓", "🌄"];
+        let header_names = ["Date", "", "Title", "Dst", "🕑", "👣", "💓", "🌄"];
         let headers = header_names
             .iter()
             .map(|header| Cell::from(Span::styled(*header, Style::default().fg(Color::DarkGray))));
-        let unit =DistanceUnit::Metric;
+        let unit =DistanceUnit::Imperial;
 
         for activity in self.activity_store.activities() {
             rows.push(Row::new([
                 Cell::from(activity.start_date.format("%Y-%m-%d").to_string()),
-                Cell::from(activity.activity_type.clone()),
+                Cell::from(match activity.activity_type.as_str() {
+                    "Ride" => "🚴".to_string(),
+                    "Run" => "🏃".to_string(),
+                    _ => activity.activity_type.clone(),
+                }),
                 Cell::from(activity.name.clone()),
                 Cell::from(distance(activity.distance, &unit)),
-                Cell::from(stopwatch_time(activity.elapsed_time)),
-                Cell::from(pace(activity.elapsed_time, activity.distance, &unit)),
+                Cell::from(stopwatch_time(activity.moving_time)),
+                Cell::from(pace(activity.moving_time, activity.distance, &unit)),
                 Cell::from(activity.average_heartrate.map_or_else(||"n/a".to_string(), |v|v.to_string())),
                 Cell::from(activity.total_elevation_gain.to_string()),
             ]));
@@ -38,7 +42,7 @@ impl ActivityList {
             )
             .widths(&[
                 Constraint::Percentage(10),
-                Constraint::Percentage(10),
+                Constraint::Min(2),
                 Constraint::Percentage(20),
                 Constraint::Percentage(10),
                 Constraint::Percentage(10),

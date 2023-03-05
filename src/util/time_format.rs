@@ -22,14 +22,24 @@ pub fn distance(quantity: f64, unit: &DistanceUnit) -> String {
         DistanceUnit::Metric => {
             format!("{:.2}km", (quantity / 1000.0).round())
         },
-        DistanceUnit::Imperial => todo!(),
+        DistanceUnit::Imperial => {
+            format!("{:.2}m", ((quantity / 1000.0) * 0.621371))
+        },
     }
 }
 
-pub fn pace(elapsed_time: u64, distance: f64, _unit: &DistanceUnit) -> String {
-    let spm = elapsed_time as f64 / distance;
+pub fn pace(elapsed_time: u64, distance: f64, unit: &DistanceUnit) -> String {
+    match unit {
+        DistanceUnit::Metric => {
+            let spm = elapsed_time as f64 / distance;
 
-    format!("{}p/km", stopwatch_time((spm * 1000.0).round() as u64))
+            format!("{} /km", stopwatch_time((spm * 1000.0).round() as u64))
+        }
+        DistanceUnit::Imperial => {
+            let spm = elapsed_time as f64 / distance;
+            format!("{} /mi", stopwatch_time(((spm * 1000.0) / 0.621371).round() as u64))
+        }
+    }
 }
 
 #[cfg(test)]
