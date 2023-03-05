@@ -2,6 +2,7 @@ pub mod authenticator;
 pub mod client;
 pub mod store;
 pub mod sync;
+pub mod ui;
 
 use std::fs;
 
