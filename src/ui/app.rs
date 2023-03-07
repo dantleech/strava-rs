@@ -6,7 +6,7 @@ use tui::{
     Frame, Terminal,
 };
 
-use super::{layout::AppLayout};
+use super::layout::AppLayout;
 
 pub struct App {
     layout: AppLayout,
@@ -35,7 +35,9 @@ impl App {
                 if let Event::Key(key) = event::read()? {
                     match key.code {
                         event::KeyCode::Char('q') => self.quit = true,
-                        event::KeyCode::Char('u') => self.handle(super::event::StravaEvent::ToggleUnitSystem),
+                        event::KeyCode::Char('u') => {
+                            self.handle(super::event::StravaEvent::ToggleUnitSystem)
+                        }
                         event::KeyCode::Char('j') => self.handle(super::event::StravaEvent::Down),
                         event::KeyCode::Char('k') => self.handle(super::event::StravaEvent::Up),
                         _ => (),

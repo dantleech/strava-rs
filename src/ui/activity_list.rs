@@ -1,7 +1,7 @@
 use tui::{
     backend::Backend,
     layout::Constraint,
-    style::{Color, Style, Modifier},
+    style::{Color, Modifier, Style},
     text::Span,
     widgets::{Cell, Row, Table, TableState},
     Frame,
@@ -9,13 +9,12 @@ use tui::{
 
 use crate::store::activity::ActivityStore;
 
-use super::{unit_formatter::UnitFormatter, event::StravaEvent};
+use super::{event::StravaEvent, unit_formatter::UnitFormatter};
 
 pub struct ActivityList {
     activity_store: ActivityStore,
     unit_formatter: UnitFormatter,
     table_state: TableState,
-
 }
 
 impl ActivityList {
@@ -96,9 +95,7 @@ impl ActivityList {
 
     fn next_row(&mut self) {
         let i = match self.table_state.selected() {
-            Some(i) => {
-                i + 1
-            }
+            Some(i) => i + 1,
             None => 0,
         };
         self.table_state.select(Some(i));
@@ -107,7 +104,11 @@ impl ActivityList {
     fn prev_row(&mut self) {
         let i = match self.table_state.selected() {
             Some(i) => {
-                if i > 0 { i - 1 } else { 0 }
+                if i > 0 {
+                    i - 1
+                } else {
+                    0
+                }
             }
             None => 0,
         };

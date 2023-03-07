@@ -67,10 +67,12 @@ impl UnitFormatter {
         }
     }
     pub(crate) fn toggle(&self) -> UnitFormatter {
-        return UnitFormatter { system: match self.system {
-            UnitSystem::Metric => UnitSystem::Imperial,
-            UnitSystem::Imperial => UnitSystem::Metric,
-        }}
+        return UnitFormatter {
+            system: match self.system {
+                UnitSystem::Metric => UnitSystem::Imperial,
+                UnitSystem::Imperial => UnitSystem::Metric,
+            },
+        };
     }
 }
 

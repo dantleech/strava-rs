@@ -3,4 +3,3 @@ pub enum StravaEvent {
     Down,
     Up,
 }
-
