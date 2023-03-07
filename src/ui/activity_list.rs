@@ -1,6 +1,6 @@
 use tui::{backend::Backend, Frame, widgets::{Cell, Table, Row}, text::Span, style::{Style, Color}, layout::Constraint};
 
-use crate::{store::activity::ActivityStore, util::time_format::{stopwatch_time, distance, DistanceUnit, pace}};
+use crate::{store::activity::ActivityStore, util::time_format::{stopwatch_time, distance, DistanceUnit, pace, elevation}};
 
 
 pub struct ActivityList {
@@ -10,7 +10,7 @@ pub struct ActivityList {
 impl ActivityList {
     pub fn draw<B: Backend>(&self, f: &mut Frame<B>, area: tui::layout::Rect) -> Result<(), anyhow::Error> {
         let mut rows = vec![];
-        let header_names = ["Date", "", "Title", "Dst", "🕑", "👣", "💓", "🌄"];
+        let header_names = ["Date", "", "Title", "Dst", "🕑", "👣", "💓", "🏔"];
         let headers = header_names
             .iter()
             .map(|header| Cell::from(Span::styled(*header, Style::default().fg(Color::DarkGray))));
@@ -29,7 +29,7 @@ impl ActivityList {
                 Cell::from(stopwatch_time(activity.moving_time)),
                 Cell::from(pace(activity.moving_time, activity.distance, &unit)),
                 Cell::from(activity.average_heartrate.map_or_else(||"n/a".to_string(), |v|v.to_string())),
-                Cell::from(activity.total_elevation_gain.to_string()),
+                Cell::from(elevation(activity.total_elevation_gain, &unit)),
             ]));
         }
 
@@ -45,9 +45,10 @@ impl ActivityList {
                 Constraint::Min(2),
                 Constraint::Percentage(20),
                 Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
-                Constraint::Percentage(10),
+                Constraint::Min(10),
+                Constraint::Min(10),
+                Constraint::Min(7),
+                Constraint::Min(7),
             ]);
 
         f.render_widget(table, area);

@@ -1,4 +1,4 @@
-pub fn stopwatch_time(seconds: u64) -> String {
+pub fn stopwatch_time(seconds: u32) -> String {
     if seconds == 0 {
         return "00:00".to_string();
     }
@@ -17,27 +17,38 @@ pub enum DistanceUnit {
     Imperial
 }
 
-pub fn distance(quantity: f64, unit: &DistanceUnit) -> String {
+pub fn distance(quantity: f32, unit: &DistanceUnit) -> String {
     match unit {
         DistanceUnit::Metric => {
             format!("{:.2}km", (quantity / 1000.0).round())
         },
         DistanceUnit::Imperial => {
-            format!("{:.2}m", ((quantity / 1000.0) * 0.621371))
+            format!("{:.2}mi", ((quantity / 1000.0) * 0.621371))
         },
     }
 }
 
-pub fn pace(elapsed_time: u64, distance: f64, unit: &DistanceUnit) -> String {
+pub fn elevation(elevation: f32, unit: &DistanceUnit) -> String {
     match unit {
         DistanceUnit::Metric => {
-            let spm = elapsed_time as f64 / distance;
-
-            format!("{} /km", stopwatch_time((spm * 1000.0).round() as u64))
+            format!("{:.2}m", elevation)
         }
         DistanceUnit::Imperial => {
-            let spm = elapsed_time as f64 / distance;
-            format!("{} /mi", stopwatch_time(((spm * 1000.0) / 0.621371).round() as u64))
+            format!("{:.2}ft", elevation * 3.28084)
+        }
+    }
+}
+
+pub fn pace(elapsed_time: u32, distance: f32, unit: &DistanceUnit) -> String {
+    match unit {
+        DistanceUnit::Metric => {
+            let spm = elapsed_time as f32 / distance;
+
+            format!("{} /km", stopwatch_time((spm * 1000.0).round() as u32))
+        }
+        DistanceUnit::Imperial => {
+            let spm = elapsed_time as f32 / distance;
+            format!("{} /mi", stopwatch_time(((spm * 1000.0) / 0.621371).round() as u32))
         }
     }
 }
