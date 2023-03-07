@@ -36,6 +36,8 @@ impl App {
                     match key.code {
                         event::KeyCode::Char('q') => self.quit = true,
                         event::KeyCode::Char('u') => self.handle(super::event::StravaEvent::ToggleUnitSystem),
+                        event::KeyCode::Char('j') => self.handle(super::event::StravaEvent::Down),
+                        event::KeyCode::Char('k') => self.handle(super::event::StravaEvent::Up),
                         _ => (),
                     }
                 }
@@ -44,7 +46,7 @@ impl App {
         Ok(())
     }
 
-    fn draw<B: Backend>(&self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
+    fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
         self.layout.draw(f)
     }
 

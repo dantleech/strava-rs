@@ -12,7 +12,7 @@ pub struct AppLayout {
 }
 
 impl AppLayout {
-    pub fn draw<B: Backend>(&self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
+    pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
         let rows = Layout::default()
             .margin(0)
             .constraints([Constraint::Length(1), Constraint::Min(4)].as_ref())
