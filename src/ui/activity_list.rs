@@ -1,20 +1,35 @@
-use tui::{backend::Backend, Frame, widgets::{Cell, Table, Row}, text::Span, style::{Style, Color}, layout::Constraint};
+use tui::{
+    backend::Backend,
+    layout::Constraint,
+    style::{Color, Style},
+    text::Span,
+    widgets::{Cell, Row, Table},
+    Frame,
+};
 
-use crate::{store::activity::ActivityStore, util::time_format::{stopwatch_time, distance, DistanceUnit, pace, elevation}};
+use crate::{
+    store::activity::ActivityStore,
+    util::time_format::{distance, elevation, pace, stopwatch_time, DistanceUnit},
+};
 
+use super::unit_formatter::UnitFormatter;
 
 pub struct ActivityList {
     activity_store: ActivityStore,
+    unit_formatter: UnitFormatter,
 }
 
 impl ActivityList {
-    pub fn draw<B: Backend>(&self, f: &mut Frame<B>, area: tui::layout::Rect) -> Result<(), anyhow::Error> {
+    pub fn draw<B: Backend>(
+        &self,
+        f: &mut Frame<B>,
+        area: tui::layout::Rect,
+    ) -> Result<(), anyhow::Error> {
         let mut rows = vec![];
-        let header_names = ["Date", "", "Title", "Dst", "🕑", "👣", "💓", "🏔"];
+        let header_names = ["Date", "", "Title", "Dst", "🕑", "👣", "💓", "🌄"];
         let headers = header_names
             .iter()
             .map(|header| Cell::from(Span::styled(*header, Style::default().fg(Color::DarkGray))));
-        let unit =DistanceUnit::Imperial;
 
         for activity in self.activity_store.activities() {
             rows.push(Row::new([
@@ -25,11 +40,18 @@ impl ActivityList {
                     _ => activity.activity_type.clone(),
                 }),
                 Cell::from(activity.name.clone()),
-                Cell::from(distance(activity.distance, &unit)),
-                Cell::from(stopwatch_time(activity.moving_time)),
-                Cell::from(pace(activity.moving_time, activity.distance, &unit)),
-                Cell::from(activity.average_heartrate.map_or_else(||"n/a".to_string(), |v|v.to_string())),
-                Cell::from(elevation(activity.total_elevation_gain, &unit)),
+                Cell::from(self.unit_formatter.distance(activity.distance)),
+                Cell::from(self.unit_formatter.stopwatch_time(activity.moving_time)),
+                Cell::from(
+                    self.unit_formatter
+                        .pace(activity.moving_time, activity.distance),
+                ),
+                Cell::from(
+                    activity
+                        .average_heartrate
+                        .map_or_else(|| "n/a".to_string(), |v| v.to_string()),
+                ),
+                Cell::from(self.unit_formatter.elevation(activity.total_elevation_gain)),
             ]));
         }
 
@@ -56,6 +78,6 @@ impl ActivityList {
     }
 
     pub(crate) fn new(activity_store: ActivityStore) -> Self {
-        Self{activity_store}
+        Self { activity_store, unit_formatter: UnitFormatter::imperial() }
     }
 }

@@ -18,7 +18,7 @@ use xdg::BaseDirectories;
 
 use crate::{
     store::{activity::ActivityStore, JsonStorage},
-    sync::StravaSync, ui::{layout::AppLayout, app::App, activity_list::ActivityList},
+    sync::StravaSync, ui::{layout::AppLayout, app::App, activity_list::ActivityList, unit_formatter::UnitFormatter},
 };
 
 #[derive(Parser, Debug)]
