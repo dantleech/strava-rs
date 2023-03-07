@@ -25,7 +25,7 @@ impl UnitFormatter {
     pub fn distance(&self, quantity: f32) -> String {
         match self.system {
             UnitSystem::Metric => {
-                format!("{:.2}km", (quantity / 1000.0).round())
+                format!("{:.2}km", (quantity / 1000.0))
             }
             UnitSystem::Imperial => {
                 format!("{:.2}mi", ((quantity / 1000.0) * 0.621371))
