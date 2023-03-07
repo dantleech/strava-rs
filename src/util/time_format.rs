@@ -14,17 +14,17 @@ pub fn stopwatch_time(seconds: u32) -> String {
 
 pub enum DistanceUnit {
     Metric,
-    Imperial
+    Imperial,
 }
 
 pub fn distance(quantity: f32, unit: &DistanceUnit) -> String {
     match unit {
         DistanceUnit::Metric => {
             format!("{:.2}km", (quantity / 1000.0).round())
-        },
+        }
         DistanceUnit::Imperial => {
             format!("{:.2}mi", ((quantity / 1000.0) * 0.621371))
-        },
+        }
     }
 }
 
@@ -48,14 +48,17 @@ pub fn pace(elapsed_time: u32, distance: f32, unit: &DistanceUnit) -> String {
         }
         DistanceUnit::Imperial => {
             let spm = elapsed_time as f32 / distance;
-            format!("{} /mi", stopwatch_time(((spm * 1000.0) / 0.621371).round() as u32))
+            format!(
+                "{} /mi",
+                stopwatch_time(((spm * 1000.0) / 0.621371).round() as u32)
+            )
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::util::time_format::{DistanceUnit, pace};
+    use crate::util::time_format::{pace, DistanceUnit};
 
     use super::stopwatch_time;
 

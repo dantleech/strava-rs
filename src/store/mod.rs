@@ -1,11 +1,14 @@
-use std::{fs::{File, self}, path::Path, io::BufReader};
+use std::{
+    fs::{self, File},
+    io::BufReader,
+    path::Path,
+};
 
-use serde::{Serialize, de::DeserializeOwned};
+use serde::{de::DeserializeOwned, Serialize};
 
 pub mod activity;
 
 pub struct JsonStorage {
-    
     path: String,
 }
 

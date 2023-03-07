@@ -1,5 +1,8 @@
+use hyper::{
+    service::{make_service_fn, service_fn},
+    Body, Response, Server,
+};
 use std::{convert::Infallible, net::SocketAddr, str::FromStr};
-use hyper::{service::{make_service_fn, service_fn}, Server, Body, Response};
 
 use tokio::sync::mpsc::channel;
 use url::form_urlencoded;
@@ -10,9 +13,7 @@ pub struct AuthCodeFetcher {
 }
 
 impl AuthCodeFetcher {
-    pub(crate) fn new(
-        client_id: String,
-    ) -> Self {
+    pub(crate) fn new(client_id: String) -> Self {
         Self {
             client_id,
             addr: "127.0.0.1:8112".to_string(),
@@ -53,7 +54,8 @@ impl AuthCodeFetcher {
                         }
 
                         tx.send(code.clone()).await.unwrap();
-                        Ok::<Response<Body>, Infallible>(Response::new(Body::from("
+                        Ok::<Response<Body>, Infallible>(Response::new(Body::from(
+                            "
                         <html>
                             <head><title>Rust Authentication</title></head>
                             <body>
@@ -61,7 +63,8 @@ impl AuthCodeFetcher {
                                 <p>Close this window and return to your terminal</p>
                             </body>
                         </html>
-                        ")))
+                        ",
+                        )))
                     }
                 }))
             }
@@ -76,7 +79,10 @@ impl AuthCodeFetcher {
                 tx1.send(code.unwrap()).await.unwrap();
             });
 
-        log::info!("starting web server at {} and listening for auth code", self.addr);
+        log::info!(
+            "starting web server at {} and listening for auth code",
+            self.addr
+        );
         if let Err(e) = server.await {
             eprintln!("server error: {}", e);
         }

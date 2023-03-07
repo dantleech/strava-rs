@@ -7,24 +7,25 @@ pub mod util;
 
 use std::io;
 
-use crossterm::terminal::{enable_raw_mode, disable_raw_mode};
 use authenticator::Authenticator;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use hyper::Client;
 use hyper_tls::HttpsConnector;
-use tui::{Terminal, backend::CrosstermBackend};
+use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
 use crate::{
     store::{activity::ActivityStore, JsonStorage},
-    sync::StravaSync, ui::{layout::AppLayout, app::App, activity_list::ActivityList, unit_formatter::UnitFormatter},
+    sync::StravaSync,
+    ui::{activity_list::ActivityList, app::App, layout::AppLayout},
 };
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    #[arg(short,long)]
+    #[arg(short, long)]
     pub no_sync: bool,
     #[arg(long)]
     pub client_id: String,
@@ -77,9 +78,7 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
-    let layout = AppLayout::new(
-        ActivityList::new(activity_store),
-    );
+    let layout = AppLayout::new(ActivityList::new(activity_store));
     App::new(layout).run(&mut terminal)?;
 
     disable_raw_mode()?;

@@ -15,7 +15,7 @@ pub struct App {
 
 impl App {
     pub fn new(layout: AppLayout) -> App {
-        App{
+        App {
             layout,
             quit: false,
         }
@@ -28,12 +28,14 @@ impl App {
             if self.quit {
                 break;
             }
-            terminal.draw(|f| { self.draw(f).expect("Could not draw frame"); })?;
+            terminal.draw(|f| {
+                self.draw(f).expect("Could not draw frame");
+            })?;
             if (poll(Duration::from_millis(1000)))? {
                 if let Event::Key(key) = event::read()? {
                     match key.code {
                         event::KeyCode::Char('q') => self.quit = true,
-                        _ => ()
+                        _ => (),
                     }
                 }
             }

@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 
 use super::JsonStorage;
 
-
 #[derive(Serialize, Deserialize)]
 pub struct Activity {
     pub name: String,
@@ -25,7 +24,10 @@ pub struct ActivityStore {
 
 impl ActivityStore {
     pub(crate) fn new(storage: JsonStorage) -> ActivityStore {
-        ActivityStore { activities: storage.load("activities".to_string()), storage }
+        ActivityStore {
+            activities: storage.load("activities".to_string()),
+            storage,
+        }
     }
 
     pub(crate) fn clear(&mut self) -> () {
@@ -37,7 +39,8 @@ impl ActivityStore {
     }
 
     pub(crate) fn flush(&self) -> Result<(), anyhow::Error> {
-        self.storage.write("activities".to_string(), &self.activities)?;
+        self.storage
+            .write("activities".to_string(), &self.activities)?;
         Ok(())
     }
 

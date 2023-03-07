@@ -1,5 +1,5 @@
 pub struct UnitFormatter {
-    system: UnitSystem
+    system: UnitSystem,
 }
 
 pub enum UnitSystem {
@@ -62,7 +62,9 @@ impl UnitFormatter {
     }
 
     pub(crate) fn imperial() -> Self {
-        UnitFormatter { system: UnitSystem::Imperial }
+        UnitFormatter {
+            system: UnitSystem::Imperial,
+        }
     }
 }
 

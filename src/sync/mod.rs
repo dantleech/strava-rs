@@ -21,14 +21,18 @@ impl StravaSync<'_> {
         let mut offset: u64 = 0;
         self.activity_store.clear();
         loop {
-            page+=1;
-            let s_activities: Vec<client::Activity> = self.client.athlete_activities(page, PAGE_SIZE).await.unwrap();
+            page += 1;
+            let s_activities: Vec<client::Activity> = self
+                .client
+                .athlete_activities(page, PAGE_SIZE)
+                .await
+                .unwrap();
             if s_activities.len() == 0 {
-                break
+                break;
             }
 
             for s_activity in s_activities.iter() {
-                offset+=1;
+                offset += 1;
                 log::info!("sync: {}: {}", offset, s_activity);
                 self.activity_store.add(Activity {
                     name: s_activity.name.clone(),
@@ -43,10 +47,8 @@ impl StravaSync<'_> {
                     activity_type: s_activity.sport_type.clone(),
                 })
             }
-
         }
         self.activity_store.flush()?;
         Ok(())
     }
 }
-

@@ -82,9 +82,16 @@ impl StravaClient {
         Ok(deserialized)
     }
 
-    pub async fn athlete_activities(&self, page: u32, per_page: u32) -> Result<Vec<Activity>, anyhow::Error> {
+    pub async fn athlete_activities(
+        &self,
+        page: u32,
+        per_page: u32,
+    ) -> Result<Vec<Activity>, anyhow::Error> {
         let activities = self
-            .request(Method::GET, format!("/v3/athlete/activities?per_page={}&page={}", per_page, page))
+            .request(
+                Method::GET,
+                format!("/v3/athlete/activities?per_page={}&page={}", per_page, page),
+            )
             .await?;
 
         Ok(activities)

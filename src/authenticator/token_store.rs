@@ -1,6 +1,6 @@
-use std::{fs::{File}, path::Path};
+use std::{fs::File, path::Path};
 
-use super::{AuthResponse};
+use super::AuthResponse;
 
 pub struct TokenStore {
     path: String,
@@ -8,12 +8,12 @@ pub struct TokenStore {
 
 impl TokenStore {
     pub(crate) fn new(path: String) -> Self {
-        Self{path}
+        Self { path }
     }
 
     pub(crate) fn get(&self) -> Result<Option<AuthResponse>, anyhow::Error> {
         if !Path::new(&self.path).exists() {
-            return Ok(None)
+            return Ok(None);
         }
         let file = File::open(&self.path)?;
         self.read_file(file)

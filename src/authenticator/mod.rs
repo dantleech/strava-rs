@@ -6,11 +6,12 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use hyper_tls::HttpsConnector;
 use serde::{Deserialize, Serialize};
 
-use hyper::{
-    client::HttpConnector, Client,
-};
+use hyper::{client::HttpConnector, Client};
 
-use self::{auth_code_fetcher::AuthCodeFetcher, token_store::TokenStore, access_token_fetcher::AccessTokenFetcher};
+use self::{
+    access_token_fetcher::AccessTokenFetcher, auth_code_fetcher::AuthCodeFetcher,
+    token_store::TokenStore,
+};
 
 pub struct Authenticator {
     token_fetch: AuthCodeFetcher,
@@ -28,7 +29,7 @@ impl Authenticator {
         Authenticator {
             token_fetch: AuthCodeFetcher::new(client_id.clone()),
             token_store: TokenStore::new(token_path),
-            access_token_fetcher: AccessTokenFetcher::new(client, client_id, client_secret)
+            access_token_fetcher: AccessTokenFetcher::new(client, client_id, client_secret),
         }
     }
 
@@ -38,7 +39,7 @@ impl Authenticator {
             log::info!("found existing token");
             if result.is_valid() {
                 log::info!("and it's still valid!");
-                return Ok(result.access_token)
+                return Ok(result.access_token);
             }
         }
         log::info!("and it's invalid, we'll need to request a new one");
@@ -64,9 +65,16 @@ pub struct AuthResponse {
 }
 
 impl AuthResponse {
-    pub (crate) fn is_valid(&self) -> bool {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).expect("foo").as_secs();
-        log::info!("-- token expires at {} and it's now {}", self.expires_at, now);
+    pub(crate) fn is_valid(&self) -> bool {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("foo")
+            .as_secs();
+        log::info!(
+            "-- token expires at {} and it's now {}",
+            self.expires_at,
+            now
+        );
         self.expires_at >= now
     }
 }
@@ -89,17 +97,25 @@ mod test {
     pub fn auth_response_expires() {
         let mut resp = auth_response();
 
-        resp.expires_at = SystemTime::now().duration_since(UNIX_EPOCH).expect("foo").as_secs() + 10;
+        resp.expires_at = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("foo")
+            .as_secs()
+            + 10;
 
         assert_eq!(true, resp.is_valid());
 
-        resp.expires_at = SystemTime::now().duration_since(UNIX_EPOCH).expect("foo").as_secs() - 10;
+        resp.expires_at = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("foo")
+            .as_secs()
+            - 10;
 
         assert_eq!(false, resp.is_valid());
     }
 
     fn auth_response() -> AuthResponse {
-        AuthResponse{
+        AuthResponse {
             expires_at: 123,
             expires_in: 0,
             token_type: "tokentype".to_string(),
@@ -109,9 +125,8 @@ mod test {
                 id: 123,
                 username: "dan".to_string(),
                 firstname: "Dan".to_string(),
-                lastname: "Leech".to_string()
-            }
+                lastname: "Leech".to_string(),
+            },
         }
     }
-
 }

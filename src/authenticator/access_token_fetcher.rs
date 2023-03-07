@@ -1,8 +1,5 @@
-
-use hyper::{client::HttpConnector, Client, Request, Body, Response};
+use hyper::{client::HttpConnector, Body, Client, Request, Response};
 use hyper_tls::HttpsConnector;
-
-
 
 use super::AuthResponse;
 
@@ -18,14 +15,17 @@ impl AccessTokenFetcher {
         client_id: String,
         client_secret: String,
     ) -> Self {
-        Self{
+        Self {
             client,
             client_id,
             client_secret,
         }
     }
 
-    pub (crate) async fn access_token(&mut self, code: String) -> Result<AuthResponse, anyhow::Error> {
+    pub(crate) async fn access_token(
+        &mut self,
+        code: String,
+    ) -> Result<AuthResponse, anyhow::Error> {
         let req = Request::builder()
             .uri("https://www.strava.com/oauth/token")
             .method("POST")
@@ -38,13 +38,15 @@ impl AccessTokenFetcher {
         let res: Response<Body> = self.client.request(req).await?;
 
         if res.status() != 200 {
-            return Err(anyhow::Error::msg(format!("Got '{}' when trying to authenticate, check your client ID and secret", res.status())));
+            return Err(anyhow::Error::msg(format!(
+                "Got '{}' when trying to authenticate, check your client ID and secret",
+                res.status()
+            )));
         }
 
         let bytes = hyper::body::to_bytes(res.into_body()).await?;
-        let deserialized: AuthResponse  = serde_json::from_slice(&bytes)?;
+        let deserialized: AuthResponse = serde_json::from_slice(&bytes)?;
 
         return Ok(deserialized);
     }
 }
-

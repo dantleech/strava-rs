@@ -7,10 +7,7 @@ use tui::{
     Frame,
 };
 
-use crate::{
-    store::activity::ActivityStore,
-    util::time_format::{distance, elevation, pace, stopwatch_time, DistanceUnit},
-};
+use crate::store::activity::ActivityStore;
 
 use super::unit_formatter::UnitFormatter;
 
@@ -78,6 +75,9 @@ impl ActivityList {
     }
 
     pub(crate) fn new(activity_store: ActivityStore) -> Self {
-        Self { activity_store, unit_formatter: UnitFormatter::imperial() }
+        Self {
+            activity_store,
+            unit_formatter: UnitFormatter::imperial(),
+        }
     }
 }
