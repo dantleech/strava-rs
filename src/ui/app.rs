@@ -6,7 +6,7 @@ use tui::{
     Frame, Terminal,
 };
 
-use super::layout::AppLayout;
+use super::{layout::AppLayout};
 
 pub struct App {
     layout: AppLayout,
@@ -35,6 +35,7 @@ impl App {
                 if let Event::Key(key) = event::read()? {
                     match key.code {
                         event::KeyCode::Char('q') => self.quit = true,
+                        event::KeyCode::Char('u') => self.handle(super::event::StravaEvent::ToggleUnitSystem),
                         _ => (),
                     }
                 }
@@ -45,5 +46,9 @@ impl App {
 
     fn draw<B: Backend>(&self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
         self.layout.draw(f)
+    }
+
+    fn handle(&mut self, event: super::event::StravaEvent) {
+        self.layout.handle(event)
     }
 }

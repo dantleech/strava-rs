@@ -27,4 +27,8 @@ impl AppLayout {
     pub(crate) fn new(activities_list: ActivityList) -> AppLayout {
         AppLayout { activities_list }
     }
+
+    pub(crate) fn handle(&mut self, event: super::event::StravaEvent) {
+        self.activities_list.handle(event);
+    }
 }

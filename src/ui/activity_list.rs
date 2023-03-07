@@ -9,7 +9,7 @@ use tui::{
 
 use crate::store::activity::ActivityStore;
 
-use super::unit_formatter::UnitFormatter;
+use super::{unit_formatter::UnitFormatter, event::StravaEvent};
 
 pub struct ActivityList {
     activity_store: ActivityStore,
@@ -17,6 +17,12 @@ pub struct ActivityList {
 }
 
 impl ActivityList {
+    pub fn handle(&mut self, event: StravaEvent) {
+        match event {
+            StravaEvent::ToggleUnitSystem => self.unit_formatter = self.unit_formatter.toggle(),
+        }
+    }
+
     pub fn draw<B: Backend>(
         &self,
         f: &mut Frame<B>,
