@@ -27,7 +27,7 @@ impl JsonStorage {
 
     fn load<T: DeserializeOwned>(&self, name: String) -> Vec<T> {
         let path = Path::new(&self.path).join(name);
-        let file = File::open(&path).expect("Could not open file");
+        let file = File::open(&path).expect(format!("Could not open file: {}", path.display()).as_str());
         let reader = BufReader::new(file);
         let collection: Vec<T> = match serde_json::from_reader(reader) {
             Ok(ok) => ok,

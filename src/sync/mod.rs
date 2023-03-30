@@ -9,7 +9,7 @@ pub struct StravaSync<'a> {
 }
 
 impl StravaSync<'_> {
-    pub fn new<'a>(client: &'a StravaClient, activity_store: &'a mut ActivityStore) -> StravaSync {
+    pub fn new<'a>(client: &'a StravaClient, activity_store: &'a mut ActivityStore) -> StravaSync<'a> {
         StravaSync {
             client,
             activity_store,

@@ -57,9 +57,6 @@ async fn main() -> Result<(), anyhow::Error> {
         base_url: "https://www.strava.com/api".to_string(),
         access_token: authenticator.access_token().await?,
     };
-    let json_storage = JsonStorage::new(storage_path.to_str().unwrap().to_string());
-    let mut activity_store = ActivityStore::new(json_storage);
-    let client = new_strava_client(api_config);
 
     log::info!("Strava TUI");
     log::info!("==========");
@@ -67,6 +64,9 @@ async fn main() -> Result<(), anyhow::Error> {
     log::info!("Token path: {}", access_token_path.display());
     log::info!("Storage path: {}", storage_path.display());
     log::info!("");
+    let json_storage = JsonStorage::new(storage_path.to_str().unwrap().to_string());
+    let mut activity_store = ActivityStore::new(json_storage);
+    let client = new_strava_client(api_config);
 
     if args.no_sync != true {
         StravaSync::new(&client, &mut activity_store).sync().await?;
