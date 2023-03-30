@@ -7,7 +7,7 @@ use tui::{
     Frame,
 };
 
-use crate::store::activity::ActivityStore;
+use crate::{store::activity::ActivityStore, util::time_format::{stopwatch_time, distance, DistanceUnit, pace}};
 
 use super::{event::StravaEvent, unit_formatter::UnitFormatter};
 
@@ -75,10 +75,9 @@ impl ActivityList {
                 Constraint::Min(2),
                 Constraint::Percentage(20),
                 Constraint::Percentage(10),
-                Constraint::Min(10),
-                Constraint::Min(10),
-                Constraint::Min(7),
-                Constraint::Min(7),
+                Constraint::Percentage(10),
+                Constraint::Percentage(10),
+                Constraint::Percentage(10),
             ]);
 
         f.render_stateful_widget(table, area, &mut self.table_state);
