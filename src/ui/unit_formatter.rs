@@ -8,7 +8,7 @@ pub enum UnitSystem {
 }
 
 impl UnitFormatter {
-    pub fn stopwatch_time(&self, seconds: u32) -> String {
+    pub fn stopwatch_time(&self, seconds: u64) -> String {
         if seconds == 0 {
             return "00:00".to_string();
         }
@@ -22,7 +22,7 @@ impl UnitFormatter {
         format!("{:0>2}:{:0>2}:{:0>2}", hours, minutes, seconds)
     }
 
-    pub fn distance(&self, quantity: f32) -> String {
+    pub fn distance(&self, quantity: f64) -> String {
         match self.system {
             UnitSystem::Metric => {
                 format!("{:.2}km", (quantity / 1000.0))
@@ -33,7 +33,7 @@ impl UnitFormatter {
         }
     }
 
-    pub fn elevation(&self, elevation: f32) -> String {
+    pub fn elevation(&self, elevation: f64) -> String {
         match self.system {
             UnitSystem::Metric => {
                 format!("{:.2}m", elevation)
@@ -44,18 +44,18 @@ impl UnitFormatter {
         }
     }
 
-    pub fn pace(&self, elapsed_time: u32, distance: f32) -> String {
+    pub fn pace(&self, elapsed_time: u64, distance: f64) -> String {
         match self.system {
             UnitSystem::Metric => {
-                let spm = elapsed_time as f32 / distance;
+                let spm = elapsed_time as f64 / distance;
 
-                format!("{} /km", self.stopwatch_time((spm * 1000.0).round() as u32))
+                format!("{} /km", self.stopwatch_time((spm * 1000.0).round() as u64))
             }
             UnitSystem::Imperial => {
-                let spm = elapsed_time as f32 / distance;
+                let spm = elapsed_time as f64 / distance;
                 format!(
                     "{} /mi",
-                    self.stopwatch_time(((spm * 1000.0) / 0.621371).round() as u32)
+                    self.stopwatch_time(((spm * 1000.0) / 0.621371).round() as u64)
                 )
             }
         }
