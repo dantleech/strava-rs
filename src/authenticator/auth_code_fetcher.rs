@@ -29,7 +29,7 @@ impl AuthCodeFetcher {
 
         log::info!("trying to open URL: {}", auth_url);
 
-        if !open::that(&auth_url).is_ok() {
+        if !open::that_in_background(&auth_url).is_finished() {
             log::info!("Could not open browser, visit the following URL to grant Strava TUI access to your Strava data:");
             log::info!("");
             log::info!("    {}", auth_url);
