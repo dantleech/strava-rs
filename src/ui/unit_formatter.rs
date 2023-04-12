@@ -74,6 +74,18 @@ impl UnitFormatter {
             },
         };
     }
+
+    pub(crate) fn speed(&self, distance: f64, elapsed_time: u64) -> String {
+        let kmph = (distance / 1000.0) / (elapsed_time as f64 / 3600.0);
+        match self.system {
+            UnitSystem::Metric => {
+                format!("{:.2}km/h", kmph)
+            }
+            UnitSystem::Imperial => {
+                format!("{:.2}m/h", kmph * 0.621371)
+            }
+        }
+    }
 }
 
 #[cfg(test)]

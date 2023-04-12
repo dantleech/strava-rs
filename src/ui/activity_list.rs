@@ -32,7 +32,7 @@ impl ActivityList {
         area: tui::layout::Rect,
     ) -> Result<(), anyhow::Error> {
         let mut rows = vec![];
-        let header_names = ["Date", "", "Title", "Dst", "🕑", "👣", "💓", "🌄"];
+        let header_names = ["Date", "", "Title", "Dst", "🕑", "🚤", "👣", "💓", "🌄"];
         let headers = header_names
             .iter()
             .map(|header| Cell::from(Span::styled(*header, Style::default().fg(Color::DarkGray))));
@@ -43,11 +43,13 @@ impl ActivityList {
                 Cell::from(match activity.activity_type.as_str() {
                     "Ride" => "🚴".to_string(),
                     "Run" => "🏃".to_string(),
+                    "Walk" => "🥾".to_string(),
                     _ => activity.activity_type.clone(),
                 }),
                 Cell::from(activity.name.clone()),
                 Cell::from(self.unit_formatter.distance(activity.distance)),
                 Cell::from(self.unit_formatter.stopwatch_time(activity.moving_time)),
+                Cell::from(self.unit_formatter.speed(activity.distance, activity.moving_time)),
                 Cell::from(
                     self.unit_formatter
                         .pace(activity.moving_time, activity.distance),
@@ -74,6 +76,7 @@ impl ActivityList {
                 Constraint::Percentage(10),
                 Constraint::Min(2),
                 Constraint::Percentage(20),
+                Constraint::Percentage(10),
                 Constraint::Percentage(10),
                 Constraint::Percentage(10),
                 Constraint::Percentage(10),
