@@ -26,7 +26,14 @@ impl JsonStorage {
     }
 
     fn load<T: DeserializeOwned>(&self, name: String) -> Vec<T> {
+        let dir = Path::new(&self.path);
         let path = Path::new(&self.path).join(name);
+        if !dir.exists() {
+            std::fs::create_dir_all(dir).expect("Could not create directory");
+        }
+        if !path.exists() {
+            return vec![];
+        }
         let file = File::open(&path).expect(format!("Could not open file: {}", path.display()).as_str());
         let reader = BufReader::new(file);
         let collection: Vec<T> = match serde_json::from_reader(reader) {

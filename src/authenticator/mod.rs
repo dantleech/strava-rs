@@ -82,7 +82,7 @@ impl AuthResponse {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Athlete {
     pub id: u64,
-    pub username: String,
+    pub username: Option<String>,
     pub firstname: String,
     pub lastname: String,
 }

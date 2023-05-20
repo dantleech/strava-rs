@@ -27,6 +27,7 @@ impl StravaSync<'_> {
                 .athlete_activities(page, PAGE_SIZE)
                 .await
                 .unwrap();
+
             if s_activities.len() == 0 {
                 break;
             }
