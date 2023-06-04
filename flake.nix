@@ -35,6 +35,8 @@
             pkgs.rustup
             pkgs.openssl
             pkgs.pkg-config
+            pkgs.sqlite
+            pkgs.diesel-cli
           ];
           
         };
