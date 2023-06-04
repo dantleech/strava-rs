@@ -7,6 +7,7 @@ use std::{
 use serde::{de::DeserializeOwned, Serialize};
 
 pub mod activity;
+pub mod schema;
 
 pub struct JsonStorage {
     path: String,

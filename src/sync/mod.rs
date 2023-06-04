@@ -36,7 +36,7 @@ impl StravaSync<'_> {
                 offset += 1;
                 log::info!("sync: {}: {}", offset, s_activity);
                 self.activity_store.add(Activity {
-                    name: s_activity.name.clone(),
+                    title: s_activity.name.clone(),
                     distance: s_activity.distance.clone(),
                     moving_time: s_activity.moving_time.clone(),
                     elapsed_time: s_activity.elapsed_time.clone(),
