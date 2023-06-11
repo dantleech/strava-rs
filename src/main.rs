@@ -20,7 +20,7 @@ use xdg::BaseDirectories;
 use crate::{
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest::StravaSync},
-    ui::{activity_list::ActivityList, app::App, layout::AppLayout},
+    ui::{activity_list::ActivityList, app::App, layout::{AppLayout, State, View}},
 };
 
 #[derive(Parser, Debug)]
@@ -81,8 +81,12 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
+    let mut state = State{
+        view: View::ActivityList,
+        activity: None,
+    };
     let mut list = ActivityList::new(&mut activity_store);
-    let mut layout = AppLayout::new(&mut list);
+    let mut layout = AppLayout::new(&mut list, state);
     App::new(&mut layout).run(&mut terminal)?;
 
     disable_raw_mode()?;

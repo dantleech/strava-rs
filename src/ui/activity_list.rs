@@ -8,23 +8,36 @@ use tui::{
 };
 
 use crate::{
-    store::activity::ActivityStore,
+    store::activity::{ActivityStore, Activity},
 };
 
-use super::{event::StravaEvent, unit_formatter::UnitFormatter};
+use super::{event::StravaEvent, unit_formatter::UnitFormatter, layout::State};
 
 pub struct ActivityList<'a> {
     activity_store: &'a mut ActivityStore<'a>,
     unit_formatter: UnitFormatter,
     table_state: TableState,
+    activities: Vec<Activity>,
 }
 
 impl ActivityList<'_> {
-    pub fn handle(&mut self, event: StravaEvent) {
+    pub fn handle<'a>(&'a mut self, event: StravaEvent, state: State) -> Option<State> {
         match event {
-            StravaEvent::ToggleUnitSystem => self.unit_formatter = self.unit_formatter.toggle(),
-            StravaEvent::Down => self.next_row(),
-            StravaEvent::Up => self.prev_row(),
+            StravaEvent::ToggleUnitSystem => {
+                self.unit_formatter = self.unit_formatter.toggle();
+                None
+            },
+            StravaEvent::Down => {
+                self.next_row();
+                None
+            },
+            StravaEvent::Up => {
+                self.prev_row();
+                None
+            },
+            StravaEvent::Enter => {
+                return self.select(state);
+            },
         }
     }
 
@@ -39,7 +52,9 @@ impl ActivityList<'_> {
             .iter()
             .map(|header| Cell::from(Span::styled(*header, Style::default().fg(Color::DarkGray))));
 
-        for activity in self.activity_store.activities() {
+        self.activities = self.activity_store.activities();
+        let activities = &self.activities;
+        for activity in activities {
             rows.push(Row::new([
                 Cell::from(match activity.start_date {
                     Some(x) => x.format("%Y-%m-%d").to_string(),
@@ -99,6 +114,7 @@ impl ActivityList<'_> {
 
     pub(crate) fn new<'a>(activity_store: &'a mut ActivityStore<'a>) -> ActivityList<'a> {
         ActivityList {
+            activities: vec![],
             activity_store,
             unit_formatter: UnitFormatter::imperial(),
             table_state: TableState::default(),
@@ -125,5 +141,14 @@ impl ActivityList<'_> {
             None => 0,
         };
         self.table_state.select(Some(i));
+    }
+
+    fn select<'a>(&'a self, mut state: State) -> Option<State> {
+        if let Some(selected) = self.table_state.selected() {
+            state.view = super::layout::View::Activity;
+            state.activity = Some(self.activities.get(selected).unwrap().clone());
+            return Some(state);
+        }
+        None
     }
 }

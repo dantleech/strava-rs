@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 #[diesel(table_name = crate::store::schema::activity)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 #[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Activity {
     pub id: i64,
     pub title: String,

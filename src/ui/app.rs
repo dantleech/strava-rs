@@ -40,6 +40,7 @@ impl App<'_> {
                         }
                         event::KeyCode::Char('j') => self.handle(super::event::StravaEvent::Down),
                         event::KeyCode::Char('k') => self.handle(super::event::StravaEvent::Up),
+                        event::KeyCode::Enter => self.handle(super::event::StravaEvent::Enter),
                         _ => (),
                     }
                 }
