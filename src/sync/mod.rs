@@ -1,6 +1,6 @@
 use chrono::{Local, NaiveDate, NaiveDateTime};
 use diesel::{expression::AsExpression, RunQueryDsl, SqliteConnection};
-use serde_json::Value;
+use diesel::prelude::*;
 
 use crate::{
     client::{self, StravaClient},
@@ -26,15 +26,20 @@ impl StravaSync<'_> {
         }
     }
     pub async fn sync(&mut self) -> Result<(), anyhow::Error> {
+        use crate::store::schema::raw_activity::dsl::*;
         let mut page: u32 = 0;
         const PAGE_SIZE: u32 = 10;
-        let mut offset: u64 = 0;
+        let last_epoch = raw_activity.select(
+            diesel::dsl::max(created_at)
+        ).limit(1).first::<Option<NaiveDateTime>>(
+            self.connection
+        )?;
 
         loop {
             page += 1;
             let s_activities = self
                 .client
-                .athlete_activities(page, PAGE_SIZE)
+                .athlete_activities(page, PAGE_SIZE, last_epoch)
                 .await
                 .unwrap();
 
@@ -43,7 +48,6 @@ impl StravaSync<'_> {
             }
 
             for s_activity in s_activities {
-                offset += 1;
                 let raw = RawActivity {
                     id: s_activity["id"]
                         .as_i64()
@@ -54,6 +58,8 @@ impl StravaSync<'_> {
                 };
                 diesel::insert_into(schema::raw_activity::table)
                     .values(&raw)
+                    .on_conflict(schema::raw_activity::id)
+                    .do_nothing()
                     .execute(self.connection)?;
             }
         }
