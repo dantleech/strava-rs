@@ -9,7 +9,6 @@ use tui::{
 
 use crate::{
     store::activity::ActivityStore,
-    util::time_format::{distance, pace, stopwatch_time, DistanceUnit},
 };
 
 use super::{event::StravaEvent, unit_formatter::UnitFormatter};
