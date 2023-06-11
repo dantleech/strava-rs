@@ -18,7 +18,7 @@ diesel::table! {
 
 diesel::table! {
     raw_activity (id) {
-        id -> Integer,
+        id -> BigInt,
         data -> Text,
         synced -> Bool,
         created_at -> Timestamp,

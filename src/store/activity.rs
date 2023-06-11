@@ -22,46 +22,35 @@ pub struct Activity {
     pub start_date: Option<NaiveDateTime>,
 }
 
-
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Insertable, Serialize, Deserialize)]
 #[diesel(table_name = crate::store::schema::raw_activity)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-#[derive(Serialize, Deserialize)]
 pub struct RawActivity {
-    pub id: i32,
+    pub id: i64,
     pub data: String,
     pub synced: bool,
     pub created_at: NaiveDateTime,
 }
 
-pub struct ActivityStore {
-    activities: Vec<Activity>,
-    storage: JsonStorage,
+pub struct ActivityStore<'a> {
+    connection: &'a mut SqliteConnection,
 }
 
-impl ActivityStore {
-    pub(crate) fn new(storage: JsonStorage) -> ActivityStore {
+impl ActivityStore<'_> {
+    pub(crate) fn new(connection: &mut SqliteConnection) -> ActivityStore {
         ActivityStore {
-            activities: storage.load("activities".to_string()),
-            storage,
+            connection
         }
     }
 
     pub(crate) fn clear(&mut self) -> () {
-        self.activities = Vec::new()
     }
 
-    pub(crate) fn add(&mut self, activity: Activity) {
-        self.activities.push(activity)
+    pub(crate) fn add(&mut self, activity: RawActivity) {
     }
 
-    pub(crate) fn flush(&self) -> Result<(), anyhow::Error> {
-        self.storage
-            .write("activities".to_string(), &self.activities)?;
-        Ok(())
-    }
-
-    pub(crate) fn activities(&self) -> &Vec<Activity> {
-        &self.activities
+    pub(crate) fn activities(&mut self) -> Vec<Activity> {
+        use crate::store::schema::activity::dsl::*;
+        activity.select(Activity::as_select()).load(self.connection).expect("Could not load activities")
     }
 }

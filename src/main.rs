@@ -11,6 +11,7 @@ use authenticator::Authenticator;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
+use diesel::{SqliteConnection, Connection};
 use hyper::Client;
 use hyper_tls::HttpsConnector;
 use tui::{backend::CrosstermBackend, Terminal};
@@ -47,6 +48,7 @@ async fn main() -> Result<(), anyhow::Error> {
         .place_state_file("access_token.json")
         .expect("Could not create state directory");
     let storage_path = dirs.get_data_home();
+    let mut db = SqliteConnection::establish("sqlite://strava.sqlite").expect("Could not connect to Sqlite database");
     let mut authenticator = Authenticator::new(
         client,
         args.client_id,
@@ -64,13 +66,12 @@ async fn main() -> Result<(), anyhow::Error> {
     log::info!("Token path: {}", access_token_path.display());
     log::info!("Storage path: {}", storage_path.display());
     log::info!("");
-    let json_storage = JsonStorage::new(storage_path.to_str().unwrap().to_string());
-    let mut activity_store = ActivityStore::new(json_storage);
     let client = new_strava_client(api_config);
 
     if args.no_sync != true {
-        StravaSync::new(&client, &mut activity_store).sync().await?;
+        StravaSync::new(&client, &mut db).sync().await?;
     }
+    let mut activity_store = ActivityStore::new(&mut db);
 
     let stdout = io::stdout();
     let backend = CrosstermBackend::new(stdout);
@@ -78,8 +79,9 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
-    let layout = AppLayout::new(ActivityList::new(activity_store));
-    App::new(layout).run(&mut terminal)?;
+    let mut list = ActivityList::new(&mut activity_store);
+    let mut layout = AppLayout::new(&mut list);
+    App::new(&mut layout).run(&mut terminal)?;
 
     disable_raw_mode()?;
 
