@@ -47,8 +47,10 @@ impl ActivityList<'_> {
                 }),
                 Cell::from(match activity.activity_type.as_str() {
                     "Ride" => "🚴".to_string(),
-                    "Run" => "🏃".to_string(),
+                    "Run" => "🏃".to_string(),
+                    "TrailRun" => "🏃🌲".to_string(),
                     "Walk" => "🥾".to_string(),
+                    "WeightTraining" => "󱅝".to_string(),
                     _ => activity.activity_type.clone(),
                 }),
                 Cell::from(activity.title.clone()),
@@ -81,8 +83,8 @@ impl ActivityList<'_> {
             .highlight_style(Style::default().add_modifier(Modifier::BOLD))
             .highlight_symbol(">> ")
             .widths(&[
-                Constraint::Percentage(10),
-                Constraint::Min(2),
+                Constraint::Min(10),
+                Constraint::Min(4),
                 Constraint::Percentage(20),
                 Constraint::Percentage(10),
                 Constraint::Percentage(10),
