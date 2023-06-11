@@ -2,7 +2,7 @@
 
 use std::fmt::Display;
 
-use chrono::{DateTime, Utc, NaiveDateTime};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use hyper::{client::HttpConnector, Body, Client, Method, Request, Response};
 use hyper_tls::HttpsConnector;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -87,16 +87,20 @@ impl StravaClient {
         &self,
         page: u32,
         per_page: u32,
-        after: Option<NaiveDateTime>
+        after: Option<NaiveDateTime>,
     ) -> Result<Vec<Value>, anyhow::Error> {
-
         let activities = self
             .request(
                 Method::GET,
-                format!("/v3/athlete/activities?per_page={}&page={}&after={}", per_page, page, match after {
-                    Some(epoch) => epoch.timestamp().to_string(),
-                    None => "".to_string()
-                }),
+                format!(
+                    "/v3/athlete/activities?per_page={}&page={}&after={}",
+                    per_page,
+                    page,
+                    match after {
+                        Some(epoch) => epoch.timestamp().to_string(),
+                        None => "".to_string(),
+                    }
+                ),
             )
             .await?;
 

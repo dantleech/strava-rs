@@ -11,7 +11,7 @@ use authenticator::Authenticator;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use diesel::{SqliteConnection, Connection};
+use diesel::{Connection, SqliteConnection};
 use hyper::Client;
 use hyper_tls::HttpsConnector;
 use tui::{backend::CrosstermBackend, Terminal};
@@ -19,7 +19,7 @@ use xdg::BaseDirectories;
 
 use crate::{
     store::activity::ActivityStore,
-    sync::{ingest::StravaSync, convert::AcitivityConverter},
+    sync::{convert::AcitivityConverter, ingest::StravaSync},
     ui::{activity_list::ActivityList, app::App, layout::AppLayout},
 };
 
@@ -48,7 +48,8 @@ async fn main() -> Result<(), anyhow::Error> {
         .place_state_file("access_token.json")
         .expect("Could not create state directory");
     let storage_path = dirs.get_data_home();
-    let mut db = SqliteConnection::establish("sqlite://strava.sqlite").expect("Could not connect to Sqlite database");
+    let mut db = SqliteConnection::establish("sqlite://strava.sqlite")
+        .expect("Could not connect to Sqlite database");
     let mut authenticator = Authenticator::new(
         client,
         args.client_id,

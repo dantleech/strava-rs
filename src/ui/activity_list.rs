@@ -7,7 +7,10 @@ use tui::{
     Frame,
 };
 
-use crate::{store::activity::ActivityStore, util::time_format::{stopwatch_time, distance, DistanceUnit, pace}};
+use crate::{
+    store::activity::ActivityStore,
+    util::time_format::{distance, pace, stopwatch_time, DistanceUnit},
+};
 
 use super::{event::StravaEvent, unit_formatter::UnitFormatter};
 
@@ -52,7 +55,10 @@ impl ActivityList<'_> {
                 Cell::from(activity.title.clone()),
                 Cell::from(self.unit_formatter.distance(activity.distance)),
                 Cell::from(self.unit_formatter.stopwatch_time(activity.moving_time)),
-                Cell::from(self.unit_formatter.speed(activity.distance, activity.moving_time)),
+                Cell::from(
+                    self.unit_formatter
+                        .speed(activity.distance, activity.moving_time),
+                ),
                 Cell::from(
                     self.unit_formatter
                         .pace(activity.moving_time, activity.distance),

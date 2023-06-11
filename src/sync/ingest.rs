@@ -1,13 +1,10 @@
 use chrono::{Local, NaiveDateTime};
-use diesel::{RunQueryDsl, SqliteConnection};
 use diesel::prelude::*;
+use diesel::{RunQueryDsl, SqliteConnection};
 
 use crate::{
     client::StravaClient,
-    store::{
-        activity::RawActivity,
-        schema,
-    },
+    store::{activity::RawActivity, schema},
 };
 
 pub struct StravaSync<'a> {
@@ -20,20 +17,16 @@ impl StravaSync<'_> {
         client: &'a StravaClient,
         connection: &'a mut SqliteConnection,
     ) -> StravaSync<'a> {
-        StravaSync {
-            client,
-            connection,
-        }
+        StravaSync { client, connection }
     }
     pub async fn sync(&mut self) -> Result<(), anyhow::Error> {
         use crate::store::schema::raw_activity::dsl::*;
         let mut page: u32 = 0;
         const PAGE_SIZE: u32 = 10;
-        let last_epoch = raw_activity.select(
-            diesel::dsl::max(created_at)
-        ).limit(1).first::<Option<NaiveDateTime>>(
-            self.connection
-        )?;
+        let last_epoch = raw_activity
+            .select(diesel::dsl::max(created_at))
+            .limit(1)
+            .first::<Option<NaiveDateTime>>(self.connection)?;
 
         loop {
             page += 1;

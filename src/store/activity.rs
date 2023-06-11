@@ -1,8 +1,6 @@
-use chrono::{DateTime, Utc, NaiveDateTime};
-use serde::{Deserialize, Serialize};
+use chrono::NaiveDateTime;
 use diesel::prelude::*;
-
-use super::JsonStorage;
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::store::schema::activity)]
@@ -38,15 +36,15 @@ pub struct ActivityStore<'a> {
 
 impl ActivityStore<'_> {
     pub(crate) fn new(connection: &mut SqliteConnection) -> ActivityStore {
-        ActivityStore {
-            connection
-        }
+        ActivityStore { connection }
     }
 
     pub(crate) fn activities(&mut self) -> Vec<Activity> {
         use crate::store::schema::activity;
         activity::table
             .order(activity::start_date.desc())
-            .select(Activity::as_select()).load(self.connection).expect("Could not load activities")
+            .select(Activity::as_select())
+            .load(self.connection)
+            .expect("Could not load activities")
     }
 }

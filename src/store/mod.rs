@@ -35,7 +35,8 @@ impl JsonStorage {
         if !path.exists() {
             return vec![];
         }
-        let file = File::open(&path).expect(format!("Could not open file: {}", path.display()).as_str());
+        let file =
+            File::open(&path).expect(format!("Could not open file: {}", path.display()).as_str());
         let reader = BufReader::new(file);
         let collection: Vec<T> = match serde_json::from_reader(reader) {
             Ok(ok) => ok,
