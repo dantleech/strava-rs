@@ -18,8 +18,8 @@ use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
 use crate::{
-    store::{activity::ActivityStore, JsonStorage},
-    sync::StravaSync,
+    store::activity::ActivityStore,
+    sync::{ingest::StravaSync, convert::AcitivityConverter},
     ui::{activity_list::ActivityList, app::App, layout::AppLayout},
 };
 
@@ -71,6 +71,7 @@ async fn main() -> Result<(), anyhow::Error> {
     if args.no_sync != true {
         StravaSync::new(&client, &mut db).sync().await?;
     }
+    AcitivityConverter::new(&mut db).convert().await?;
     let mut activity_store = ActivityStore::new(&mut db);
 
     let stdout = io::stdout();

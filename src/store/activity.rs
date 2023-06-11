@@ -4,12 +4,12 @@ use diesel::prelude::*;
 
 use super::JsonStorage;
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::store::schema::activity)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 #[derive(Serialize, Deserialize)]
 pub struct Activity {
-    pub id: i32,
+    pub id: i64,
     pub title: String,
     pub activity_type: String,
     pub distance: f32,
@@ -43,14 +43,10 @@ impl ActivityStore<'_> {
         }
     }
 
-    pub(crate) fn clear(&mut self) -> () {
-    }
-
-    pub(crate) fn add(&mut self, activity: RawActivity) {
-    }
-
     pub(crate) fn activities(&mut self) -> Vec<Activity> {
-        use crate::store::schema::activity::dsl::*;
-        activity.select(Activity::as_select()).load(self.connection).expect("Could not load activities")
+        use crate::store::schema::activity;
+        activity::table
+            .order(activity::start_date.desc())
+            .select(Activity::as_select()).load(self.connection).expect("Could not load activities")
     }
 }
