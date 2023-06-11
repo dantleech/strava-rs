@@ -2,7 +2,7 @@
 
 diesel::table! {
     activity (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         title -> Text,
         activity_type -> Text,
         distance -> Float,
@@ -15,3 +15,17 @@ diesel::table! {
         start_date -> Nullable<Timestamp>,
     }
 }
+
+diesel::table! {
+    raw_activity (id) {
+        id -> Integer,
+        data -> Text,
+        synced -> Bool,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::allow_tables_to_appear_in_same_query!(
+    activity,
+    raw_activity,
+);

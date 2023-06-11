@@ -6,6 +6,7 @@ use chrono::{DateTime, Utc};
 use hyper::{client::HttpConnector, Body, Client, Method, Request, Response};
 use hyper_tls::HttpsConnector;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde_json::Value;
 
 pub fn new_strava_client(config: StravaConfig) -> StravaClient {
     let connector = HttpsConnector::new();
@@ -86,7 +87,7 @@ impl StravaClient {
         &self,
         page: u32,
         per_page: u32,
-    ) -> Result<Vec<Activity>, anyhow::Error> {
+    ) -> Result<Vec<Value>, anyhow::Error> {
         let activities = self
             .request(
                 Method::GET,

@@ -9,6 +9,7 @@ use super::JsonStorage;
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 #[derive(Serialize, Deserialize)]
 pub struct Activity {
+    pub id: i32,
     pub title: String,
     pub activity_type: String,
     pub distance: f32,
@@ -19,6 +20,18 @@ pub struct Activity {
     pub average_heartrate: Option<f32>,
     pub max_heartrate: Option<f32>,
     pub start_date: Option<NaiveDateTime>,
+}
+
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::store::schema::raw_activity)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[derive(Serialize, Deserialize)]
+pub struct RawActivity {
+    pub id: i32,
+    pub data: String,
+    pub synced: bool,
+    pub created_at: NaiveDateTime,
 }
 
 pub struct ActivityStore {
