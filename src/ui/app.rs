@@ -8,13 +8,13 @@ use tui::{
 
 use super::layout::AppLayout;
 
-pub struct App {
-    layout: AppLayout,
+pub struct App<'a> {
+    layout: &'a mut AppLayout<'a>,
     quit: bool,
 }
 
-impl App {
-    pub fn new(layout: AppLayout) -> App {
+impl App<'_> {
+    pub fn new<'a>(layout: &'a mut AppLayout<'a>) -> App<'a> {
         App {
             layout,
             quit: false,

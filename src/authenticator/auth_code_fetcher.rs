@@ -29,11 +29,14 @@ impl AuthCodeFetcher {
 
         log::info!("trying to open URL: {}", auth_url);
 
-        if !open::that_in_background(&auth_url).is_finished() {
-            log::info!("Could not open browser, visit the following URL to grant Strava TUI access to your Strava data:");
-            log::info!("");
-            log::info!("    {}", auth_url);
-            log::info!("");
+        match open::that(&auth_url) {
+            Ok(()) => (),
+            Err(err) => {
+                log::info!("Could not open browser: {}, visit the following URL to grant Strava TUI access to your Strava data:", err);
+                log::info!("");
+                log::info!("    {}", auth_url);
+                log::info!("");
+            }
         }
 
         let make_svc = make_service_fn(|_con| {

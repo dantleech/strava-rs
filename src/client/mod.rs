@@ -2,10 +2,11 @@
 
 use std::fmt::Display;
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use hyper::{client::HttpConnector, Body, Client, Method, Request, Response};
 use hyper_tls::HttpsConnector;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde_json::Value;
 
 pub fn new_strava_client(config: StravaConfig) -> StravaClient {
     let connector = HttpsConnector::new();
@@ -32,16 +33,16 @@ pub struct StravaClient {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Activity {
-    pub id: u64,
+    pub id: i64,
     pub name: String,
-    pub distance: f64,
-    pub moving_time: u64,
-    pub elapsed_time: u64,
-    pub total_elevation_gain: f64,
+    pub distance: f32,
+    pub moving_time: i32,
+    pub elapsed_time: i32,
+    pub total_elevation_gain: f32,
     pub sport_type: String,
-    pub average_heartrate: Option<f64>,
-    pub max_heartrate: Option<f64>,
-    pub start_date: DateTime<Utc>,
+    pub average_heartrate: Option<f32>,
+    pub max_heartrate: Option<f32>,
+    pub start_date: Option<DateTime<Utc>>,
 }
 
 impl Display for Activity {
@@ -86,11 +87,20 @@ impl StravaClient {
         &self,
         page: u32,
         per_page: u32,
-    ) -> Result<Vec<Activity>, anyhow::Error> {
+        after: Option<NaiveDateTime>,
+    ) -> Result<Vec<Value>, anyhow::Error> {
         let activities = self
             .request(
                 Method::GET,
-                format!("/v3/athlete/activities?per_page={}&page={}", per_page, page),
+                format!(
+                    "/v3/athlete/activities?per_page={}&page={}&after={}",
+                    per_page,
+                    page,
+                    match after {
+                        Some(epoch) => epoch.timestamp().to_string(),
+                        None => "".to_string(),
+                    }
+                ),
             )
             .await?;
 

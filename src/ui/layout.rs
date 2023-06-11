@@ -7,11 +7,11 @@ use tui::{
 
 use super::activity_list::ActivityList;
 
-pub struct AppLayout {
-    activities_list: ActivityList,
+pub struct AppLayout<'a> {
+    activities_list: &'a mut ActivityList<'a>,
 }
 
-impl AppLayout {
+impl AppLayout<'_> {
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
         let rows = Layout::default()
             .margin(0)
@@ -24,7 +24,7 @@ impl AppLayout {
         Ok(())
     }
 
-    pub(crate) fn new(activities_list: ActivityList) -> AppLayout {
+    pub(crate) fn new<'a>(activities_list: &'a mut ActivityList<'a>) -> AppLayout<'a> {
         AppLayout { activities_list }
     }
 

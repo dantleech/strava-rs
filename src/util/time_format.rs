@@ -37,7 +37,10 @@ pub fn pace(elapsed_time: u64, distance: f64, unit: &DistanceUnit) -> String {
         }
         DistanceUnit::Imperial => {
             let spm = elapsed_time as f64 / distance;
-            format!("{} /mi", stopwatch_time(((spm * 1000.0) / 0.621371).round() as u64))
+            format!(
+                "{} /mi",
+                stopwatch_time(((spm * 1000.0) / 0.621371).round() as u64)
+            )
         }
     }
 }

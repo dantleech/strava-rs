@@ -123,7 +123,7 @@ mod test {
             access_token: "token".to_string(),
             athlete: super::Athlete {
                 id: 123,
-                username: "dan".to_string(),
+                username: Some("dan".to_string()),
                 firstname: "Dan".to_string(),
                 lastname: "Leech".to_string(),
             },

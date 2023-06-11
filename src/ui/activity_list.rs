@@ -7,17 +7,19 @@ use tui::{
     Frame,
 };
 
-use crate::{store::activity::ActivityStore, util::time_format::{stopwatch_time, distance, DistanceUnit, pace}};
+use crate::{
+    store::activity::ActivityStore,
+};
 
 use super::{event::StravaEvent, unit_formatter::UnitFormatter};
 
-pub struct ActivityList {
-    activity_store: ActivityStore,
+pub struct ActivityList<'a> {
+    activity_store: &'a mut ActivityStore<'a>,
     unit_formatter: UnitFormatter,
     table_state: TableState,
 }
 
-impl ActivityList {
+impl ActivityList<'_> {
     pub fn handle(&mut self, event: StravaEvent) {
         match event {
             StravaEvent::ToggleUnitSystem => self.unit_formatter = self.unit_formatter.toggle(),
@@ -39,17 +41,25 @@ impl ActivityList {
 
         for activity in self.activity_store.activities() {
             rows.push(Row::new([
-                Cell::from(activity.start_date.format("%Y-%m-%d").to_string()),
+                Cell::from(match activity.start_date {
+                    Some(x) => x.format("%Y-%m-%d").to_string(),
+                    None => "".to_string(),
+                }),
                 Cell::from(match activity.activity_type.as_str() {
                     "Ride" => "🚴".to_string(),
-                    "Run" => "🏃".to_string(),
+                    "Run" => "🏃".to_string(),
+                    "TrailRun" => "🏃🌲".to_string(),
                     "Walk" => "🥾".to_string(),
+                    "WeightTraining" => "󱅝".to_string(),
                     _ => activity.activity_type.clone(),
                 }),
-                Cell::from(activity.name.clone()),
+                Cell::from(activity.title.clone()),
                 Cell::from(self.unit_formatter.distance(activity.distance)),
                 Cell::from(self.unit_formatter.stopwatch_time(activity.moving_time)),
-                Cell::from(self.unit_formatter.speed(activity.distance, activity.moving_time)),
+                Cell::from(
+                    self.unit_formatter
+                        .speed(activity.distance, activity.moving_time),
+                ),
                 Cell::from(
                     self.unit_formatter
                         .pace(activity.moving_time, activity.distance),
@@ -73,8 +83,8 @@ impl ActivityList {
             .highlight_style(Style::default().add_modifier(Modifier::BOLD))
             .highlight_symbol(">> ")
             .widths(&[
-                Constraint::Percentage(10),
-                Constraint::Min(2),
+                Constraint::Min(10),
+                Constraint::Min(4),
                 Constraint::Percentage(20),
                 Constraint::Percentage(10),
                 Constraint::Percentage(10),
@@ -87,8 +97,8 @@ impl ActivityList {
         Ok(())
     }
 
-    pub(crate) fn new(activity_store: ActivityStore) -> Self {
-        Self {
+    pub(crate) fn new<'a>(activity_store: &'a mut ActivityStore<'a>) -> ActivityList<'a> {
+        ActivityList {
             activity_store,
             unit_formatter: UnitFormatter::imperial(),
             table_state: TableState::default(),
