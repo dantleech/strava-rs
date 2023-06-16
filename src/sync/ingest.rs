@@ -48,6 +48,7 @@ impl StravaSync<'_> {
                     data: s_activity.to_string(),
                     synced: false,
                 };
+                log::info!("[{}] {}", s_activity["id"], s_activity["name"]);
                 diesel::insert_into(schema::raw_activity::table)
                     .values(&raw)
                     .on_conflict(schema::raw_activity::id)

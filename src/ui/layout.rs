@@ -29,7 +29,6 @@ pub struct AppLayout<'a> {
 impl AppLayout<'_> {
     pub fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
         match self.state.view {
-            View::Activity => panic!("fuck"),
             _ => {
                 let rows = Layout::default()
                     .margin(0)
