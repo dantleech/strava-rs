@@ -19,6 +19,7 @@ pub struct App {
 
     pub unit_formatter: UnitFormatter,
     pub activity_list_table_state: TableState,
+    pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
 }
 
@@ -34,6 +35,7 @@ impl App {
             unit_formatter: UnitFormatter::imperial(),
 
             activities: vec![],
+            activity: None,
 
             activity_list_table_state: TableState::default(),
         }

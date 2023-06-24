@@ -48,3 +48,9 @@ impl ActivityStore<'_> {
             .expect("Could not load activities")
     }
 }
+
+impl Activity {
+    pub fn time_for_distance(&self, meters: f32) -> i32 {
+        return 0
+    }
+}
