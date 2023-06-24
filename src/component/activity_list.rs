@@ -19,14 +19,14 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::ToggleUnitSystem => {
             app.unit_formatter = app.unit_formatter.toggle();
         }
-        StravaEvent::Down => table_state_next(app.activity_list_table_state, app.activities.len()),
-        StravaEvent::Up => table_state_prev(app.activity_list_table_state, app.activities.len()),
+        StravaEvent::Down => table_state_next(&mut app.activity_list_table_state, app.activities.len()),
+        StravaEvent::Up => table_state_prev(&mut app.activity_list_table_state, app.activities.len()),
         _ => (),
     }
 }
 
 pub fn draw<B: Backend>(
-    app: &App,
+    app: &mut App,
     f: &mut Frame<B>,
     area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
@@ -36,7 +36,7 @@ pub fn draw<B: Backend>(
         .iter()
         .map(|header| Cell::from(Span::styled(*header, Style::default().fg(Color::DarkGray))));
 
-    let activities = app.activities;
+    let activities = &app.activities;
     for activity in activities {
         rows.push(Row::new([
             Cell::from(match activity.start_date {

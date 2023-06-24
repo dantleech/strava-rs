@@ -7,7 +7,7 @@ use tui::{
 
 use crate::{app::{App, ActivePage}, component::activity_list};
 
-pub fn draw<B: Backend>(app: &App, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
+pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
     let rows = Layout::default()
         .margin(0)
         .constraints([Constraint::Length(1), Constraint::Min(4)].as_ref())

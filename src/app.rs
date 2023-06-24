@@ -63,10 +63,9 @@ impl App {
         Ok(())
     }
 
-    fn handle(&mut self, _key: MappedKey) {
+    fn handle(&mut self, key: MappedKey) {
         match self.active_page {
-            ActivePage::ActivityList => activity_list::handle(self),
-            _ => panic!("Unkown page"),
+            ActivePage::ActivityList => activity_list::handle(self, key),
         }
     }
 }

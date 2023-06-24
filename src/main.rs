@@ -22,9 +22,6 @@ use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
 use crate::{
-    component::{
-        layout::{State, View},
-    },
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest::StravaSync},
 };
@@ -87,11 +84,6 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut terminal: Terminal<CrosstermBackend<io::Stdout>> = Terminal::new(backend)?;
     enable_raw_mode()?;
     terminal.clear()?;
-
-    let mut state = State {
-        view: View::ActivityList,
-        activity: None,
-    };
 
     let mut app = App::new();
     app.activities = activity_store.activities();
