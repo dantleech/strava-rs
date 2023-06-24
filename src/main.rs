@@ -2,7 +2,7 @@ pub mod authenticator;
 pub mod client;
 pub mod store;
 pub mod sync;
-pub mod ui;
+pub mod component;
 pub mod util;
 
 use std::io;
@@ -20,7 +20,7 @@ use xdg::BaseDirectories;
 use crate::{
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest::StravaSync},
-    ui::{
+    component::{
         activity_list::ActivityList,
         app::App,
         layout::{AppLayout, State, View},
