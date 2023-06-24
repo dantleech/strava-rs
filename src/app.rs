@@ -22,7 +22,7 @@ pub struct App {
     pub activities: Vec<Activity>,
 }
 
-enum ActivePage {
+pub enum ActivePage {
     ActivityList,
 }
 

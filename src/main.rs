@@ -1,4 +1,5 @@
 pub mod app;
+pub mod ui;
 pub mod authenticator;
 pub mod client;
 pub mod component;
@@ -22,8 +23,7 @@ use xdg::BaseDirectories;
 
 use crate::{
     component::{
-        activity_list::ActivityList,
-        layout::{AppLayout, State, View},
+        layout::{State, View},
     },
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest::StravaSync},
@@ -92,8 +92,10 @@ async fn main() -> Result<(), anyhow::Error> {
         view: View::ActivityList,
         activity: None,
     };
-    let mut list = ActivityList::new(&mut activity_store);
-    App::new().run(&mut terminal)?;
+
+    let mut app = App::new();
+    app.activities = activity_store.activities();
+    app.run(&mut terminal)?;
 
     disable_raw_mode()?;
 

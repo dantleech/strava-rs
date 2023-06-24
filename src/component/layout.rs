@@ -7,7 +7,6 @@ use tui::{
 
 use crate::store::activity::Activity;
 
-use super::activity_list::ActivityList;
 
 #[derive(Debug, Clone)]
 pub enum View {

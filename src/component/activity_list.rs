@@ -8,12 +8,10 @@ use tui::{
 };
 
 use crate::{
-    app::App,
     event::{
         keymap::{MappedKey, StravaEvent},
         util::{table_state_next, table_state_prev},
-    },
-    store::activity::{Activity, ActivityStore},
+    }, app::App
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
