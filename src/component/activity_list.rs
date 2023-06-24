@@ -3,7 +3,7 @@ use tui::{
     layout::Constraint,
     style::{Color, Modifier, Style},
     text::Span,
-    widgets::{Cell, Row, Table, TableState},
+    widgets::{Cell, Row, Table},
     Frame,
 };
 

@@ -1,9 +1,6 @@
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout},
-    style::{Color, Modifier, Style},
-    text::Span,
-    widgets::{Cell, Row, Table, TableState},
     Frame,
 };
 

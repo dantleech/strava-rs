@@ -50,7 +50,7 @@ impl ActivityStore<'_> {
 }
 
 impl Activity {
-    pub fn time_for_distance(&self, meters: f32) -> i32 {
+    pub fn time_for_distance(&self, _meters: f32) -> i32 {
         return 0
     }
 }
