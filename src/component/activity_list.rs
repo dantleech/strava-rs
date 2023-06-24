@@ -12,7 +12,7 @@ use crate::{
     event::{
         keymap::{MappedKey, StravaEvent},
         util::{table_state_next, table_state_prev},
-    },
+    }, store::activity::Activity,
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
@@ -42,34 +42,33 @@ pub fn draw<B: Backend>(
     f: &mut Frame<B>,
     area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
+    let activities = &app.activities;
+
+    if app.activity_list_table_state.selected() == None && activities.len() > 0 {
+        app.activity_list_table_state.select(Some(0));
+    }
+
+    f.render_stateful_widget(activity_list_table(app, activities), area, &mut app.activity_list_table_state);
+    Ok(())
+}
+
+pub fn activity_list_table<'a>(app: &App, activities: &'a Vec<Activity>) -> Table<'a> {
     let mut rows = vec![];
-    let header_names = ["Date", "", "Title", "Dst", "🕑", "🚤", "👣", "💓", "🌄"];
+    let header_names = ["Date", "", "Title", "Dst", "🕑 Time", "👣 Pace", "💓 Heart", "🌄 Elevation"];
     let headers = header_names
         .iter()
         .map(|header| Cell::from(Span::styled(*header, Style::default().fg(Color::DarkGray))));
 
-    let activities = &app.activities;
     for activity in activities {
         rows.push(Row::new([
             Cell::from(match activity.start_date {
                 Some(x) => x.format("%Y-%m-%d").to_string(),
                 None => "".to_string(),
             }),
-            Cell::from(match activity.activity_type.as_str() {
-                "Ride" => "🚴".to_string(),
-                "Run" => "🏃".to_string(),
-                "TrailRun" => "🏃🌲".to_string(),
-                "Walk" => "🥾".to_string(),
-                "WeightTraining" => "󱅝".to_string(),
-                _ => activity.activity_type.clone(),
-            }),
+            Cell::from(activity.activity_type_icon()),
             Cell::from(activity.title.clone()),
             Cell::from(app.unit_formatter.distance(activity.distance)),
             Cell::from(app.unit_formatter.stopwatch_time(activity.moving_time)),
-            Cell::from(
-                app.unit_formatter
-                    .speed(activity.distance, activity.moving_time),
-            ),
             Cell::from(
                 app.unit_formatter
                     .pace(activity.moving_time, activity.distance),
@@ -83,7 +82,7 @@ pub fn draw<B: Backend>(
         ]));
     }
 
-    let table = Table::new(rows)
+    Table::new(rows)
         .header(
             Row::new(headers)
                 .height(1)
@@ -101,8 +100,5 @@ pub fn draw<B: Backend>(
             Constraint::Percentage(10),
             Constraint::Percentage(10),
             Constraint::Percentage(10),
-        ]);
-
-    f.render_stateful_widget(table, area, &mut app.activity_list_table_state);
-    Ok(())
+        ])
 }

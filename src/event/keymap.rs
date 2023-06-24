@@ -5,6 +5,7 @@ pub fn map_key(ke: KeyEvent) -> MappedKey {
         KeyCode::Char('q') => new_strava_key(ke, StravaEvent::Quit),
         KeyCode::Char('k') => new_strava_key(ke, StravaEvent::Up),
         KeyCode::Char('j') => new_strava_key(ke, StravaEvent::Down),
+        KeyCode::Char('u') => new_strava_key(ke, StravaEvent::ToggleUnitSystem),
         KeyCode::Enter => new_strava_key(ke, StravaEvent::Enter),
         _ => new_strava_key(ke, StravaEvent::None),
     }
