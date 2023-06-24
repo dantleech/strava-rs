@@ -20,7 +20,11 @@ use xdg::BaseDirectories;
 use crate::{
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest::StravaSync},
-    ui::{activity_list::ActivityList, app::App, layout::{AppLayout, State, View}},
+    ui::{
+        activity_list::ActivityList,
+        app::App,
+        layout::{AppLayout, State, View},
+    },
 };
 
 #[derive(Parser, Debug)]
@@ -41,7 +45,6 @@ async fn main() -> Result<(), anyhow::Error> {
         .init();
 
     let connector = HttpsConnector::new();
-    let client = Client::builder().build(connector);
     let args = Args::parse();
     let dirs: BaseDirectories = xdg::BaseDirectories::with_prefix("strava-rs").unwrap();
     let access_token_path = dirs
@@ -50,16 +53,6 @@ async fn main() -> Result<(), anyhow::Error> {
     let storage_path = dirs.get_data_home();
     let mut db = SqliteConnection::establish("sqlite://strava.sqlite")
         .expect("Could not connect to Sqlite database");
-    let mut authenticator = Authenticator::new(
-        client,
-        args.client_id,
-        args.client_secret,
-        access_token_path.to_str().unwrap().to_string(),
-    );
-    let api_config = StravaConfig {
-        base_url: "https://www.strava.com/api".to_string(),
-        access_token: authenticator.access_token().await?,
-    };
 
     log::info!("Strava TUI");
     log::info!("==========");
@@ -67,12 +60,24 @@ async fn main() -> Result<(), anyhow::Error> {
     log::info!("Token path: {}", access_token_path.display());
     log::info!("Storage path: {}", storage_path.display());
     log::info!("");
-    let client = new_strava_client(api_config);
 
     if args.no_sync != true {
+        let client = Client::builder().build(connector);
+        let mut authenticator = Authenticator::new(
+            client,
+            args.client_id,
+            args.client_secret,
+            access_token_path.to_str().unwrap().to_string(),
+        );
+        let api_config = StravaConfig {
+            base_url: "https://www.strava.com/api".to_string(),
+            access_token: authenticator.access_token().await?,
+        };
+        let client = new_strava_client(api_config);
         StravaSync::new(&client, &mut db).sync().await?;
+        AcitivityConverter::new(&mut db).convert().await?;
     }
-    AcitivityConverter::new(&mut db).convert().await?;
+
     let mut activity_store = ActivityStore::new(&mut db);
 
     let stdout = io::stdout();
@@ -81,7 +86,7 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
-    let mut state = State{
+    let mut state = State {
         view: View::ActivityList,
         activity: None,
     };
