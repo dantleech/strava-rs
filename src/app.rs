@@ -8,7 +8,7 @@ use tui::{
 };
 
 use crate::{
-    component::{activity_list, unit_formatter::UnitFormatter},
+    component::{activity_list, unit_formatter::UnitFormatter, activity_view},
     event::keymap::{map_key, MappedKey},
     store::activity::Activity, ui,
 };
@@ -25,6 +25,7 @@ pub struct App {
 
 pub enum ActivePage {
     ActivityList,
+    Activity,
 }
 
 impl App {
@@ -68,6 +69,7 @@ impl App {
     fn handle(&mut self, key: MappedKey) {
         match self.active_page {
             ActivePage::ActivityList => activity_list::handle(self, key),
+            ActivePage::Activity => activity_view::handle(self, key),
         }
     }
 }

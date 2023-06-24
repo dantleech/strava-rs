@@ -4,12 +4,12 @@ use tui::{
     Frame,
 };
 
-use crate::{app::{App, ActivePage}, event::keymap::StravaEvent};
+use crate::{app::{App, ActivePage}, event::keymap::{StravaEvent, MappedKey}};
 
 use super::race_predictor;
 
-pub fn handle(app: &mut App, event: StravaEvent) {
-    match event {
+pub fn handle(app: &mut App, key: MappedKey) {
+    match key.strava_event {
         StravaEvent::ToggleUnitSystem => {
             app.unit_formatter = app.unit_formatter.toggle();
         },
@@ -34,6 +34,6 @@ pub fn draw<B: Backend>(
         .margin(0)
         .constraints([Constraint::Length(1), Constraint::Min(4)].as_ref())
         .split(area);
-    race_predictor::draw(app, f, rows[0])?;
+    race_predictor::draw(app, f, rows[1])?;
     Ok(())
 }

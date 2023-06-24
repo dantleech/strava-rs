@@ -8,10 +8,11 @@ use tui::{
 };
 
 use crate::{
+    app::{ActivePage, App},
     event::{
         keymap::{MappedKey, StravaEvent},
         util::{table_state_next, table_state_prev},
-    }, app::App
+    },
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
@@ -20,8 +21,18 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::ToggleUnitSystem => {
             app.unit_formatter = app.unit_formatter.toggle();
         }
-        StravaEvent::Down => table_state_next(&mut app.activity_list_table_state, app.activities.len()),
-        StravaEvent::Up => table_state_prev(&mut app.activity_list_table_state, app.activities.len()),
+        StravaEvent::Down => {
+            table_state_next(&mut app.activity_list_table_state, app.activities.len())
+        }
+        StravaEvent::Up => {
+            table_state_prev(&mut app.activity_list_table_state, app.activities.len())
+        }
+        StravaEvent::Enter => {
+            if let Some(selected) = app.activity_list_table_state.selected() {
+                app.activity = Some(app.activities.get(selected).unwrap().clone());
+                app.active_page = ActivePage::Activity;
+            }
+        },
         _ => (),
     }
 }
