@@ -10,7 +10,7 @@ use tui::{
 use crate::{
     component::{activity_list, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
-    store::activity::Activity,
+    store::activity::Activity, ui,
 };
 
 pub struct App {
@@ -60,7 +60,7 @@ impl App {
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
-        Ok(())
+        ui::draw(self, f)
     }
 
     fn handle(&mut self, key: MappedKey) {

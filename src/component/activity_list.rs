@@ -16,6 +16,7 @@ use crate::{
 
 pub fn handle(app: &mut App, key: MappedKey) {
     match key.strava_event {
+        StravaEvent::Quit => app.quit = true,
         StravaEvent::ToggleUnitSystem => {
             app.unit_formatter = app.unit_formatter.toggle();
         }

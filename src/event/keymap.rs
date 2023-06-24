@@ -1,7 +1,10 @@
-use crossterm::event::KeyEvent;
+use crossterm::event::{KeyEvent, KeyCode};
 
 pub fn map_key(ke: KeyEvent) -> MappedKey {
-    match ke {
+    match ke.code {
+        KeyCode::Char('q') => new_strava_key(ke, StravaEvent::Quit),
+        KeyCode::Char('k') => new_strava_key(ke, StravaEvent::Up),
+        KeyCode::Char('j') => new_strava_key(ke, StravaEvent::Down),
         _ => new_strava_key(ke, StravaEvent::None),
     }
 }
@@ -24,4 +27,5 @@ pub enum StravaEvent {
     Up,
     Enter,
     None,
+    Quit,
 }
