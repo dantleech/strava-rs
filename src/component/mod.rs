@@ -1,5 +1,4 @@
 pub mod activity_list;
-pub mod app;
-pub mod event;
-pub mod layout;
+pub mod activity_view;
 pub mod unit_formatter;
+pub mod race_predictor;

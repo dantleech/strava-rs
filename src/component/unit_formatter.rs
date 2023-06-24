@@ -90,7 +90,7 @@ impl UnitFormatter {
 
 #[cfg(test)]
 mod tests {
-    use crate::ui::unit_formatter::UnitFormatter;
+    use crate::component::unit_formatter::UnitFormatter;
 
     #[test]
     fn test_stopwatch_time() {

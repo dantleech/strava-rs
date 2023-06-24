@@ -1,12 +1,16 @@
+pub mod app;
+pub mod ui;
 pub mod authenticator;
 pub mod client;
+pub mod component;
+pub mod event;
 pub mod store;
 pub mod sync;
-pub mod ui;
 pub mod util;
 
 use std::io;
 
+use app::App;
 use authenticator::Authenticator;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
@@ -20,11 +24,6 @@ use xdg::BaseDirectories;
 use crate::{
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest::StravaSync},
-    ui::{
-        activity_list::ActivityList,
-        app::App,
-        layout::{AppLayout, State, View},
-    },
 };
 
 #[derive(Parser, Debug)]
@@ -86,13 +85,9 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
-    let mut state = State {
-        view: View::ActivityList,
-        activity: None,
-    };
-    let mut list = ActivityList::new(&mut activity_store);
-    let mut layout = AppLayout::new(&mut list, state);
-    App::new(&mut layout).run(&mut terminal)?;
+    let mut app = App::new();
+    app.activities = activity_store.activities();
+    app.run(&mut terminal)?;
 
     disable_raw_mode()?;
 

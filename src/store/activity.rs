@@ -5,8 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::store::schema::activity)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Activity {
     pub id: i64,
     pub title: String,
@@ -47,5 +46,22 @@ impl ActivityStore<'_> {
             .select(Activity::as_select())
             .load(self.connection)
             .expect("Could not load activities")
+    }
+}
+
+impl Activity {
+    pub fn time_for_distance(&self, meters: f32) -> i32 {
+        ((self.moving_time as f32 / self.distance) as f32 * meters) as i32
+    }
+
+    pub(crate) fn activity_type_icon(&self) -> String {
+        match self.activity_type.as_str() {
+            "Ride" => "🚴".to_string(),
+            "Run" => "🏃".to_string(),
+            "TrailRun" => "🏃🌲".to_string(),
+            "Walk" => "🥾".to_string(),
+            "WeightTraining" => "󱅝".to_string(),
+            _ => self.activity_type.clone(),
+        }
     }
 }
