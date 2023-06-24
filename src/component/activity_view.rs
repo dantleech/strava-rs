@@ -36,7 +36,7 @@ pub fn draw<B: Backend>(
     let rows = Layout::default()
         .margin(0)
         .constraints([Constraint::Length(1), Constraint::Min(4)].as_ref())
-        .split(f.size());
-    race_predictor.draw(f, rows[0]);
+        .split(area);
+    race_predictor::draw(app, f, rows[0])?;
     Ok(())
 }
