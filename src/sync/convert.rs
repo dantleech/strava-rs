@@ -1,7 +1,5 @@
-
 use diesel::prelude::*;
 use diesel::SqliteConnection;
-
 
 use crate::client;
 use crate::store::activity::Activity;

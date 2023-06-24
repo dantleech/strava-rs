@@ -5,8 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::store::schema::activity)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-#[derive(Serialize, Deserialize)]
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Activity {
     pub id: i64,
     pub title: String,

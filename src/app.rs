@@ -3,23 +3,40 @@ use std::{io, time::Duration};
 use crossterm::event::{self, poll, Event};
 use tui::{
     backend::{Backend, CrosstermBackend},
+    widgets::TableState,
     Frame, Terminal,
 };
 
-use crate::{config::keymap::{map_key, MappedKey}, component::activity_list};
+use crate::{
+    component::{activity_list, unit_formatter::UnitFormatter},
+    event::keymap::{map_key, MappedKey},
+    store::activity::Activity,
+};
 
 pub struct App {
-    quit: bool,
-    active_page: ActivePage,
+    pub quit: bool,
+    pub active_page: ActivePage,
+
+    pub unit_formatter: UnitFormatter,
+    pub activity_list_table_state: TableState,
+    pub activities: Vec<Activity>,
 }
 
 enum ActivePage {
-    ActivityList
+    ActivityList,
 }
 
 impl App {
     pub fn new() -> App {
-        App { quit: false }
+        App {
+            quit: false,
+            active_page: ActivePage::ActivityList,
+            unit_formatter: UnitFormatter::imperial(),
+
+            activities: vec![],
+
+            activity_list_table_state: TableState::default(),
+        }
     }
     pub fn run<'a>(
         &mut self,
@@ -36,7 +53,6 @@ impl App {
                 if let Event::Key(key) = event::read()? {
                     let key = map_key(key);
                     self.handle(key)
-
                 }
             }
         }
@@ -50,7 +66,7 @@ impl App {
     fn handle(&mut self, _key: MappedKey) {
         match self.active_page {
             ActivePage::ActivityList => activity_list::handle(self),
-            _ => panic!("Unkown page")
+            _ => panic!("Unkown page"),
         }
     }
 }

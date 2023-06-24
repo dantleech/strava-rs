@@ -1,14 +1,15 @@
+pub mod app;
 pub mod authenticator;
 pub mod client;
-pub mod app;
-pub mod config;
+pub mod component;
+pub mod event;
 pub mod store;
 pub mod sync;
-pub mod component;
 pub mod util;
 
 use std::io;
 
+use app::App;
 use authenticator::Authenticator;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
@@ -18,15 +19,14 @@ use hyper::Client;
 use hyper_tls::HttpsConnector;
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
-use app::App;
 
 use crate::{
-    store::activity::ActivityStore,
-    sync::{convert::AcitivityConverter, ingest::StravaSync},
     component::{
         activity_list::ActivityList,
         layout::{AppLayout, State, View},
     },
+    store::activity::ActivityStore,
+    sync::{convert::AcitivityConverter, ingest::StravaSync},
 };
 
 #[derive(Parser, Debug)]

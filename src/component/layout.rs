@@ -12,7 +12,7 @@ use super::activity_list::ActivityList;
 #[derive(Debug, Clone)]
 pub enum View {
     ActivityList,
-    Activity
+    Activity,
 }
 
 #[derive(Debug, Clone)]
@@ -23,7 +23,7 @@ pub struct State {
 
 pub struct AppLayout<'a> {
     activities_list: &'a mut ActivityList<'a>,
-    state: State
+    state: State,
 }
 
 impl AppLayout<'_> {
@@ -43,10 +43,13 @@ impl AppLayout<'_> {
         Ok(())
     }
 
-    pub(crate) fn new<'a>(activities_list: &'a mut ActivityList<'a>, state: State) -> AppLayout<'a> {
+    pub(crate) fn new<'a>(
+        activities_list: &'a mut ActivityList<'a>,
+        state: State,
+    ) -> AppLayout<'a> {
         AppLayout {
             activities_list,
-            state
+            state,
         }
     }
 
