@@ -1,5 +1,7 @@
 pub mod authenticator;
 pub mod client;
+pub mod app;
+pub mod config;
 pub mod store;
 pub mod sync;
 pub mod component;
@@ -16,13 +18,13 @@ use hyper::Client;
 use hyper_tls::HttpsConnector;
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
+use app::App;
 
 use crate::{
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest::StravaSync},
     component::{
         activity_list::ActivityList,
-        app::App,
         layout::{AppLayout, State, View},
     },
 };
@@ -91,8 +93,7 @@ async fn main() -> Result<(), anyhow::Error> {
         activity: None,
     };
     let mut list = ActivityList::new(&mut activity_store);
-    let mut layout = AppLayout::new(&mut list, state);
-    App::new(&mut layout).run(&mut terminal)?;
+    App::new().run(&mut terminal)?;
 
     disable_raw_mode()?;
 
