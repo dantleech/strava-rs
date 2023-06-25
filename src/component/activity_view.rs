@@ -56,7 +56,7 @@ pub fn draw<B: Backend>(
     }))?;
 
     let block = Block::default()
-        .title("Polyline")
+        .title("Map")
         .borders(Borders::ALL);
 
     f.render_widget(block, cols[1]);

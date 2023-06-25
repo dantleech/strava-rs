@@ -26,7 +26,7 @@ pub fn draw<B: Backend>(
             Cell::from(app.unit_formatter.stopwatch_time(activity.time_for_distance(42195.0))),
         ]));
         rows.push(Row::new([
-            Cell::from("Half Marathon"),
+            Cell::from("Half Mthn"),
             Cell::from(app.unit_formatter.stopwatch_time(activity.time_for_distance(21097.5))),
         ]));
         rows.push(Row::new([
@@ -51,7 +51,7 @@ pub fn draw<B: Backend>(
                 .style(Style::default()),
         )
         .widths(&[
-            Constraint::Length(13),
+            Constraint::Length(9),
             Constraint::Length(10),
         ]);
 
