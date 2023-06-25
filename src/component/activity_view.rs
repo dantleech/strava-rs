@@ -6,7 +6,7 @@ use tui::{
 
 use crate::{app::{App, ActivePage}, event::keymap::{StravaEvent, MappedKey}};
 
-use super::{race_predictor, activity_list::activity_list_table};
+use super::{polyline, race_predictor, activity_list::activity_list_table};
 
 pub fn handle(app: &mut App, key: MappedKey) {
     match key.strava_event {
@@ -54,5 +54,16 @@ pub fn draw<B: Backend>(
         vertical: 2,
         horizontal:2 
     }))?;
+
+    let block = Block::default()
+        .title("Polyline")
+        .borders(Borders::ALL);
+
+    f.render_widget(block, cols[1]);
+    polyline::draw(app, f, cols[1].inner(&Margin{
+        vertical: 2,
+        horizontal:2 
+    }))?;
+
     Ok(())
 }

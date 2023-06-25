@@ -40,6 +40,7 @@ impl AcitivityConverter<'_> {
                     Some(date) => Some(date.naive_utc()),
                     None => None,
                 },
+                summary_polyline: Some(data.map.summary_polyline),
             };
 
             diesel::insert_into(schema::activity::table)

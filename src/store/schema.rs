@@ -13,6 +13,7 @@ diesel::table! {
         average_heartrate -> Nullable<Float>,
         max_heartrate -> Nullable<Float>,
         start_date -> Nullable<Timestamp>,
+        summary_polyline -> Nullable<Text>,
     }
 }
 
@@ -25,4 +26,7 @@ diesel::table! {
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(activity, raw_activity,);
+diesel::allow_tables_to_appear_in_same_query!(
+    activity,
+    raw_activity,
+);
