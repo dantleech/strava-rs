@@ -4,7 +4,7 @@ use tui::{
     layout::Constraint,
     style::{Color, Modifier, Style},
     text::Span,
-    widgets::{Cell, Row, Table, Block, Borders},
+    widgets::{Cell, Row, Table, Block, Borders, Clear},
     Frame,
 };
 use tui_textarea::Input;
@@ -28,6 +28,9 @@ pub fn handle(app: &mut App, key: MappedKey) {
             _ => false
 
         };
+        if matched {
+            return
+        }
 
         app.activity_list_filter_text_area.input(key_event_to_input(key.key_event));
         return
@@ -65,11 +68,13 @@ pub fn draw<B: Backend>(
     f: &mut Frame<B>,
     area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
-    let activities = &app.activities;
+    let activities = &app.filtered_activities();
 
     if app.activity_list_table_state.selected() == None && activities.len() > 0 {
         app.activity_list_table_state.select(Some(0));
     }
+
+    f.render_stateful_widget(activity_list_table(app, activities), area, &mut app.activity_list_table_state);
 
     if app.activity_list_filter_dialog == true {
         let rect = centered_rect_absolute(64, 3, f.size());
@@ -77,10 +82,10 @@ pub fn draw<B: Backend>(
             .set_block(Block::default().borders(Borders::ALL).title("Filter"));
         app.activity_list_filter_text_area
             .set_style(Style::default().fg(Color::LightGreen));
+        f.render_widget(Clear, rect);
         f.render_widget(app.activity_list_filter_text_area.widget(), rect);
     }
 
-    f.render_stateful_widget(activity_list_table(app, activities), area, &mut app.activity_list_table_state);
     Ok(())
 }
 

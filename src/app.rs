@@ -69,6 +69,10 @@ impl App<'_> {
         Ok(())
     }
 
+    pub fn filtered_activities(&self) -> Vec<Activity> {
+        self.activities.clone().into_iter().filter(|a|a.title.contains(self.activity_list_filter.as_str())).collect()
+    }
+
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
         ui::draw(self, f)
     }
