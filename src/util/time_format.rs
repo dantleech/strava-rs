@@ -61,6 +61,6 @@ mod tests {
 
     #[test]
     fn test_pace() {
-        assert_eq!("02:00", pace(120, 1000.0, &DistanceUnit::Metric));
+        assert_eq!("02:00 /km", pace(120, 1000.0, &DistanceUnit::Metric));
     }
 }

@@ -23,6 +23,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
             StravaEvent::Enter => {
                 app.activity_list_filter = app.activity_list_filter_text_area.lines()[0].to_string();
                 app.activity_list_filter_dialog = false;
+                app.activity_list_table_state.select(Some(0));
                 true
             },
             _ => false
@@ -51,8 +52,10 @@ pub fn handle(app: &mut App, key: MappedKey) {
         }
         StravaEvent::Enter => {
             if let Some(selected) = app.activity_list_table_state.selected() {
-                app.activity = Some(app.activities.get(selected).unwrap().clone());
-                app.active_page = ActivePage::Activity;
+                if let Some(a) = app.filtered_activities().get(selected) {
+                    app.activity = Some(a.clone());
+                    app.active_page = ActivePage::Activity;
+                }
             }
         },
         _ => (),
@@ -127,7 +130,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Vec<Activity>) -> Tabl
                 .style(Style::default()),
         )
         .highlight_style(Style::default().add_modifier(Modifier::BOLD))
-        .highlight_symbol(">> ")
+        .highlight_symbol("")
         .widths(&[
             Constraint::Min(10),
             Constraint::Min(4),

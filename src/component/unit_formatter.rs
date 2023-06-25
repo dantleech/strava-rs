@@ -104,6 +104,6 @@ mod tests {
     #[test]
     fn test_pace() {
         let f = UnitFormatter::imperial();
-        assert_eq!("02:00", f.pace(120, 1000.0));
+        assert_eq!("03:13 /mi", f.pace(120, 1000.0));
     }
 }

@@ -1,9 +1,9 @@
 use crossterm::event::{KeyEvent, KeyModifiers, KeyCode};
+use serde_json::to_vec;
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},
-    widgets::Paragraph,
-    Frame,
+    Frame, widgets::Paragraph,
 };
 use tui_textarea::{Input, Key};
 
@@ -12,7 +12,7 @@ use crate::{app::{App, ActivePage}, component::{activity_list, activity_view}};
 pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
     let rows = Layout::default()
         .margin(0)
-        .constraints([Constraint::Min(4)].as_ref())
+        .constraints([Constraint::Min(4), Constraint::Max(1)].as_ref())
         .split(f.size());
 
     match app.active_page {
@@ -24,7 +24,19 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
         }
     }
 
+    f.render_widget(status_bar(app), rows[1]);
+
     Ok(())
+}
+
+fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
+    let mut status: Vec<String> = Vec::new();
+    if app.activity_list_filter != "".to_string() {
+        status.push(format!("filtered by \"{}\"", app.activity_list_filter))
+    }
+    status.push(format!("{} activities", app.filtered_activities().len()));
+
+    Paragraph::new(status.join(", "))
 }
 
 // borrowed from https://github.com/extrawurst/gitui
