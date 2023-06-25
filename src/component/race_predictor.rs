@@ -50,12 +50,9 @@ pub fn draw<B: Backend>(
                 .bottom_margin(1)
                 .style(Style::default()),
         )
-        .highlight_style(Style::default().add_modifier(Modifier::BOLD))
-        .highlight_symbol(">> ")
         .widths(&[
-            Constraint::Min(20),
-            Constraint::Min(20),
-            Constraint::Percentage(20),
+            Constraint::Length(13),
+            Constraint::Length(10),
         ]);
 
     f.render_widget(table, area);

@@ -133,7 +133,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Vec<Activity>) -> Tabl
         .highlight_symbol("")
         .widths(&[
             Constraint::Min(10),
-            Constraint::Min(4),
+            Constraint::Min(2),
             Constraint::Percentage(20),
             Constraint::Percentage(10),
             Constraint::Percentage(10),

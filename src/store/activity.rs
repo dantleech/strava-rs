@@ -57,11 +57,10 @@ impl Activity {
     pub(crate) fn activity_type_icon(&self) -> String {
         match self.activity_type.as_str() {
             "Ride" => "🚴".to_string(),
-            "Run" => "🏃".to_string(),
-            "TrailRun" => "🏃🌲".to_string(),
+            "Run" => "🏃".to_string(),
+            "TrailRun" => "🏃".to_string(),
             "Walk" => "🥾".to_string(),
-            "WeightTraining" => "󱅝".to_string(),
-            _ => self.activity_type.clone(),
+            _ => "❓".to_string(),
         }
     }
 }

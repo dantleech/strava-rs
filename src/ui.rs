@@ -3,7 +3,7 @@ use crossterm::event::{KeyEvent, KeyModifiers, KeyCode};
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},
-    Frame, widgets::Paragraph,
+    Frame, widgets::{Paragraph, Block, BorderType, Borders}, text::{Span, Spans}, style::{Style, Color, Modifier},
 };
 use tui_textarea::{Input, Key};
 
@@ -12,21 +12,42 @@ use crate::{app::{App, ActivePage}, component::{activity_list, activity_view}};
 pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
     let rows = Layout::default()
         .margin(0)
-        .constraints([Constraint::Min(4), Constraint::Max(1)].as_ref())
+        .constraints([Constraint::Length(3), Constraint::Min(4), Constraint::Length(1)].as_ref())
         .split(f.size());
+
+    f.render_widget(header(app), rows[0]);
 
     match app.active_page {
         ActivePage::ActivityList => {
-            activity_list::draw(app, f, rows[0])?;
+            activity_list::draw(app, f, rows[1])?;
         }
         ActivePage::Activity => {
-            activity_view::draw(app, f, rows[0])?;
+            activity_view::draw(app, f, rows[1])?;
         }
     }
 
-    f.render_widget(status_bar(app), rows[1]);
+    f.render_widget(status_bar(app), rows[2]);
 
     Ok(())
+}
+
+fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
+    let strava = Color::Rgb(252, 76, 2);
+    let text: Vec<Spans> = vec![Spans::from(vec![
+
+        Span::styled("[n]", Style::default().fg(strava)),
+        Span::raw("ext "),
+        Span::styled("[p]", Style::default().fg(strava)),
+        Span::raw("rev "),
+        Span::styled("[u]", Style::default().fg(strava)),
+        Span::raw("nit toggle "),
+        Span::styled("[f]", Style::default().fg(strava)),
+        Span::raw("ilter "),
+        Span::styled("[q]", Style::default().fg(strava)),
+        Span::raw("uit"),
+    ])];
+
+    Paragraph::new(text).block(Block::default().borders(Borders::ALL).style(Style::default()))
 }
 
 fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
