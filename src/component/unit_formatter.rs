@@ -1,10 +1,19 @@
 pub struct UnitFormatter {
-    system: UnitSystem,
+    pub system: UnitSystem,
 }
 
 pub enum UnitSystem {
     Metric,
     Imperial,
+}
+
+impl UnitSystem {
+    pub fn to_string(&self) -> String {
+        match *self {
+            UnitSystem::Metric => String::from("metric"),
+            UnitSystem::Imperial => String::from("imperial"),
+        }
+    }
 }
 
 impl UnitFormatter {

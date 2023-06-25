@@ -56,6 +56,7 @@ fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
         status.push(format!("filtered by \"{}\"", app.activity_list_filter))
     }
     status.push(format!("{} activities", app.filtered_activities().len()));
+    status.push(format!("{} units", app.unit_formatter.system.to_string()));
 
     Paragraph::new(status.join(", "))
 }
