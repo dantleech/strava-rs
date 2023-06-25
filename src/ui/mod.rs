@@ -5,7 +5,7 @@ use crossterm::event::{KeyEvent, KeyModifiers, KeyCode};
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},
-    Frame, widgets::{Paragraph, Block, BorderType, Borders}, text::{Span, Spans}, style::{Style, Color, Modifier},
+    Frame, widgets::{Paragraph, Block, Borders}, text::{Span, Spans}, style::{Style},
 };
 use tui_textarea::{Input, Key};
 

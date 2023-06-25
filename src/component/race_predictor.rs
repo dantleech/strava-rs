@@ -1,7 +1,7 @@
 use tui::{
     backend::Backend,
     layout::Constraint,
-    style::{Color, Modifier, Style},
+    style::{Color, Style},
     text::Span,
     widgets::{Cell, Row, Table},
     Frame,

@@ -1,11 +1,10 @@
-use geo_types::{Coord, LineString, Point};
+use geo_types::{LineString};
 use geoutils::Location;
 use polyline;
 use tui::{
     backend::Backend,
-    style::{Style, Color},
-    widgets::{Axis, Block, Chart, Dataset, canvas::{Canvas, Line}, Paragraph, Borders},
-    Frame, text::{Text, Span},
+    widgets::{Block, canvas::{Canvas, Line}, Borders},
+    Frame, text::{Span},
 };
 
 use crate::{app::App, ui::color::{gradiant, Rgb}};
