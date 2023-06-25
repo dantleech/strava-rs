@@ -1,5 +1,5 @@
 use crossterm::event::{KeyEvent, KeyModifiers, KeyCode};
-use serde_json::to_vec;
+
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},

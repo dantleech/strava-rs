@@ -1,5 +1,5 @@
 use crossterm::event::{KeyEvent, KeyCode};
-use tui_textarea::Input;
+
 
 pub fn map_key(ke: KeyEvent) -> MappedKey {
     match ke.code {

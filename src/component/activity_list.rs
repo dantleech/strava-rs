@@ -1,4 +1,4 @@
-use crossterm::event::KeyCode;
+
 use tui::{
     backend::Backend,
     layout::Constraint,
@@ -7,7 +7,7 @@ use tui::{
     widgets::{Cell, Row, Table, Block, Borders, Clear},
     Frame,
 };
-use tui_textarea::Input;
+
 
 use crate::{
     app::{ActivePage, App},
