@@ -36,6 +36,7 @@
             pkgs.openssl
             pkgs.pkg-config
             pkgs.sqlite-interactive
+            pkgs.sqlite
             pkgs.diesel-cli
           ];
           

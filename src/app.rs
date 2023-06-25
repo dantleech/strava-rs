@@ -6,6 +6,7 @@ use tui::{
     widgets::TableState,
     Frame, Terminal,
 };
+use tui_textarea::TextArea;
 
 use crate::{
     component::{activity_list, unit_formatter::UnitFormatter, activity_view},
@@ -13,12 +14,15 @@ use crate::{
     store::activity::Activity, ui,
 };
 
-pub struct App {
+pub struct App<'a> {
     pub quit: bool,
     pub active_page: ActivePage,
 
     pub unit_formatter: UnitFormatter,
     pub activity_list_table_state: TableState,
+    pub activity_list_filter_text_area: TextArea<'a>,
+    pub activity_list_filter_dialog: bool,
+    pub activity_list_filter: String,
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
 }
@@ -28,8 +32,8 @@ pub enum ActivePage {
     Activity,
 }
 
-impl App {
-    pub fn new() -> App {
+impl App<'_> {
+    pub fn new() -> App<'static> {
         App {
             quit: false,
             active_page: ActivePage::ActivityList,
@@ -39,6 +43,9 @@ impl App {
             activity: None,
 
             activity_list_table_state: TableState::default(),
+            activity_list_filter_text_area: TextArea::default(),
+            activity_list_filter_dialog: false,
+            activity_list_filter: "".to_string(),
         }
     }
     pub fn run<'a>(
