@@ -1,3 +1,5 @@
+pub mod color;
+
 use crossterm::event::{KeyEvent, KeyModifiers, KeyCode};
 
 use tui::{
@@ -8,6 +10,8 @@ use tui::{
 use tui_textarea::{Input, Key};
 
 use crate::{app::{App, ActivePage}, component::{activity_list, activity_view}};
+
+use self::color::ColorTheme;
 
 pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
     let rows = Layout::default()
@@ -96,14 +100,3 @@ pub fn key_event_to_input(key: KeyEvent) -> Input {
     Input { key, ctrl, alt }
 }
 
-pub enum ColorTheme {
-    Orange,
-}
-
-impl ColorTheme {
-    pub fn to_color(&self) -> Color {
-        match *self {
-            ColorTheme::Orange => Color::Rgb(252, 76, 2)
-        }
-    }
-}

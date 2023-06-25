@@ -3,11 +3,11 @@ use polyline;
 use tui::{
     backend::Backend,
     style::{Style, Color},
-    widgets::{Axis, Block, Chart, Dataset},
+    widgets::{Axis, Block, Chart, Dataset, canvas::{Canvas, Line}},
     Frame,
 };
 
-use crate::app::App;
+use crate::{app::App, ui::color::{gradiant, Rgb}};
 
 pub fn draw<B: Backend>(
     app: &mut App,
@@ -22,26 +22,42 @@ pub fn draw<B: Backend>(
     if None == activity.summary_polyline {
         ()
     }
+
     let polyline = activity.summary_polyline.unwrap();
 
     if let Ok(decoded) = polyline::decode_polyline(polyline.as_str(), 5) {
         let coords = map_coords_to_area(decoded, area.width, area.height);
-        let datasets = vec![Dataset::default()
-            .graph_type(tui::widgets::GraphType::Scatter)
-            .data(&coords)];
-        let chart = Chart::new(datasets)
-            .style(Style::default().fg(Color::Red))
-            .x_axis(
-                Axis::default()
-                    .style(Style::default().fg(Color::DarkGray))
-                    .bounds([0.0, area.width as f64])
-            )
-            .y_axis(
-                Axis::default()
-                    .style(Style::default().fg(Color::DarkGray))
-                    .bounds([0.0, area.height as f64])
-            );
-        f.render_widget(chart, area);
+        let canvas = Canvas::default()
+            .x_bounds([0.0, area.width as f64])
+            .y_bounds([0.0, area.height as f64])
+            .paint(|ctx| {
+                let mut prev: Option<(f64,f64)> = None;
+                let mut offset = 0;
+                for coord in &coords {
+                    if None == prev {
+                        prev = Some(*coord);
+                        continue;
+                    }
+                    let from = prev.unwrap();
+                    let to = coord;
+
+                    ctx.draw(&Line{
+                        x1: from.0,
+                        y1: from.1,
+                        x2: to.0,
+                        y2: to.1,
+                        color: gradiant(
+                            Rgb{ red: 0, green: 255, blue: 0 },
+                            Rgb{ red: 255, green: 0, blue: 0 },
+                            offset as f64,
+                            coords.len() as f64
+                        ).to_color(),
+                    });
+                    prev = Some(*to);
+                    offset += 1;
+                }
+            });
+        f.render_widget(canvas, area);
     }
     Ok(())
 }

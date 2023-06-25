@@ -14,7 +14,7 @@ use crate::{
     event::{
         keymap::{MappedKey, StravaEvent},
         util::{table_state_next, table_state_prev},
-    }, store::activity::Activity, ui::{centered_rect_absolute, key_event_to_input, ColorTheme},
+    }, store::activity::Activity, ui::{centered_rect_absolute, key_event_to_input, color::ColorTheme},
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
