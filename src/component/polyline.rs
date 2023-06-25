@@ -1,10 +1,11 @@
 use geo_types::{Coord, LineString, Point};
+use geoutils::Location;
 use polyline;
 use tui::{
     backend::Backend,
     style::{Style, Color},
-    widgets::{Axis, Block, Chart, Dataset, canvas::{Canvas, Line}},
-    Frame,
+    widgets::{Axis, Block, Chart, Dataset, canvas::{Canvas, Line}, Paragraph, Borders},
+    Frame, text::{Text, Span},
 };
 
 use crate::{app::App, ui::color::{gradiant, Rgb}};
@@ -26,8 +27,13 @@ pub fn draw<B: Backend>(
     let polyline = activity.summary_polyline.unwrap();
 
     if let Ok(decoded) = polyline::decode_polyline(polyline.as_str(), 5) {
-        let coords = map_coords_to_area(decoded, area.width, area.height);
+
+        let (coords, x_width, y_width) = map_coords_to_area(decoded, area.width - 4, area.height - 4);
+        let x_distance_meters = Location::new(0.0, 0.0).distance_to(&Location::new(x_width, 0.0)).unwrap();
+        let y_distance_meters = Location::new(0.0, 0.0).distance_to(&Location::new(0.0, y_width)).unwrap();
+
         let canvas = Canvas::default()
+            .block(Block::default().borders(Borders::RIGHT))
             .x_bounds([0.0, area.width as f64])
             .y_bounds([0.0, area.height as f64])
             .paint(|ctx| {
@@ -41,11 +47,20 @@ pub fn draw<B: Backend>(
                     let from = prev.unwrap();
                     let to = coord;
 
+                    ctx.print(0.0, 0.0, Span::from(
+                        format!("{} → ", app.unit_formatter.distance(x_distance_meters.meters() as f32))
+                    ));
+
+                    ctx.print(0.0, area.height as f64, Span::from(
+                        app.unit_formatter.distance(y_distance_meters.meters() as f32)
+                    ));
+                    ctx.print(0.0, area.height as f64 - 2.0, Span::from("↓"));
+
                     ctx.draw(&Line{
-                        x1: from.0,
-                        y1: from.1,
-                        x2: to.0,
-                        y2: to.1,
+                        x1: from.0 + 1.0,
+                        y1: from.1 + 1.0,
+                        x2: to.0 + 1.0,
+                        y2: to.1 + 1.0,
                         color: gradiant(
                             Rgb{ red: 0, green: 255, blue: 0 },
                             Rgb{ red: 255, green: 0, blue: 0 },
@@ -62,7 +77,7 @@ pub fn draw<B: Backend>(
     Ok(())
 }
 
-fn map_coords_to_area(decoded: LineString, width: u16, height: u16) -> Vec<(f64, f64)> {
+fn map_coords_to_area(decoded: LineString, width: u16, height: u16) -> (Vec<(f64, f64)>, f64, f64) {
     let x_max = decoded
         .points()
         .into_iter()
@@ -103,7 +118,7 @@ fn map_coords_to_area(decoded: LineString, width: u16, height: u16) -> Vec<(f64,
         .coords()
         .map(|c| ((c.x + x_diff) * size, (c.y + y_diff) * size));
 
-    coords.collect::<Vec<(f64, f64)>>()
+    (coords.collect::<Vec<(f64, f64)>>(), x_width, y_width)
 }
 
 #[cfg(test)]

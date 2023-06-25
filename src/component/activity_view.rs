@@ -61,8 +61,8 @@ pub fn draw<B: Backend>(
 
     f.render_widget(block, cols[1]);
     polyline::draw(app, f, cols[1].inner(&Margin{
-        vertical: 2,
-        horizontal:2 
+        vertical: 1,
+        horizontal: 1 
     }))?;
 
     Ok(())
