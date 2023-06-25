@@ -14,7 +14,7 @@ use crate::{
     event::{
         keymap::{MappedKey, StravaEvent},
         util::{table_state_next, table_state_prev},
-    }, store::activity::Activity, ui::{centered_rect_absolute, key_event_to_input},
+    }, store::activity::Activity, ui::{centered_rect_absolute, key_event_to_input, ColorTheme},
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
@@ -36,23 +36,24 @@ pub fn handle(app: &mut App, key: MappedKey) {
         app.activity_list_filter_text_area.input(key_event_to_input(key.key_event));
         return
     }
+    let activities = app.filtered_activities();
     match key.strava_event {
         StravaEvent::Quit => app.quit = true,
         StravaEvent::ToggleUnitSystem => {
             app.unit_formatter = app.unit_formatter.toggle();
         }
         StravaEvent::Down => {
-            table_state_next(&mut app.activity_list_table_state, app.activities.len())
+            table_state_next(&mut app.activity_list_table_state, activities.len())
         }
         StravaEvent::Up => {
-            table_state_prev(&mut app.activity_list_table_state, app.activities.len())
+            table_state_prev(&mut app.activity_list_table_state, activities.len())
         }
         StravaEvent::Filter => {
             toggle_filter(app)
         }
         StravaEvent::Enter => {
             if let Some(selected) = app.activity_list_table_state.selected() {
-                if let Some(a) = app.filtered_activities().get(selected) {
+                if let Some(a) = activities.get(selected) {
                     app.activity = Some(a.clone());
                     app.active_page = ActivePage::Activity;
                 }
@@ -82,9 +83,11 @@ pub fn draw<B: Backend>(
     if app.activity_list_filter_dialog == true {
         let rect = centered_rect_absolute(64, 3, f.size());
         app.activity_list_filter_text_area
-            .set_block(Block::default().borders(Borders::ALL).title("Filter"));
-        app.activity_list_filter_text_area
-            .set_style(Style::default().fg(Color::LightGreen));
+            .set_block(
+                Block::default().borders(Borders::ALL).title("Filter")
+                .border_style(Style::default().fg(ColorTheme::Orange.to_color()))
+            );
+
         f.render_widget(Clear, rect);
         f.render_widget(app.activity_list_filter_text_area.widget(), rect);
     }

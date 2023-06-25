@@ -32,7 +32,7 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
 }
 
 fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
-    let strava = Color::Rgb(252, 76, 2);
+    let strava = ColorTheme::Orange.to_color();
     let text: Vec<Spans> = vec![Spans::from(vec![
 
         Span::styled("[n]", Style::default().fg(strava)),
@@ -93,4 +93,16 @@ pub fn key_event_to_input(key: KeyEvent) -> Input {
         _ => Key::Null,
     };
     Input { key, ctrl, alt }
+}
+
+pub enum ColorTheme {
+    Orange,
+}
+
+impl ColorTheme {
+    pub fn to_color(&self) -> Color {
+        match *self {
+            ColorTheme::Orange => Color::Rgb(252, 76, 2)
+        }
+    }
 }
