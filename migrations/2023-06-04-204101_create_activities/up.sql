@@ -10,7 +10,8 @@ CREATE TABLE activity (
     sport_type VARCHAR(255) NOT NULL,
     average_heartrate FLOAT,
     max_heartrate FLOAT,
-    start_date DATETIME
+    start_date DATETIME,
+    summary_polyline TEXT
 );
 CREATE TABLE raw_activity (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,

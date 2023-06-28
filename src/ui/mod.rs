@@ -1,13 +1,17 @@
+pub mod color;
+
 use crossterm::event::{KeyEvent, KeyModifiers, KeyCode};
 
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},
-    Frame, widgets::{Paragraph, Block, BorderType, Borders}, text::{Span, Spans}, style::{Style, Color, Modifier},
+    Frame, widgets::{Paragraph, Block, Borders}, text::{Span, Spans}, style::{Style},
 };
 use tui_textarea::{Input, Key};
 
 use crate::{app::{App, ActivePage}, component::{activity_list, activity_view}};
+
+use self::color::ColorTheme;
 
 pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
     let rows = Layout::default()
@@ -35,10 +39,10 @@ fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
     let strava = ColorTheme::Orange.to_color();
     let text: Vec<Spans> = vec![Spans::from(vec![
 
-        Span::styled("[n]", Style::default().fg(strava)),
-        Span::raw("ext "),
-        Span::styled("[p]", Style::default().fg(strava)),
-        Span::raw("rev "),
+        Span::styled("[k]", Style::default().fg(strava)),
+        Span::raw("up "),
+        Span::styled("[j]", Style::default().fg(strava)),
+        Span::raw("down "),
         Span::styled("[u]", Style::default().fg(strava)),
         Span::raw("nit toggle "),
         Span::styled("[f]", Style::default().fg(strava)),
@@ -96,14 +100,3 @@ pub fn key_event_to_input(key: KeyEvent) -> Input {
     Input { key, ctrl, alt }
 }
 
-pub enum ColorTheme {
-    Orange,
-}
-
-impl ColorTheme {
-    pub fn to_color(&self) -> Color {
-        match *self {
-            ColorTheme::Orange => Color::Rgb(252, 76, 2)
-        }
-    }
-}

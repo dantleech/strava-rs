@@ -18,6 +18,7 @@ pub struct Activity {
     pub average_heartrate: Option<f32>,
     pub max_heartrate: Option<f32>,
     pub start_date: Option<NaiveDateTime>,
+    pub summary_polyline: Option<String>,
 }
 
 #[derive(Queryable, Selectable, Insertable, Serialize, Deserialize)]

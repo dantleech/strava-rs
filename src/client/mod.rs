@@ -43,6 +43,12 @@ pub struct Activity {
     pub average_heartrate: Option<f32>,
     pub max_heartrate: Option<f32>,
     pub start_date: Option<DateTime<Utc>>,
+    pub map: Map,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Map {
+    pub summary_polyline: String,
 }
 
 impl Display for Activity {
