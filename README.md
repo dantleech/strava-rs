@@ -15,5 +15,5 @@ Strava TUI written in Rust! This is an experimental TUI for Strava.
 
 ### Details
 
-![image](https://github.com/dantleech/strava-rs/assets/530801/633ea4ff-12c8-4ead-817b-80db8efcf61a)j
-*Maps*
+![image](https://github.com/dantleech/strava-rs/assets/530801/633ea4ff-12c8-4ead-817b-80db8efcf61a)
+*Detailed Maps*
