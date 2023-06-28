@@ -39,10 +39,10 @@ fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
     let strava = ColorTheme::Orange.to_color();
     let text: Vec<Spans> = vec![Spans::from(vec![
 
-        Span::styled("[n]", Style::default().fg(strava)),
-        Span::raw("ext "),
-        Span::styled("[p]", Style::default().fg(strava)),
-        Span::raw("rev "),
+        Span::styled("[k]", Style::default().fg(strava)),
+        Span::raw("up "),
+        Span::styled("[j]", Style::default().fg(strava)),
+        Span::raw("down "),
         Span::styled("[u]", Style::default().fg(strava)),
         Span::raw("nit toggle "),
         Span::styled("[f]", Style::default().fg(strava)),

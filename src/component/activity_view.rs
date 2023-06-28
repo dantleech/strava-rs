@@ -4,11 +4,12 @@ use tui::{
     Frame, widgets::{Block, Borders},
 };
 
-use crate::{app::{App, ActivePage}, event::keymap::{StravaEvent, MappedKey}};
+use crate::{app::{App, ActivePage}, event::{keymap::{StravaEvent, MappedKey}, util::{table_state_next, table_state_prev}}};
 
-use super::{polyline, race_predictor, activity_list::activity_list_table};
+use super::{polyline, race_predictor, activity_list::activity_list_table, table_status_select_current};
 
 pub fn handle(app: &mut App, key: MappedKey) {
+    let activities = app.filtered_activities();
     match key.strava_event {
         StravaEvent::ToggleUnitSystem => {
             app.unit_formatter = app.unit_formatter.toggle();
@@ -19,6 +20,14 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Enter => {
             app.active_page = ActivePage::ActivityList
         },
+        StravaEvent::Down => {
+            table_state_next(&mut app.activity_list_table_state, activities.len());
+            table_status_select_current(app);
+        }
+        StravaEvent::Up => {
+            table_state_prev(&mut app.activity_list_table_state, activities.len());
+            table_status_select_current(app);
+        }
         _ => {
             ()
         },
