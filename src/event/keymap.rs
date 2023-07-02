@@ -10,6 +10,7 @@ pub fn map_key(ke: KeyEvent) -> MappedKey {
         KeyCode::Char('s') => new_strava_key(ke, StravaEvent::Sort),
         KeyCode::Char('f') => new_strava_key(ke, StravaEvent::Filter),
         KeyCode::Enter => new_strava_key(ke, StravaEvent::Enter),
+        KeyCode::Esc => new_strava_key(ke, StravaEvent::Escape),
         _ => new_strava_key(ke, StravaEvent::None),
     }
 }
@@ -33,6 +34,7 @@ pub enum StravaEvent {
     Down,
     Up,
     Enter,
+    Escape,
     None,
     Quit,
 }

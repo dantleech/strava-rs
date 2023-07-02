@@ -1,4 +1,5 @@
-use std::{io, time::Duration};
+use std::{io, time::Duration, fmt::Display};
+use strum::EnumIter;
 
 use crossterm::event::{self, poll, Event};
 use tui::{
@@ -23,6 +24,7 @@ pub struct App<'a> {
     pub activity_list_filter_text_area: TextArea<'a>,
     pub activity_list_filter_dialog: bool,
     pub activity_list_sort_dialog: bool,
+    pub activity_list_sort_by: SortBy,
     pub activity_list_filter: String,
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
@@ -31,6 +33,20 @@ pub struct App<'a> {
 pub enum ActivePage {
     ActivityList,
     Activity,
+}
+
+#[derive(EnumIter)]
+pub enum SortBy {
+    Date,
+    Distance,
+    Pace,
+    HeartRate,
+}
+
+impl Display for SortBy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_label())
+    }
 }
 
 impl App<'_> {
@@ -48,6 +64,7 @@ impl App<'_> {
             activity_list_filter_dialog: false,
             activity_list_filter: "".to_string(),
             activity_list_sort_dialog: false,
+            activity_list_sort_by: SortBy::Date,
         }
     }
     pub fn run<'a>(

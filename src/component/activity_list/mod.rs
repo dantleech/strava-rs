@@ -1,5 +1,6 @@
 pub mod sort_dialog;
 
+use crossterm::event::KeyCode;
 use tui::{
     backend::Backend,
     layout::Constraint,
@@ -43,16 +44,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
     }
 
     if app.activity_list_sort_dialog == true {
-        let matched = match key.strava_event {
-            StravaEvent::Enter => {
-                app.activity_list_sort_dialog = false;
-                true
-            }
-            _ => false,
-        };
-        if matched {
-            return;
-        }
+        sort_dialog::handle(app, key);
 
         return;
     }
@@ -108,13 +100,13 @@ pub fn draw<B: Backend>(
         f.render_widget(Clear, rect);
         f.render_widget(app.activity_list_filter_text_area.widget(), rect);
 
-        return Ok(())
+        return Ok(());
     }
 
     if app.activity_list_sort_dialog == true {
         sort_dialog::draw(app, f, f.size());
 
-        return Ok(())
+        return Ok(());
     }
 
     Ok(())
