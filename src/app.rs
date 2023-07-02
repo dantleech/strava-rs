@@ -89,7 +89,16 @@ impl App<'_> {
     }
 
     pub fn filtered_activities(&self) -> Vec<Activity> {
-        self.activities.clone().into_iter().filter(|a|a.title.contains(self.activity_list_filter.as_str())).collect()
+        let mut activities = self.activities.clone();
+        activities.sort_by(|a, b| {
+            match self.activity_list_sort_by {
+                SortBy::Date => b.title.cmp(&a.title),
+                SortBy::Distance => todo!(),
+                SortBy::Pace => todo!(),
+                SortBy::HeartRate => todo!(),
+            }
+        });
+        activities.into_iter().filter(|a|a.title.contains(self.activity_list_filter.as_str())).collect()
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
