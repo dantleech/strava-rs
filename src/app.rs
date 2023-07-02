@@ -1,4 +1,4 @@
-use std::{io, time::Duration, fmt::Display};
+use std::{io, time::Duration, fmt::Display, cmp::Ordering};
 use strum::EnumIter;
 
 use crossterm::event::{self, poll, Event};
@@ -92,10 +92,10 @@ impl App<'_> {
         let mut activities = self.activities.clone();
         activities.sort_by(|a, b| {
             match self.activity_list_sort_by {
-                SortBy::Date => b.title.cmp(&a.title),
-                SortBy::Distance => todo!(),
-                SortBy::Pace => todo!(),
-                SortBy::HeartRate => todo!(),
+                SortBy::Date => b.id.cmp(&a.id),
+                SortBy::Distance => b.distance.partial_cmp(&a.distance).or(Some(Ordering::Less)).unwrap(),
+                SortBy::Pace => b.kmph().partial_cmp(&a.kmph()).or(Some(Ordering::Less)).unwrap(),
+                SortBy::HeartRate => b.average_heartrate.or(Some(0.0)).partial_cmp(&a.average_heartrate.or(Some(0.0))).unwrap()
             }
         });
         activities.into_iter().filter(|a|a.title.contains(self.activity_list_filter.as_str())).collect()
