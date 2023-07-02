@@ -59,6 +59,8 @@ mod tests {
             2.0,
             10.0,
         );
-        panic!("{:?}", rgb);
+        assert_eq!(204, rgb.green);
+        assert_eq!(0, rgb.red);
+        assert_eq!(51, rgb.blue);
     }
 }
