@@ -1,25 +1,30 @@
 use tui::{
     backend::Backend,
-    layout::{Constraint, Layout, Margin, Direction},
-    Frame, widgets::{Block, Borders},
+    layout::{Constraint, Direction, Layout, Margin},
+    widgets::{Block, Borders},
+    Frame,
 };
 
-use crate::{app::{App, ActivePage}, event::{keymap::{StravaEvent, MappedKey}, util::{table_state_next, table_state_prev}}};
+use crate::{
+    app::{ActivePage, App},
+    event::{
+        keymap::{MappedKey, StravaEvent},
+        util::{table_state_next, table_state_prev},
+    },
+};
 
-use super::{polyline, race_predictor, activity_list::activity_list_table, table_status_select_current};
+use super::{
+    activity_list::activity_list_table, polyline, race_predictor, table_status_select_current,
+};
 
 pub fn handle(app: &mut App, key: MappedKey) {
     let activities = app.filtered_activities();
     match key.strava_event {
         StravaEvent::ToggleUnitSystem => {
             app.unit_formatter = app.unit_formatter.toggle();
-        },
-        StravaEvent::Quit => {
-            app.active_page = ActivePage::ActivityList
-        },
-        StravaEvent::Enter => {
-            app.active_page = ActivePage::ActivityList
-        },
+        }
+        StravaEvent::Quit => app.active_page = ActivePage::ActivityList,
+        StravaEvent::Enter => app.active_page = ActivePage::ActivityList,
         StravaEvent::Down => {
             table_state_next(&mut app.activity_list_table_state, activities.len());
             table_status_select_current(app);
@@ -28,9 +33,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
             table_state_prev(&mut app.activity_list_table_state, activities.len());
             table_status_select_current(app);
         }
-        _ => {
-            ()
-        },
+        _ => (),
     }
 }
 
@@ -59,20 +62,26 @@ pub fn draw<B: Backend>(
 
     f.render_widget(block, cols[0]);
 
-    race_predictor::draw(app, f, cols[0].inner(&Margin{
-        vertical: 2,
-        horizontal:2 
-    }))?;
+    race_predictor::draw(
+        app,
+        f,
+        cols[0].inner(&Margin {
+            vertical: 2,
+            horizontal: 2,
+        }),
+    )?;
 
-    let block = Block::default()
-        .title("Map")
-        .borders(Borders::ALL);
+    let block = Block::default().title("Map").borders(Borders::ALL);
 
     f.render_widget(block, cols[1]);
-    polyline::draw(app, f, cols[1].inner(&Margin{
-        vertical: 1,
-        horizontal: 1 
-    }))?;
+    polyline::draw(
+        app,
+        f,
+        cols[1].inner(&Margin {
+            vertical: 1,
+            horizontal: 1,
+        }),
+    )?;
 
     Ok(())
 }

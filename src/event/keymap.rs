@@ -1,5 +1,4 @@
-use crossterm::event::{KeyEvent, KeyCode};
-
+use crossterm::event::{KeyCode, KeyEvent};
 
 pub fn map_key(ke: KeyEvent) -> MappedKey {
     match ke.code {

@@ -1,13 +1,20 @@
-use geo_types::{LineString};
+use geo_types::LineString;
 use geoutils::Location;
 use polyline;
 use tui::{
     backend::Backend,
-    widgets::{Block, canvas::{Canvas, Line}, Borders},
-    Frame, text::{Span},
+    text::Span,
+    widgets::{
+        canvas::{Canvas, Line},
+        Block, Borders,
+    },
+    Frame,
 };
 
-use crate::{app::App, ui::color::{gradiant, Rgb}};
+use crate::{
+    app::App,
+    ui::color::{gradiant, Rgb},
+};
 
 pub fn draw<B: Backend>(
     app: &mut App,
@@ -26,17 +33,21 @@ pub fn draw<B: Backend>(
     let polyline = activity.summary_polyline.unwrap();
 
     if let Ok(decoded) = polyline::decode_polyline(polyline.as_str(), 5) {
-
-        let (coords, x_width, y_width) = map_coords_to_area(decoded, area.width - 4, area.height - 4);
-        let x_distance_meters = Location::new(0.0, 0.0).distance_to(&Location::new(x_width, 0.0)).unwrap();
-        let y_distance_meters = Location::new(0.0, 0.0).distance_to(&Location::new(0.0, y_width)).unwrap();
+        let (coords, x_width, y_width) =
+            map_coords_to_area(decoded, area.width - 4, area.height - 4);
+        let x_distance_meters = Location::new(0.0, 0.0)
+            .distance_to(&Location::new(x_width, 0.0))
+            .unwrap();
+        let y_distance_meters = Location::new(0.0, 0.0)
+            .distance_to(&Location::new(0.0, y_width))
+            .unwrap();
 
         let canvas = Canvas::default()
             .block(Block::default().borders(Borders::RIGHT))
             .x_bounds([0.0, area.width as f64])
             .y_bounds([0.0, area.height as f64])
             .paint(|ctx| {
-                let mut prev: Option<(f64,f64)> = None;
+                let mut prev: Option<(f64, f64)> = None;
                 let mut offset = 0;
                 for coord in &coords {
                     if None == prev {
@@ -46,26 +57,46 @@ pub fn draw<B: Backend>(
                     let from = prev.unwrap();
                     let to = coord;
 
-                    ctx.print(0.0, 0.0, Span::from(
-                        format!("{} → ", app.unit_formatter.distance(x_distance_meters.meters() as f32))
-                    ));
+                    ctx.print(
+                        0.0,
+                        0.0,
+                        Span::from(format!(
+                            "{} → ",
+                            app.unit_formatter
+                                .distance(x_distance_meters.meters() as f32)
+                        )),
+                    );
 
-                    ctx.print(0.0, area.height as f64, Span::from(
-                        app.unit_formatter.distance(y_distance_meters.meters() as f32)
-                    ));
+                    ctx.print(
+                        0.0,
+                        area.height as f64,
+                        Span::from(
+                            app.unit_formatter
+                                .distance(y_distance_meters.meters() as f32),
+                        ),
+                    );
                     ctx.print(0.0, area.height as f64 - 2.0, Span::from("↓"));
 
-                    ctx.draw(&Line{
+                    ctx.draw(&Line {
                         x1: from.0 + 1.0,
                         y1: from.1 + 1.0,
                         x2: to.0 + 1.0,
                         y2: to.1 + 1.0,
                         color: gradiant(
-                            Rgb{ red: 0, green: 255, blue: 0 },
-                            Rgb{ red: 255, green: 0, blue: 0 },
+                            Rgb {
+                                red: 0,
+                                green: 255,
+                                blue: 0,
+                            },
+                            Rgb {
+                                red: 255,
+                                green: 0,
+                                blue: 0,
+                            },
                             offset as f64,
-                            coords.len() as f64
-                        ).to_color(),
+                            coords.len() as f64,
+                        )
+                        .to_color(),
                     });
                     prev = Some(*to);
                     offset += 1;

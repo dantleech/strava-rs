@@ -1,7 +1,6 @@
 use tui::widgets::TableState;
 
 pub fn table_state_next(table_state: &mut TableState, max: usize) {
-
     let i = match table_state.selected() {
         Some(i) => {
             if i >= max - 1 {
@@ -9,7 +8,7 @@ pub fn table_state_next(table_state: &mut TableState, max: usize) {
             } else {
                 i + 1
             }
-        },
+        }
         None => 0,
     };
     table_state.select(Some(i));
