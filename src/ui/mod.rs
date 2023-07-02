@@ -1,22 +1,35 @@
 pub mod color;
 
-use crossterm::event::{KeyEvent, KeyModifiers, KeyCode};
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},
-    Frame, widgets::{Paragraph, Block, Borders}, text::{Span, Spans}, style::{Style},
+    style::Style,
+    text::{Span, Spans},
+    widgets::{Block, Borders, Paragraph},
+    Frame,
 };
 use tui_textarea::{Input, Key};
 
-use crate::{app::{App, ActivePage}, component::{activity_list, activity_view}};
+use crate::{
+    app::{ActivePage, App},
+    component::{activity_list, activity_view},
+};
 
 use self::color::ColorTheme;
 
 pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
     let rows = Layout::default()
         .margin(0)
-        .constraints([Constraint::Length(3), Constraint::Min(4), Constraint::Length(1)].as_ref())
+        .constraints(
+            [
+                Constraint::Length(3),
+                Constraint::Min(4),
+                Constraint::Length(1),
+            ]
+            .as_ref(),
+        )
         .split(f.size());
 
     f.render_widget(header(app), rows[0]);
@@ -38,7 +51,6 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
 fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
     let strava = ColorTheme::Orange.to_color();
     let text: Vec<Spans> = vec![Spans::from(vec![
-
         Span::styled("[k]", Style::default().fg(strava)),
         Span::raw("up "),
         Span::styled("[j]", Style::default().fg(strava)),
@@ -47,11 +59,19 @@ fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
         Span::raw("nit toggle "),
         Span::styled("[f]", Style::default().fg(strava)),
         Span::raw("ilter "),
+        Span::styled("[s]", Style::default().fg(strava)),
+        Span::raw("ort "),
+        Span::styled("[o]", Style::default().fg(strava)),
+        Span::raw("rder "),
         Span::styled("[q]", Style::default().fg(strava)),
         Span::raw("uit"),
     ])];
 
-    Paragraph::new(text).block(Block::default().borders(Borders::ALL).style(Style::default()))
+    Paragraph::new(text).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default()),
+    )
 }
 
 fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
@@ -60,6 +80,10 @@ fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
         status.push(format!("filtered by \"{}\"", app.activity_list_filter))
     }
     status.push(format!("{} activities", app.filtered_activities().len()));
+    status.push(format!(
+        "sorted by {} {}",
+        app.activity_list_sort_by, app.activity_list_sort_order
+    ));
     status.push(format!("{} units", app.unit_formatter.system.to_string()));
 
     Paragraph::new(status.join(", "))
@@ -99,4 +123,3 @@ pub fn key_event_to_input(key: KeyEvent) -> Input {
     };
     Input { key, ctrl, alt }
 }
-

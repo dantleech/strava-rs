@@ -53,15 +53,15 @@ impl UnitFormatter {
         }
     }
 
-    pub fn pace(&self, elapsed_time: i32, distance: f32) -> String {
+    pub fn pace(&self, time: i32, distance: f32) -> String {
         match self.system {
             UnitSystem::Metric => {
-                let spm = elapsed_time as f32 / distance;
+                let spm = time as f32 / distance;
 
                 format!("{} /km", self.stopwatch_time((spm * 1000.0).round() as i32))
             }
             UnitSystem::Imperial => {
-                let spm = elapsed_time as f32 / distance;
+                let spm = time as f32 / distance;
                 format!(
                     "{} /mi",
                     self.stopwatch_time(((spm * 1000.0) / 0.621371).round() as i32)

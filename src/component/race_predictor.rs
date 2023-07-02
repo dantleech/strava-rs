@@ -23,23 +23,38 @@ pub fn draw<B: Backend>(
     if let Some(activity) = &app.activity {
         rows.push(Row::new([
             Cell::from("Marathon"),
-            Cell::from(app.unit_formatter.stopwatch_time(activity.time_for_distance(42195.0))),
+            Cell::from(
+                app.unit_formatter
+                    .stopwatch_time(activity.time_for_distance(42195.0)),
+            ),
         ]));
         rows.push(Row::new([
             Cell::from("Half Mthn"),
-            Cell::from(app.unit_formatter.stopwatch_time(activity.time_for_distance(21097.5))),
+            Cell::from(
+                app.unit_formatter
+                    .stopwatch_time(activity.time_for_distance(21097.5)),
+            ),
         ]));
         rows.push(Row::new([
             Cell::from("10 miles"),
-            Cell::from(app.unit_formatter.stopwatch_time(activity.time_for_distance(16093.0))),
+            Cell::from(
+                app.unit_formatter
+                    .stopwatch_time(activity.time_for_distance(16093.0)),
+            ),
         ]));
         rows.push(Row::new([
             Cell::from("10k"),
-            Cell::from(app.unit_formatter.stopwatch_time(activity.time_for_distance(10000.0))),
+            Cell::from(
+                app.unit_formatter
+                    .stopwatch_time(activity.time_for_distance(10000.0)),
+            ),
         ]));
         rows.push(Row::new([
             Cell::from("5k"),
-            Cell::from(app.unit_formatter.stopwatch_time(activity.time_for_distance(5000.0))),
+            Cell::from(
+                app.unit_formatter
+                    .stopwatch_time(activity.time_for_distance(5000.0)),
+            ),
         ]));
     }
 
@@ -50,10 +65,7 @@ pub fn draw<B: Backend>(
                 .bottom_margin(1)
                 .style(Style::default()),
         )
-        .widths(&[
-            Constraint::Length(9),
-            Constraint::Length(10),
-        ]);
+        .widths(&[Constraint::Length(9), Constraint::Length(10)]);
 
     f.render_widget(table, area);
     Ok(())

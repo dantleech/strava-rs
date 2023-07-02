@@ -1,11 +1,11 @@
 pub mod app;
-pub mod ui;
 pub mod authenticator;
 pub mod client;
 pub mod component;
 pub mod event;
 pub mod store;
 pub mod sync;
+pub mod ui;
 pub mod util;
 
 use std::io;

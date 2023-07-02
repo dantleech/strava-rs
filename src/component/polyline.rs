@@ -1,13 +1,20 @@
-use geo_types::{LineString};
+use geo_types::LineString;
 use geoutils::Location;
 use polyline;
 use tui::{
     backend::Backend,
-    widgets::{Block, canvas::{Canvas, Line}, Borders},
-    Frame, text::{Span},
+    text::Span,
+    widgets::{
+        canvas::{Canvas, Line},
+        Block, Borders,
+    },
+    Frame,
 };
 
-use crate::{app::App, ui::color::{gradiant, Rgb}};
+use crate::{
+    app::App,
+    ui::color::{gradiant, Rgb},
+};
 
 pub fn draw<B: Backend>(
     app: &mut App,
@@ -26,17 +33,21 @@ pub fn draw<B: Backend>(
     let polyline = activity.summary_polyline.unwrap();
 
     if let Ok(decoded) = polyline::decode_polyline(polyline.as_str(), 5) {
-
-        let (coords, x_width, y_width) = map_coords_to_area(decoded, area.width - 4, area.height - 4);
-        let x_distance_meters = Location::new(0.0, 0.0).distance_to(&Location::new(x_width, 0.0)).unwrap();
-        let y_distance_meters = Location::new(0.0, 0.0).distance_to(&Location::new(0.0, y_width)).unwrap();
+        let (coords, x_width, y_width) =
+            map_coords_to_area(decoded, area.width - 4, area.height - 4);
+        let x_distance_meters = Location::new(0.0, 0.0)
+            .distance_to(&Location::new(x_width, 0.0))
+            .unwrap();
+        let y_distance_meters = Location::new(0.0, 0.0)
+            .distance_to(&Location::new(0.0, y_width))
+            .unwrap();
 
         let canvas = Canvas::default()
             .block(Block::default().borders(Borders::RIGHT))
             .x_bounds([0.0, area.width as f64])
             .y_bounds([0.0, area.height as f64])
             .paint(|ctx| {
-                let mut prev: Option<(f64,f64)> = None;
+                let mut prev: Option<(f64, f64)> = None;
                 let mut offset = 0;
                 for coord in &coords {
                     if None == prev {
@@ -46,26 +57,46 @@ pub fn draw<B: Backend>(
                     let from = prev.unwrap();
                     let to = coord;
 
-                    ctx.print(0.0, 0.0, Span::from(
-                        format!("{} → ", app.unit_formatter.distance(x_distance_meters.meters() as f32))
-                    ));
+                    ctx.print(
+                        0.0,
+                        0.0,
+                        Span::from(format!(
+                            "{} → ",
+                            app.unit_formatter
+                                .distance(x_distance_meters.meters() as f32)
+                        )),
+                    );
 
-                    ctx.print(0.0, area.height as f64, Span::from(
-                        app.unit_formatter.distance(y_distance_meters.meters() as f32)
-                    ));
+                    ctx.print(
+                        0.0,
+                        area.height as f64,
+                        Span::from(
+                            app.unit_formatter
+                                .distance(y_distance_meters.meters() as f32),
+                        ),
+                    );
                     ctx.print(0.0, area.height as f64 - 2.0, Span::from("↓"));
 
-                    ctx.draw(&Line{
+                    ctx.draw(&Line {
                         x1: from.0 + 1.0,
                         y1: from.1 + 1.0,
                         x2: to.0 + 1.0,
                         y2: to.1 + 1.0,
                         color: gradiant(
-                            Rgb{ red: 0, green: 255, blue: 0 },
-                            Rgb{ red: 255, green: 0, blue: 0 },
+                            Rgb {
+                                red: 0,
+                                green: 255,
+                                blue: 0,
+                            },
+                            Rgb {
+                                red: 255,
+                                green: 0,
+                                blue: 0,
+                            },
                             offset as f64,
-                            coords.len() as f64
-                        ).to_color(),
+                            coords.len() as f64,
+                        )
+                        .to_color(),
                     });
                     prev = Some(*to);
                     offset += 1;
@@ -130,7 +161,7 @@ mod tests {
             r"s{zsHnp~MELHLAVk@PILYVO@g@PO@KBYCIEGQCBECQJGAMOAGE@?[UAEEM[EG]CCBO?G@GEAIKHQ?NUDS?UJcANe@\iCFqAq@eE[wAEIMc@MWyAqEWsAKgAECM?MHINEdAG\G?OB_@Js@\a@h@}@xAo@l@uAr@k@R_@R{@ZwA\i@HmAJi@Am@BsBEoAKeC[iB]e@S_Be@iCaAeAm@QMmBcA_@Ws@m@WMsAqAy@o@]e@_@[QS_BkAeA}@]Os@s@{@u@g@m@WQSSMEi@i@i@q@o@i@}@eAm@e@SUUOw@{@o@k@yCkDeAwAYAyAcA?UOKIKYk@]a@e@g@y@iAi@k@gA{AWS]i@Yi@[]eCqD}AoBc@s@]c@[i@o@w@u@eA]s@u@cAOc@]o@O[_AqAs@uAuAyBg@eAqFaLmA{Bq@eBMe@_@{@OQQM{AcCMMGAAHFbAHX`@l@tA`DLN`@x@d@jAl@lAL\hBtDR\LXXd@^fA\PFL`@nA^`AjBrDd@x@Zt@Zj@bBpCnA`B`BdCZ^Zd@fB~BNXDP@\FLVX\Nb@b@rC|DDDRBDBh@jAh@v@~@hBl@bA`@`Ad@n@Lb@JB\?NDFFj@l@b@n@XRj@l@x@~@TZNLbBhBtArAp@z@vArA\THNjCvBh@l@RP\^nC`Cn@t@TN`@NZl@VLn@LPHRZXTn@XRTf@RjAZf@T@HElAH\VPP?ZFZLh@HbA`@fBz@HBX?ZHAACJd@Tt@F^LTRz@`AZTPJdANZRBBAl@Qn@Ij@@VFJLHP@LAvAP@`CHP\LJJT`AE`C?tBCdA?X@Fb@Cd@LfA`@RLF`@HHZNTAXDpCt@PF`ALPLd@Lx@TpB^d@Pz@FRCl@OVOLCHMFXJRJPBJ_@fB",
             5,
         );
-        let coords = map_coords_to_area(decoded.unwrap(), 100, 100);
+        let (coords, _x_width, _y_width) = map_coords_to_area(decoded.unwrap(), 100, 100);
         assert_eq!(305, coords.len())
     }
 }

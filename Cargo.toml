@@ -31,3 +31,4 @@ xdg = "2.4.1"
 polyline = "0.10.1"
 geo-types = "0.7.10"
 geoutils = "0.5.1"
+strum = { version = "0.25.0", features = ["derive"] }

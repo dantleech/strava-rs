@@ -1,3 +1,6 @@
+pub mod sort_dialog;
+
+
 use tui::{
     backend::Backend,
     layout::Constraint,
@@ -8,7 +11,7 @@ use tui::{
 };
 
 use crate::{
-    app::{ActivePage, App},
+    app::{App, SortOrder},
     event::{
         keymap::{MappedKey, StravaEvent},
         util::{table_state_next, table_state_prev},
@@ -39,15 +42,28 @@ pub fn handle(app: &mut App, key: MappedKey) {
             .input(key_event_to_input(key.key_event));
         return;
     }
+
+    if app.activity_list_sort_dialog == true {
+        sort_dialog::handle(app, key);
+
+        return;
+    }
     let activities = app.filtered_activities();
     match key.strava_event {
         StravaEvent::Quit => app.quit = true,
         StravaEvent::ToggleUnitSystem => {
             app.unit_formatter = app.unit_formatter.toggle();
         }
+        StravaEvent::ToggleSortOrder => {
+            app.activity_list_sort_order = match app.activity_list_sort_order {
+                SortOrder::Asc => SortOrder::Desc,
+                SortOrder::Desc => SortOrder::Asc,
+            }
+        }
         StravaEvent::Down => table_state_next(&mut app.activity_list_table_state, activities.len()),
         StravaEvent::Up => table_state_prev(&mut app.activity_list_table_state, activities.len()),
         StravaEvent::Filter => toggle_filter(app),
+        StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),
         _ => (),
     }
@@ -55,6 +71,10 @@ pub fn handle(app: &mut App, key: MappedKey) {
 
 fn toggle_filter(app: &mut App) {
     app.activity_list_filter_dialog = !app.activity_list_filter_dialog;
+}
+
+fn toggle_sort(app: &mut App) {
+    app.activity_list_sort_dialog = !app.activity_list_sort_dialog;
 }
 
 pub fn draw<B: Backend>(
@@ -80,11 +100,19 @@ pub fn draw<B: Backend>(
             Block::default()
                 .borders(Borders::ALL)
                 .title("Filter")
-                .border_style(Style::default().fg(ColorTheme::Orange.to_color())),
+                .border_style(Style::default().fg(ColorTheme::Dialog.to_color())),
         );
 
         f.render_widget(Clear, rect);
         f.render_widget(app.activity_list_filter_text_area.widget(), rect);
+
+        return Ok(());
+    }
+
+    if app.activity_list_sort_dialog == true {
+        sort_dialog::draw(app, f, f.size());
+
+        return Ok(());
     }
 
     Ok(())

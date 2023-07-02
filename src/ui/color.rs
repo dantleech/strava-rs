@@ -1,13 +1,15 @@
 use tui::style::Color;
 
 pub enum ColorTheme {
-    Orange,
+    Orange, // TODO: rename after role not color
+    Dialog,
 }
 
 impl ColorTheme {
     pub fn to_color(&self) -> Color {
         match *self {
             ColorTheme::Orange => Color::Rgb(252, 76, 2),
+            ColorTheme::Dialog => Color::Rgb(252, 76, 2),
         }
     }
 }
@@ -57,6 +59,8 @@ mod tests {
             2.0,
             10.0,
         );
-        panic!("{:?}", rgb);
+        assert_eq!(204, rgb.green);
+        assert_eq!(0, rgb.red);
+        assert_eq!(51, rgb.blue);
     }
 }

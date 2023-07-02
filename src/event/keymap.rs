@@ -1,14 +1,16 @@
-use crossterm::event::{KeyEvent, KeyCode};
-
+use crossterm::event::{KeyCode, KeyEvent};
 
 pub fn map_key(ke: KeyEvent) -> MappedKey {
     match ke.code {
         KeyCode::Char('q') => new_strava_key(ke, StravaEvent::Quit),
         KeyCode::Char('k') => new_strava_key(ke, StravaEvent::Up),
         KeyCode::Char('j') => new_strava_key(ke, StravaEvent::Down),
+        KeyCode::Char('o') => new_strava_key(ke, StravaEvent::ToggleSortOrder),
         KeyCode::Char('u') => new_strava_key(ke, StravaEvent::ToggleUnitSystem),
+        KeyCode::Char('s') => new_strava_key(ke, StravaEvent::Sort),
         KeyCode::Char('f') => new_strava_key(ke, StravaEvent::Filter),
         KeyCode::Enter => new_strava_key(ke, StravaEvent::Enter),
+        KeyCode::Esc => new_strava_key(ke, StravaEvent::Escape),
         _ => new_strava_key(ke, StravaEvent::None),
     }
 }
@@ -27,10 +29,13 @@ pub struct MappedKey {
 
 pub enum StravaEvent {
     ToggleUnitSystem,
+    ToggleSortOrder,
     Filter,
+    Sort,
     Down,
     Up,
     Enter,
+    Escape,
     None,
     Quit,
 }
