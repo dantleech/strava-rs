@@ -1,6 +1,6 @@
 pub mod sort_dialog;
 
-use crossterm::event::KeyCode;
+
 use tui::{
     backend::Backend,
     layout::Constraint,

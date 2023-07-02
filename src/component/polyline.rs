@@ -161,7 +161,7 @@ mod tests {
             r"s{zsHnp~MELHLAVk@PILYVO@g@PO@KBYCIEGQCBECQJGAMOAGE@?[UAEEM[EG]CCBO?G@GEAIKHQ?NUDS?UJcANe@\iCFqAq@eE[wAEIMc@MWyAqEWsAKgAECM?MHINEdAG\G?OB_@Js@\a@h@}@xAo@l@uAr@k@R_@R{@ZwA\i@HmAJi@Am@BsBEoAKeC[iB]e@S_Be@iCaAeAm@QMmBcA_@Ws@m@WMsAqAy@o@]e@_@[QS_BkAeA}@]Os@s@{@u@g@m@WQSSMEi@i@i@q@o@i@}@eAm@e@SUUOw@{@o@k@yCkDeAwAYAyAcA?UOKIKYk@]a@e@g@y@iAi@k@gA{AWS]i@Yi@[]eCqD}AoBc@s@]c@[i@o@w@u@eA]s@u@cAOc@]o@O[_AqAs@uAuAyBg@eAqFaLmA{Bq@eBMe@_@{@OQQM{AcCMMGAAHFbAHX`@l@tA`DLN`@x@d@jAl@lAL\hBtDR\LXXd@^fA\PFL`@nA^`AjBrDd@x@Zt@Zj@bBpCnA`B`BdCZ^Zd@fB~BNXDP@\FLVX\Nb@b@rC|DDDRBDBh@jAh@v@~@hBl@bA`@`Ad@n@Lb@JB\?NDFFj@l@b@n@XRj@l@x@~@TZNLbBhBtArAp@z@vArA\THNjCvBh@l@RP\^nC`Cn@t@TN`@NZl@VLn@LPHRZXTn@XRTf@RjAZf@T@HElAH\VPP?ZFZLh@HbA`@fBz@HBX?ZHAACJd@Tt@F^LTRz@`AZTPJdANZRBBAl@Qn@Ij@@VFJLHP@LAvAP@`CHP\LJJT`AE`C?tBCdA?X@Fb@Cd@LfA`@RLF`@HHZNTAXDpCt@PF`ALPLd@Lx@TpB^d@Pz@FRCl@OVOLCHMFXJRJPBJ_@fB",
             5,
         );
-        let coords = map_coords_to_area(decoded.unwrap(), 100, 100);
+        let (coords, _x_width, _y_width) = map_coords_to_area(decoded.unwrap(), 100, 100);
         assert_eq!(305, coords.len())
     }
 }
