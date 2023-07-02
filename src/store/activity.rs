@@ -56,7 +56,7 @@ impl Activity {
     }
 
     pub fn kmph(&self) -> f32 {
-        return (self.distance / 1000.0) / (self.elapsed_time as f32 / 3600.0);
+        return (self.distance / 1000.0) / (self.moving_time as f32 / 3600.0);
     }
 
     pub(crate) fn activity_type_icon(&self) -> String {

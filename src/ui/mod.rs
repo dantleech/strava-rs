@@ -47,6 +47,10 @@ fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
         Span::raw("nit toggle "),
         Span::styled("[f]", Style::default().fg(strava)),
         Span::raw("ilter "),
+        Span::styled("[s]", Style::default().fg(strava)),
+        Span::raw("ort "),
+        Span::styled("[o]", Style::default().fg(strava)),
+        Span::raw("rder "),
         Span::styled("[q]", Style::default().fg(strava)),
         Span::raw("uit"),
     ])];
@@ -60,7 +64,7 @@ fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
         status.push(format!("filtered by \"{}\"", app.activity_list_filter))
     }
     status.push(format!("{} activities", app.filtered_activities().len()));
-    status.push(format!("sorted by \"{}\"", app.activity_list_sort_by));
+    status.push(format!("sorted by {} {}", app.activity_list_sort_by, app.activity_list_sort_order));
     status.push(format!("{} units", app.unit_formatter.system.to_string()));
 
     Paragraph::new(status.join(", "))

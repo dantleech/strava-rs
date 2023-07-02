@@ -11,7 +11,7 @@ use tui::{
 };
 
 use crate::{
-    app::App,
+    app::{App, SortOrder},
     event::{
         keymap::{MappedKey, StravaEvent},
         util::{table_state_next, table_state_prev},
@@ -53,6 +53,12 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Quit => app.quit = true,
         StravaEvent::ToggleUnitSystem => {
             app.unit_formatter = app.unit_formatter.toggle();
+        }
+        StravaEvent::ToggleSortOrder => {
+            app.activity_list_sort_order = match app.activity_list_sort_order {
+                SortOrder::Asc => SortOrder::Desc,
+                SortOrder::Desc => SortOrder::Asc,
+            }
         }
         StravaEvent::Down => table_state_next(&mut app.activity_list_table_state, activities.len()),
         StravaEvent::Up => table_state_prev(&mut app.activity_list_table_state, activities.len()),
