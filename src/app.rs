@@ -22,6 +22,7 @@ pub struct App<'a> {
     pub activity_list_table_state: TableState,
     pub activity_list_filter_text_area: TextArea<'a>,
     pub activity_list_filter_dialog: bool,
+    pub activity_list_sort_dialog: bool,
     pub activity_list_filter: String,
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
@@ -46,6 +47,7 @@ impl App<'_> {
             activity_list_filter_text_area: TextArea::default(),
             activity_list_filter_dialog: false,
             activity_list_filter: "".to_string(),
+            activity_list_sort_dialog: false,
         }
     }
     pub fn run<'a>(
