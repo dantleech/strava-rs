@@ -14,7 +14,7 @@ use crate::{
 };
 
 use super::{
-    activity_list::activity_list_table, polyline, race_predictor, table_status_select_current,
+    activity_list::activity_list_table, polyline, race_predictor, table_status_select_current, stats,
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
@@ -53,26 +53,45 @@ pub fn draw<B: Backend>(
 
     let cols = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(25), Constraint::Percentage(75)].as_ref())
+        .constraints([
+            Constraint::Percentage(25),
+            Constraint::Percentage(75)
+        ].as_ref())
         .split(rows[1]);
+    let col1 = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage(50),
+            Constraint::Percentage(50)
+        ].as_ref())
+        .split(cols[0]);
 
     let block = Block::default()
         .title("Race Predictions")
         .borders(Borders::ALL);
-
     f.render_widget(block, cols[0]);
-
     race_predictor::draw(
         app,
         f,
-        cols[0].inner(&Margin {
+        col1[0].inner(&Margin {
             vertical: 2,
             horizontal: 2,
         }),
     )?;
 
-    let block = Block::default().title("Map").borders(Borders::ALL);
+    let block = Block::default().title("Stats").borders(Borders::ALL);
+    f.render_widget(block, col1[1]);
+    stats::draw(
+        app,
+        f,
+        col1[1].inner(&Margin {
+            vertical: 1,
+            horizontal: 1,
+        }),
+    )?;
 
+
+    let block = Block::default().title("Map").borders(Borders::ALL);
     f.render_widget(block, cols[1]);
     polyline::draw(
         app,

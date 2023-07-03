@@ -5,6 +5,7 @@ pub mod activity_view;
 pub mod polyline;
 pub mod race_predictor;
 pub mod unit_formatter;
+pub mod stats;
 
 fn table_status_select_current(app: &mut App) {
     let activities = app.filtered_activities();

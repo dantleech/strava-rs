@@ -30,9 +30,7 @@ pub fn draw<B: Backend>(
         ()
     }
 
-    let polyline = activity.summary_polyline.unwrap();
-
-    if let Ok(decoded) = polyline::decode_polyline(polyline.as_str(), 5) {
+    if let Ok(decoded) = activity.polyline() {
         let (coords, x_width, y_width) =
             map_coords_to_area(decoded, area.width - 4, area.height - 4);
         let x_distance_meters = Location::new(0.0, 0.0)

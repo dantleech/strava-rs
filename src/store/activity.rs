@@ -1,5 +1,6 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
+use geo_types::LineString;
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Selectable, Insertable)]
@@ -67,5 +68,13 @@ impl Activity {
             "Walk" => "🥾".to_string(),
             _ => "❓".to_string(),
         }
+    }
+
+    pub(crate) fn polyline(&self) -> Result<LineString, String> {
+        if let Some(p) = &self.summary_polyline {
+            return polyline::decode_polyline(p.as_str(), 5);
+        }
+
+        Err("No polyline".to_string())
     }
 }
