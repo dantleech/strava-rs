@@ -14,6 +14,13 @@ diesel::table! {
         max_heartrate -> Nullable<Float>,
         start_date -> Nullable<Timestamp>,
         summary_polyline -> Nullable<Text>,
+        average_cadence -> Nullable<Float>,
+        average_speed -> Nullable<Float>,
+        kudos -> Integer,
+        location_country -> Nullable<Text>,
+        location_state -> Nullable<Text>,
+        location_city -> Nullable<Text>,
+        athletes -> Integer,
     }
 }
 
@@ -26,4 +33,7 @@ diesel::table! {
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(activity, raw_activity,);
+diesel::allow_tables_to_appear_in_same_query!(
+    activity,
+    raw_activity,
+);

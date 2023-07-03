@@ -41,6 +41,12 @@ impl AcitivityConverter<'_> {
                     None => None,
                 },
                 summary_polyline: Some(data.map.summary_polyline),
+                average_cadence: data.average_cadence,
+                kudos: data.kudos_count,
+                location_country: data.location_country,
+                location_state: data.location_state,
+                location_city: data.location_city,
+                athletes: data.athlete_count,
             };
 
             diesel::insert_into(schema::activity::table)

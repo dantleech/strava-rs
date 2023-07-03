@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use diesel::prelude::*;
+use diesel::{prelude::*, sql_types::Integer};
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
 
@@ -20,6 +20,12 @@ pub struct Activity {
     pub max_heartrate: Option<f32>,
     pub start_date: Option<NaiveDateTime>,
     pub summary_polyline: Option<String>,
+    pub average_cadence: Option<f32>,
+    pub kudos: i32,
+    pub location_country: Option<String>,
+    pub location_state: Option<String>,
+    pub location_city: Option<String>,
+    pub athletes: i32,
 }
 
 #[derive(Queryable, Selectable, Insertable, Serialize, Deserialize)]

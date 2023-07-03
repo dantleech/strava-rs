@@ -44,6 +44,12 @@ pub struct Activity {
     pub max_heartrate: Option<f32>,
     pub start_date: Option<DateTime<Utc>>,
     pub map: Map,
+    pub average_cadence: Option<f32>,
+    pub kudos_count: i32,
+    pub location_country: Option<String>,
+    pub location_state: Option<String>,
+    pub location_city: Option<String>,
+    pub athlete_count: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

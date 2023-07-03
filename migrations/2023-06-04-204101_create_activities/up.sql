@@ -11,7 +11,14 @@ CREATE TABLE activity (
     average_heartrate FLOAT,
     max_heartrate FLOAT,
     start_date DATETIME,
-    summary_polyline TEXT
+    summary_polyline TEXT,
+    average_cadence FLOAT,
+    average_speed FLOAT,
+    kudos INT NOT NULL,
+    location_country VARCHAR(255),
+    location_state VARCHAR(255),
+    location_city VARCHAR(255),
+    athletes INT NOT NULL
 );
 CREATE TABLE raw_activity (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
