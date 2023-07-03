@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use diesel::{prelude::*};
+use diesel::prelude::*;
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
 

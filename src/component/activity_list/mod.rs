@@ -1,6 +1,5 @@
 pub mod sort_dialog;
 
-
 use tui::{
     backend::Backend,
     layout::Constraint,

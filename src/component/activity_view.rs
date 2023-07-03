@@ -14,7 +14,8 @@ use crate::{
 };
 
 use super::{
-    activity_list::activity_list_table, polyline, race_predictor, table_status_select_current, stats,
+    activity_list::activity_list_table, polyline, race_predictor, stats,
+    table_status_select_current,
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
@@ -53,17 +54,11 @@ pub fn draw<B: Backend>(
 
     let cols = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(25),
-            Constraint::Percentage(75)
-        ].as_ref())
+        .constraints([Constraint::Percentage(25), Constraint::Percentage(75)].as_ref())
         .split(rows[1]);
     let col1 = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage(50),
-            Constraint::Percentage(50)
-        ].as_ref())
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
         .split(cols[0]);
 
     let block = Block::default()
@@ -89,7 +84,6 @@ pub fn draw<B: Backend>(
             horizontal: 1,
         }),
     )?;
-
 
     let block = Block::default().title("Map").borders(Borders::ALL);
     f.render_widget(block, cols[1]);
