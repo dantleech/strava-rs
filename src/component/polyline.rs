@@ -1,6 +1,6 @@
 use geo_types::LineString;
 use geoutils::Location;
-use polyline;
+
 use tui::{
     backend::Backend,
     text::Span,

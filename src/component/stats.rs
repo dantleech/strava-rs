@@ -1,19 +1,17 @@
-use geo_types::LineString;
-use geoutils::Location;
-use polyline;
+
+
+
 use tui::{
     backend::Backend,
-    text::{Span, Spans, Text},
+    text::{Text},
     widgets::{
-        canvas::{Canvas, Line},
-        Block, Borders, Paragraph,
+        Paragraph,
     },
-    Frame, style::Style,
+    Frame,
 };
 
 use crate::{
     app::App,
-    ui::color::{gradiant, Rgb, ColorTheme},
 };
 
 pub fn draw<B: Backend>(
