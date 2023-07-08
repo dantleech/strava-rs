@@ -28,6 +28,21 @@ pub struct Activity {
     pub athletes: i32,
 }
 
+#[derive(Queryable, Selectable, Insertable)]
+#[diesel(table_name = crate::store::schema::activity_lap)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ActivityLap {
+    pub id: i64,
+    pub activity_id: i64,
+    pub name: String,
+    pub distance: f32,
+    pub moving_time: i32,
+    pub elapsed_time: i32,
+    pub total_elevation_gain: f32,
+    pub average_cadence: Option<f32>,
+}
+
 #[derive(Queryable, Selectable, Insertable, Serialize, Deserialize)]
 #[diesel(table_name = crate::store::schema::raw_activity)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]

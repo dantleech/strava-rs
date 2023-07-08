@@ -27,7 +27,7 @@ diesel::table! {
 diesel::table! {
     activity_lap (id) {
         id -> BigInt,
-        activity_id -> Integer,
+        activity_id -> BigInt,
         name -> Text,
         distance -> Float,
         moving_time -> Integer,

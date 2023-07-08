@@ -22,7 +22,7 @@ CREATE TABLE activity (
 );
 CREATE TABLE activity_lap (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    activity_id INT NOT NULL,
+    activity_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     distance FLOAT NOT NULL,
     moving_time INT NOT NULL,
