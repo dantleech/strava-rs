@@ -40,12 +40,19 @@ impl StravaSync<'_> {
             }
 
             for s_activity in s_activities {
+
+                // strava has a rate limit of 100 requests per 15 minutes, by requesting each
+                // individual activity we can easily exceed that.
+                //
+                // todo: throttle this?
+                let s_full_activity = self.client.athlete_activity(s_activity["id"].to_string()).await?;
+
                 let raw = RawActivity {
                     id: s_activity["id"]
                         .as_i64()
                         .expect("could not parse 64 bit ID"),
                     created_at: Local::now().naive_local(),
-                    data: s_activity.to_string(),
+                    data: s_full_activity.to_string(),
                     synced: false,
                 };
                 log::info!("[{}] {}", s_activity["id"], s_activity["name"]);

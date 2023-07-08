@@ -118,4 +118,12 @@ impl StravaClient {
 
         Ok(activities)
     }
+
+    pub async fn athlete_activity(&self, id: String) -> Result<Value, anyhow::Error> {
+        let activity = self
+            .request(Method::GET, format!("/v3/activities/{}", id,))
+            .await?;
+
+        Ok(activity)
+    }
 }
