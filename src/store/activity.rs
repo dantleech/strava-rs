@@ -57,7 +57,7 @@ pub struct ActivityStore<'a> {
 }
 
 impl ActivityStore<'_> {
-    pub(crate) fn new(connection: &mut SqliteConnection) -> ActivityStore {
+    pub(crate) fn new<'a>(connection: &'a mut SqliteConnection) -> ActivityStore<'a> {
         ActivityStore { connection }
     }
 
@@ -68,6 +68,16 @@ impl ActivityStore<'_> {
             .select(Activity::as_select())
             .load(self.connection)
             .expect("Could not load activities")
+    }
+
+    pub(crate) fn splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
+        use crate::store::schema::activity_split;
+        activity_split::table
+            .order(activity_split::split.asc())
+            .filter(activity_split::activity_id.eq(activity.id))
+            .select(ActivitySplit::as_select())
+            .load(self.connection)
+            .expect("Could not load activity splits")
     }
 }
 

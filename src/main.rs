@@ -79,7 +79,6 @@ async fn main() -> Result<(), anyhow::Error> {
     log::info!("Converting...");
     AcitivityConverter::new(&mut db).convert().await?;
 
-    let mut activity_store = ActivityStore::new(&mut db);
 
     let stdout = io::stdout();
     let backend = CrosstermBackend::new(stdout);
@@ -87,8 +86,8 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
-    let mut app = App::new();
-    app.activities = activity_store.activities();
+    let mut activity_store = ActivityStore::new(&mut db);
+    let mut app = App::new(&mut activity_store);
     app.run(&mut terminal)?;
 
     disable_raw_mode()?;

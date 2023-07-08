@@ -1,5 +1,6 @@
 use crate::app::{ActivePage, App};
 
+pub mod splits;
 pub mod activity_list;
 pub mod activity_view;
 pub mod polyline;

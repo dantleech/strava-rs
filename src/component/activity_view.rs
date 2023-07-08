@@ -15,7 +15,7 @@ use crate::{
 
 use super::{
     activity_list::activity_list_table, polyline, race_predictor, stats,
-    table_status_select_current,
+    table_status_select_current, splits,
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
@@ -54,7 +54,7 @@ pub fn draw<B: Backend>(
 
     let cols = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(25), Constraint::Percentage(75)].as_ref())
+        .constraints([Constraint::Percentage(25), Constraint::Percentage(50), Constraint::Percentage(25)].as_ref())
         .split(rows[1]);
     let col1 = Layout::default()
         .direction(Direction::Vertical)
@@ -91,6 +91,16 @@ pub fn draw<B: Backend>(
         app,
         f,
         cols[1].inner(&Margin {
+            vertical: 1,
+            horizontal: 1,
+        }),
+    )?;
+    let block = Block::default().title("Splits").borders(Borders::ALL);
+    f.render_widget(block, cols[2]);
+    splits::draw(
+        app,
+        f,
+        cols[2].inner(&Margin {
             vertical: 1,
             horizontal: 1,
         }),

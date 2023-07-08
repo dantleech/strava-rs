@@ -1,4 +1,6 @@
 use std::{cmp::Ordering, fmt::Display, io, time::Duration};
+use diesel::prelude::*;
+use diesel::{Connection, SqliteConnection};
 use strum::EnumIter;
 
 use crossterm::event::{self, poll, Event};
@@ -9,17 +11,17 @@ use tui::{
 };
 use tui_textarea::TextArea;
 
+use crate::store::activity::ActivityStore;
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
-    store::activity::Activity,
+    store::{activity::{Activity, ActivitySplit}, schema},
     ui,
 };
 
 pub struct App<'a> {
     pub quit: bool,
     pub active_page: ActivePage,
-
     pub unit_formatter: UnitFormatter,
     pub activity_list_table_state: TableState,
     pub activity_list_filter_text_area: TextArea<'a>,
@@ -30,6 +32,8 @@ pub struct App<'a> {
     pub activity_list_filter: String,
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
+
+    store: &'a mut ActivityStore<'a>,
 }
 
 pub enum ActivePage {
@@ -71,13 +75,13 @@ impl Display for SortOrder {
 }
 
 impl App<'_> {
-    pub fn new() -> App<'static> {
+    pub fn new<'a>(store: &'a mut ActivityStore<'a>) -> App<'a> {
         App {
             quit: false,
             active_page: ActivePage::ActivityList,
             unit_formatter: UnitFormatter::imperial(),
 
-            activities: vec![],
+            activities: store.activities(),
             activity: None,
 
             activity_list_table_state: TableState::default(),
@@ -87,6 +91,8 @@ impl App<'_> {
             activity_list_sort_dialog: false,
             activity_list_sort_by: SortBy::Date,
             activity_list_sort_order: SortOrder::Desc,
+
+            store,
         }
     }
     pub fn run<'a>(
@@ -155,5 +161,9 @@ impl App<'_> {
             ActivePage::ActivityList => activity_list::handle(self, key),
             ActivePage::Activity => activity_view::handle(self, key),
         }
+    }
+
+    pub(crate) fn activity_splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
+        self.store.splits(activity)
     }
 }
