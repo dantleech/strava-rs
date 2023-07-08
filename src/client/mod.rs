@@ -90,6 +90,8 @@ impl StravaClient {
             .body(Body::default())
             .unwrap();
 
+        log::info!("API request: {}", url);
+
         let res: Response<Body> = self.client.request(req).await?;
 
         if res.status() != 200 {

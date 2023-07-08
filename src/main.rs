@@ -61,6 +61,7 @@ async fn main() -> Result<(), anyhow::Error> {
     log::info!("");
 
     if args.no_sync != true {
+        log::info!("Synchronising...");
         let client = Client::builder().build(connector);
         let mut authenticator = Authenticator::new(
             client,
@@ -75,6 +76,7 @@ async fn main() -> Result<(), anyhow::Error> {
         let client = new_strava_client(api_config);
         StravaSync::new(&client, &mut db).sync().await?;
     }
+    log::info!("Converting...");
     AcitivityConverter::new(&mut db).convert().await?;
 
     let mut activity_store = ActivityStore::new(&mut db);

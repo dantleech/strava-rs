@@ -58,8 +58,9 @@ impl AcitivityConverter<'_> {
             diesel::delete(schema::activity_split::table.filter(schema::activity_split::activity_id.eq(activity.id))).execute(self.connection)?;
 
             if let Some(laps) = data.splits_metric {
+                let mut activity_laps: Vec<ActivitySplit> = vec![];
                 for lap in laps {
-                    let activity_lap = ActivitySplit{
+                    activity_laps.push(ActivitySplit{
                         activity_id: activity.id,
                         distance: lap.distance,
                         moving_time: lap.moving_time,
@@ -67,12 +68,12 @@ impl AcitivityConverter<'_> {
                         average_speed: lap.average_speed,
                         elevation_difference: lap.elevation_difference,
                         split: lap.split,
-                    };
-                    // todo: batch this
-                    diesel::insert_into(schema::activity_split::table)
-                        .values(&activity_lap)
-                        .execute(self.connection)?;
+                    });
                 }
+                    
+                diesel::insert_into(schema::activity_split::table)
+                    .values(&activity_laps)
+                    .execute(self.connection)?;
             }
         }
 
