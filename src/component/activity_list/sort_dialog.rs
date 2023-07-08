@@ -21,6 +21,7 @@ impl SortBy {
             SortBy::Pace => 'p',
             SortBy::HeartRate => 'h',
             SortBy::Distance => 'D',
+            SortBy::Time => 't',
         }
     }
 
@@ -30,6 +31,7 @@ impl SortBy {
             SortBy::Pace => "pace",
             SortBy::HeartRate => "heartrate",
             SortBy::Distance => "distance",
+            SortBy::Time => "time",
         }
     }
 
@@ -39,6 +41,7 @@ impl SortBy {
             KeyCode::Char('p') => Some(SortBy::Pace),
             KeyCode::Char('h') => Some(SortBy::HeartRate),
             KeyCode::Char('D') => Some(SortBy::Distance),
+            KeyCode::Char('t') => Some(SortBy::Time),
             _ => None,
         }
     }

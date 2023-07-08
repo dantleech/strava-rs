@@ -43,6 +43,7 @@ pub enum SortBy {
     Distance,
     Pace,
     HeartRate,
+    Time,
 }
 
 impl Display for SortBy {
@@ -128,6 +129,10 @@ impl App<'_> {
                     .average_heartrate
                     .or(Some(0.0))
                     .partial_cmp(&b.average_heartrate.or(Some(0.0)))
+                    .unwrap(),
+                SortBy::Time => a
+                    .moving_time
+                    .partial_cmp(&b.moving_time)
                     .unwrap(),
             };
             match self.activity_list_sort_order {
