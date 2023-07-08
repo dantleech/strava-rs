@@ -42,6 +42,12 @@ pub struct ActivitySplit {
     pub split: i32,
 }
 
+impl ActivitySplit {
+    pub fn seconds_per_meter(&self) -> f32 {
+        self.moving_time as f32 / self.distance
+    }
+}
+
 #[derive(Queryable, Selectable, Insertable, Serialize, Deserialize)]
 #[diesel(table_name = crate::store::schema::raw_activity)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]

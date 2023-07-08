@@ -75,9 +75,9 @@ async fn main() -> Result<(), anyhow::Error> {
         };
         let client = new_strava_client(api_config);
         StravaSync::new(&client, &mut db).sync().await?;
+        log::info!("Converting...");
+        AcitivityConverter::new(&mut db).convert().await?;
     }
-    log::info!("Converting...");
-    AcitivityConverter::new(&mut db).convert().await?;
 
 
     let stdout = io::stdout();

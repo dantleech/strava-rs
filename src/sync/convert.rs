@@ -57,7 +57,7 @@ impl AcitivityConverter<'_> {
                 .execute(self.connection)?;
             diesel::delete(schema::activity_split::table.filter(schema::activity_split::activity_id.eq(activity.id))).execute(self.connection)?;
 
-            if let Some(laps) = data.splits_metric {
+            if let Some(laps) = data.splits_standard {
                 let mut activity_laps: Vec<ActivitySplit> = vec![];
                 for lap in laps {
                     activity_laps.push(ActivitySplit{
