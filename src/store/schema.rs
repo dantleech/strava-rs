@@ -25,15 +25,14 @@ diesel::table! {
 }
 
 diesel::table! {
-    activity_lap (id) {
-        id -> BigInt,
+    activity_split (activity_id, split) {
         activity_id -> BigInt,
-        name -> Text,
         distance -> Float,
         moving_time -> Integer,
         elapsed_time -> Integer,
-        total_elevation_gain -> Float,
-        average_cadence -> Nullable<Float>,
+        average_speed -> Float,
+        elevation_difference -> Float,
+        split -> Integer,
     }
 }
 
@@ -46,10 +45,10 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(activity_lap -> activity (activity_id));
+diesel::joinable!(activity_split -> activity (activity_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     activity,
-    activity_lap,
+    activity_split,
     raw_activity,
 );

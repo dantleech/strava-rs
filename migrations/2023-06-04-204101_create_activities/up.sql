@@ -20,16 +20,16 @@ CREATE TABLE activity (
     location_city VARCHAR(255),
     athletes INT NOT NULL
 );
-CREATE TABLE activity_lap (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+CREATE TABLE activity_split (
     activity_id BIGINT NOT NULL,
-    name VARCHAR(255) NOT NULL,
     distance FLOAT NOT NULL,
     moving_time INT NOT NULL,
     elapsed_time INT NOT NULL,
-    total_elevation_gain FLOAT NOT NULL,
-    average_cadence FLOAT,
-    FOREIGN KEY (activity_id) REFERENCES activity (id)
+    average_speed FLOAT NOT NULL,
+    elevation_difference FLOAT NOT NULL,
+    split INT NOT NULL,
+    FOREIGN KEY (activity_id) REFERENCES activity (id),
+    PRIMARY KEY (activity_id, split)
 );
 CREATE TABLE raw_activity (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,

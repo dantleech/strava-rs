@@ -50,6 +50,17 @@ pub struct Activity {
     pub location_state: Option<String>,
     pub location_city: Option<String>,
     pub athlete_count: i32,
+    pub splits_metric: Option<Vec<Split>>
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Split {
+    pub distance: f32,
+    pub moving_time: i32,
+    pub elapsed_time: i32,
+    pub average_speed: f32,
+    pub elevation_difference: f32,
+    pub split: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

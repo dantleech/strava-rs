@@ -3,6 +3,7 @@ use diesel::SqliteConnection;
 
 use crate::client;
 use crate::store::activity::Activity;
+use crate::store::activity::ActivitySplit;
 use crate::store::activity::RawActivity;
 use crate::store::schema;
 
@@ -54,6 +55,25 @@ impl AcitivityConverter<'_> {
                 .on_conflict(schema::activity::id)
                 .do_nothing()
                 .execute(self.connection)?;
+            diesel::delete(schema::activity_split::table.filter(schema::activity_split::activity_id.eq(activity.id))).execute(self.connection)?;
+
+            if let Some(laps) = data.splits_metric {
+                for lap in laps {
+                    let activity_lap = ActivitySplit{
+                        activity_id: activity.id,
+                        distance: lap.distance,
+                        moving_time: lap.moving_time,
+                        elapsed_time: lap.elapsed_time,
+                        average_speed: lap.average_speed,
+                        elevation_difference: lap.elevation_difference,
+                        split: lap.split,
+                    };
+                    // todo: batch this
+                    diesel::insert_into(schema::activity_split::table)
+                        .values(&activity_lap)
+                        .execute(self.connection)?;
+                }
+            }
         }
 
         Ok(())
