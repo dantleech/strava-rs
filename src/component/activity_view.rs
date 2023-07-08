@@ -58,7 +58,7 @@ pub fn draw<B: Backend>(
         .split(rows[1]);
     let col1 = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+        .constraints([Constraint::Percentage(33), Constraint::Percentage(33), Constraint::Percentage(33)].as_ref())
         .split(cols[0]);
 
     let block = Block::default()
@@ -84,6 +84,17 @@ pub fn draw<B: Backend>(
             horizontal: 1,
         }),
     )?;
+    let block = Block::default().title("Splits").borders(Borders::ALL);
+    f.render_widget(block, col1[2]);
+    splits::draw(
+        app,
+        f,
+        col1[2].inner(&Margin {
+            vertical: 1,
+            horizontal: 1,
+        }),
+    )?;
+
 
     let block = Block::default().title("Map").borders(Borders::ALL);
     f.render_widget(block, cols[1]);
@@ -95,16 +106,5 @@ pub fn draw<B: Backend>(
             horizontal: 1,
         }),
     )?;
-    let block = Block::default().title("Splits").borders(Borders::ALL);
-    f.render_widget(block, cols[2]);
-    splits::draw(
-        app,
-        f,
-        cols[2].inner(&Margin {
-            vertical: 1,
-            horizontal: 1,
-        }),
-    )?;
-
     Ok(())
 }

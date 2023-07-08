@@ -44,8 +44,7 @@ pub fn draw<B: Backend>(
     let master_cols = Layout::default().direction(tui::layout::Direction::Horizontal).constraints(vec![
          Constraint::Length(3),
          Constraint::Min(1),
-         Constraint::Length(3),
-         Constraint::Length(6),
+         Constraint::Length(10),
     ]);
     let header = master_cols.split(area);
     f.render_widget(Paragraph::new("#"), header[0]);
@@ -79,7 +78,7 @@ pub fn draw<B: Backend>(
 
             cols[1],
         );
-        f.render_widget(Paragraph::new(format!("{}", split.elevation_difference)), cols[2]);
+        f.render_widget(Paragraph::new(app.unit_formatter.elevation(split.elevation_difference)), cols[2]);
         count += 1;
     }
     Ok(())

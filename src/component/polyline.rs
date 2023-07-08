@@ -41,7 +41,6 @@ pub fn draw<B: Backend>(
             .unwrap();
 
         let canvas = Canvas::default()
-            .block(Block::default().borders(Borders::RIGHT))
             .x_bounds([0.0, area.width as f64])
             .y_bounds([0.0, area.height as f64])
             .paint(|ctx| {
