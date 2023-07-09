@@ -6,7 +6,6 @@ use tui::{
     text::Span,
     widgets::{
         canvas::{Canvas, Line},
-        Block, Borders,
     },
     Frame,
 };

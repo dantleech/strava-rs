@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, fmt::Display, io, time::Duration};
 use diesel::prelude::*;
-use diesel::{Connection, SqliteConnection};
+
 use strum::EnumIter;
 
 use crossterm::event::{self, poll, Event};
@@ -15,7 +15,7 @@ use crate::store::activity::ActivityStore;
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
-    store::{activity::{Activity, ActivitySplit}, schema},
+    store::{activity::{Activity, ActivitySplit}},
     ui,
 };
 

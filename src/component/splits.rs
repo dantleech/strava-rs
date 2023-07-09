@@ -1,17 +1,16 @@
 
 use std::f32::MAX;
 
-use diesel::internal::derives::multiconnection::array_comparison::AsInExpression;
+
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout},
-    style::{Color, Modifier, Style},
-    text::Text,
-    widgets::{BarChart, Gauge, Paragraph, Block, Borders},
+    style::{Color, Style},
+    widgets::{Gauge, Paragraph},
     Frame,
 };
 
-use crate::{app::App, ui::color::{ColorTheme, gradiant, Rgb}};
+use crate::{app::App, ui::color::{gradiant, Rgb}};
 
 pub fn draw<B: Backend>(
     app: &mut App,
@@ -52,7 +51,7 @@ pub fn draw<B: Backend>(
     f.render_widget(Paragraph::new("🌄"), header[2]);
 
     let mut count = 1;
-    let split_count = splits.len();
+    let _split_count = splits.len();
     for split in splits {
         let row = rows[count];
         let cols = master_cols.split(row);
