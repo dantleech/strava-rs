@@ -95,9 +95,16 @@ impl StravaClient {
 
         let res: Response<Body> = self.client.request(req).await?;
 
+        if res.status() == 429 {
+            return Err(anyhow::Error::msg(format!(
+                "API request limit exceeded - wait for 15 minutes and try again ({})",
+                res.status()
+            )));
+        }
+
         if res.status() != 200 {
             return Err(anyhow::Error::msg(format!(
-                "Got {} respponse for URL {}",
+                "Got {} response for URL {}",
                 res.status(),
                 &url
             )));

@@ -28,7 +28,7 @@ pub fn draw<B: Backend>(
     f: &mut Frame<B>,
     area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
-    let activities = &app.filtered_activities();
+    let activities = &app.unsorted_filtered_activities();
     let times: Vec<i64> = activities
         .iter()
         .map(|a| {
@@ -64,11 +64,14 @@ pub fn draw<B: Backend>(
         .collect();
     let mut current = vec![];
     if let Some(selected) = app.activity_list_table_state.selected() {
+        let activities = app.filtered_activities();
         if let Some(a) = activities.get(selected) {
-            let activity = Some(a.clone());
-            if let Some(activity) = activity {
-                current.push((activity.start_date.unwrap().timestamp() as f64, pmin.clone() as f64));
-                current.push((activity.start_date.unwrap().timestamp() as f64, pmax.clone() as f64));
+            match app.activities.iter().find(|unsorted|unsorted.id == a.id) {
+                Some(a) => {
+                    current.push((a.start_date.unwrap().timestamp() as f64, pmin.clone() as f64));
+                    current.push((a.start_date.unwrap().timestamp() as f64, pmax.clone() as f64));
+                },
+                None => (),
             }
         }
     }

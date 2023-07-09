@@ -51,7 +51,12 @@ impl StravaSync<'_> {
                     id: s_activity["id"]
                         .as_i64()
                         .expect("could not parse 64 bit ID"),
-                    created_at: Local::now().naive_local(),
+                    created_at: NaiveDateTime::from(
+                        match NaiveDateTime::parse_from_str(s_activity["start_date"].as_str().unwrap(), "%Y-%m-%dT%H:%M:%SZ") {
+                            Ok(t) => t,
+                            Err(err) => NaiveDateTime::from_timestamp_millis(0).unwrap(),
+                        }
+                    ),
                     data: s_full_activity.to_string(),
                     synced: false,
                 };
