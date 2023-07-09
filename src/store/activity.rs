@@ -96,6 +96,10 @@ impl Activity {
         return (self.distance / 1000.0) / (self.moving_time as f32 / 3600.0);
     }
 
+    pub fn meters_per_hour(&self) -> f32 {
+        return self.distance / (self.moving_time as f32 / 3600.0);
+    }
+
     pub(crate) fn activity_type_icon(&self) -> String {
         match self.activity_type.as_str() {
             "Ride" => "🚴".to_string(),
