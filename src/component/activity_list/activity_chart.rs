@@ -94,9 +94,11 @@ pub fn draw<B: Backend>(
             .graph_type(GraphType::Line)
             .style(Style::default().fg(Color::Green)),
     ];
+    let yaxisstep = (pdiff as f64 / area.height as f64) as usize;
     let yaxis =
-        (*pmin..*pmax).step_by((pdiff as f64 / area.height as f64) as usize);
-    let xaxis = (*tmin.unwrap()..*tmax.unwrap()).step_by((tdiff as f64 / 5.0) as usize);
+        (*pmin..*pmax).step_by(if yaxisstep > 0 { yaxisstep } else { 1 });
+    let xaxisstep = (tdiff as f64 / 5.0) as usize;
+    let xaxis = (*tmin.unwrap()..*tmax.unwrap()).step_by(if xaxisstep > 0 { xaxisstep } else {1});
     let chart = Chart::new(datasets)
         .block(Block::default().borders(Borders::all()))
         .x_axis(

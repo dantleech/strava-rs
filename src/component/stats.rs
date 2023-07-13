@@ -36,6 +36,9 @@ pub fn draw<B: Backend>(
     ];
 
     let mut text = String::new();
+    if activity.description != "" {
+        text.push_str(format!("{}\n\n", &activity.description).as_str());
+    }
     for (name, value) in stats {
         text.push_str(format!("{}: {}\n", name, value).as_str());
     }

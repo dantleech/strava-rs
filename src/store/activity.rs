@@ -11,6 +11,7 @@ pub struct Activity {
     pub id: i64,
     pub title: String,
     pub activity_type: String,
+    pub description: String,
     pub distance: f32,
     pub moving_time: i32,
     pub elapsed_time: i32,

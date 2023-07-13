@@ -35,6 +35,7 @@ pub struct StravaClient {
 pub struct Activity {
     pub id: i64,
     pub name: String,
+    pub description: Option<String>,
     pub distance: f32,
     pub moving_time: i32,
     pub elapsed_time: i32,
@@ -94,13 +95,6 @@ impl StravaClient {
         log::info!("API request: {}", url);
 
         let res: Response<Body> = self.client.request(req).await?;
-
-        if res.status() == 429 {
-            return Err(anyhow::Error::msg(format!(
-                "API request limit exceeded - wait for 15 minutes and try again ({})",
-                res.status()
-            )));
-        }
 
         if res.status() != 200 {
             return Err(anyhow::Error::msg(format!(

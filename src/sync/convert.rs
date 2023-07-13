@@ -29,6 +29,10 @@ impl AcitivityConverter<'_> {
             let activity = Activity {
                 id: data.id,
                 title: data.name,
+                description: match data.description {
+                    Some(d) => d,
+                    None => "".to_string(),
+                },
                 activity_type: data.sport_type.clone(),
                 distance: data.distance,
                 moving_time: data.moving_time,

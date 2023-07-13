@@ -64,7 +64,7 @@ pub fn draw<B: Backend>(
     let block = Block::default()
         .title("Race Predictions")
         .borders(Borders::ALL);
-    f.render_widget(block, cols[0]);
+    f.render_widget(block, col1[0]);
     race_predictor::draw(
         app,
         f,

@@ -4,6 +4,7 @@ diesel::table! {
     activity (id) {
         id -> BigInt,
         title -> Text,
+        description -> Text,
         activity_type -> Text,
         distance -> Float,
         moving_time -> Integer,
