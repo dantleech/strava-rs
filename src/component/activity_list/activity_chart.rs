@@ -100,6 +100,7 @@ pub fn draw<B: Backend>(
     let xaxisstep = (tdiff as f64 / 5.0) as usize;
     let xaxis = (*tmin.unwrap()..*tmax.unwrap()).step_by(if xaxisstep > 0 { xaxisstep } else {1});
     let chart = Chart::new(datasets)
+        .hidden_legend_constraints((Constraint::Max(1), Constraint::Max(1)))
         .block(Block::default().borders(Borders::all()))
         .x_axis(
             Axis::default()

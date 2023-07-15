@@ -30,6 +30,8 @@ use crate::{
 #[command(author, version, about, long_about = None)]
 struct Args {
     #[arg(short, long)]
+    pub activity_type: Option<String>,
+    #[arg(short, long)]
     pub no_sync: bool,
     #[arg(long)]
     pub client_id: String,
@@ -88,6 +90,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let mut activity_store = ActivityStore::new(&mut db);
     let mut app = App::new(&mut activity_store);
+    app.activity_type = args.activity_type;
     app.run(&mut terminal)?;
 
     disable_raw_mode()?;

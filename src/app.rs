@@ -30,6 +30,7 @@ pub struct App<'a> {
     pub activity_list_sort_by: SortBy,
     pub activity_list_sort_order: SortOrder,
     pub activity_list_filter: String,
+    pub activity_type: Option<String>,
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
 
@@ -80,19 +81,20 @@ impl App<'_> {
             quit: false,
             active_page: ActivePage::ActivityList,
             unit_formatter: UnitFormatter::imperial(),
-
-            activities: store.activities(),
-            activity: None,
-
             activity_list_table_state: TableState::default(),
+
             activity_list_filter_text_area: TextArea::default(),
             activity_list_filter_dialog: false,
-            activity_list_filter: "".to_string(),
+
             activity_list_sort_dialog: false,
             activity_list_sort_by: SortBy::Date,
             activity_list_sort_order: SortOrder::Desc,
-
+            activity_list_filter: "".to_string(),
+            activity: None,
+            activities: store.activities(),
             store,
+
+            activity_type: None,
         }
     }
     pub fn run<'a>(
@@ -121,12 +123,23 @@ impl App<'_> {
         let activities = self.activities.clone();
         activities
             .into_iter()
-            .filter(|a| a.title.contains(self.activity_list_filter.as_str()))
+            .filter(|a| {
+                if !a.title.contains(self.activity_list_filter.as_str()) {
+                    return false
+                }
+                if let Some(activity_type) = self.activity_type.clone() {
+                    if a.activity_type != activity_type {
+                        return false;
+                    }
+                }
+
+                true
+            })
             .collect()
     }
 
     pub fn filtered_activities(&self) -> Vec<Activity> {
-        let mut activities = self.activities.clone();
+        let mut activities = self.unsorted_filtered_activities().clone();
         activities.sort_by(|a, b| {
             let ordering = match self.activity_list_sort_by {
                 SortBy::Date => a.id.cmp(&b.id),
@@ -153,9 +166,7 @@ impl App<'_> {
             }
         });
         activities
-            .into_iter()
-            .filter(|a| a.title.contains(self.activity_list_filter.as_str()))
-            .collect()
+
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
