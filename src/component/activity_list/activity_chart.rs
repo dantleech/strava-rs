@@ -1,28 +1,24 @@
-use chrono::{serde::ts_seconds_option, NaiveDate, NaiveDateTime};
+use chrono::{NaiveDateTime};
 use tui::{
     backend::Backend,
     layout::Constraint,
-    style::{Color, Modifier, Style},
+    style::{Color, Style},
     symbols::Marker,
     text::Span,
-    widgets::{Axis, Block, Borders, Cell, Chart, Clear, Dataset, GraphType, Row, Table},
+    widgets::{Axis, Block, Borders, Chart, Dataset, GraphType},
     Frame,
 };
 
 use crate::{
-    app::{App, SortOrder},
-    component::table_status_select_current,
+    app::{App},
     event::{
-        keymap::{MappedKey, StravaEvent},
-        util::{table_state_next, table_state_prev},
+        keymap::{MappedKey},
     },
-    store::activity::Activity,
-    ui::{centered_rect_absolute, color::ColorTheme, key_event_to_input},
 };
 
-use super::sort_dialog;
 
-pub fn handle(app: &mut App, key: MappedKey) {}
+
+pub fn handle(_app: &mut App, _key: MappedKey) {}
 pub fn draw<B: Backend>(
     app: &mut App,
     f: &mut Frame<B>,

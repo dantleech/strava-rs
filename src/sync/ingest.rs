@@ -1,4 +1,4 @@
-use chrono::{Local, NaiveDateTime};
+use chrono::{NaiveDateTime};
 use diesel::prelude::*;
 use diesel::{RunQueryDsl, SqliteConnection};
 
@@ -54,7 +54,7 @@ impl StravaSync<'_> {
                     created_at: NaiveDateTime::from(
                         match NaiveDateTime::parse_from_str(s_activity["start_date"].as_str().unwrap(), "%Y-%m-%dT%H:%M:%SZ") {
                             Ok(t) => t,
-                            Err(err) => NaiveDateTime::from_timestamp_millis(0).unwrap(),
+                            Err(_err) => NaiveDateTime::from_timestamp_millis(0).unwrap(),
                         }
                     ),
                     data: s_full_activity.to_string(),
