@@ -84,7 +84,7 @@ fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
         "sorted by {} {}",
         app.filters.sort_by, app.filters.sort_order
     ));
-    status.push(format!("{} units", app.unit_formatter.system.to_string()));
+    status.push(format!("{} units", app.unit_formatter.system));
 
     Paragraph::new(status.join(", "))
 }

@@ -62,12 +62,9 @@ pub fn draw<B: Backend>(
     if let Some(selected) = app.activity_list.table_state.selected() {
         let activities = app.filtered_activities();
         if let Some(a) = activities.get(selected) {
-            match app.activities.iter().find(|unsorted|unsorted.id == a.id) {
-                Some(a) => {
+            if let Some(a) = app.activities.iter().find(|unsorted|unsorted.id == a.id) {
                     current.push((a.start_date.unwrap().timestamp() as f64, *pmin as f64));
                     current.push((a.start_date.unwrap().timestamp() as f64, *pmax as f64));
-                },
-                None => (),
             }
         }
     }

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 pub struct UnitFormatter {
     pub system: UnitSystem,
 }
@@ -7,12 +9,12 @@ pub enum UnitSystem {
     Imperial,
 }
 
-impl UnitSystem {
-    pub fn to_string(&self) -> String {
-        match *self {
-            UnitSystem::Metric => String::from("metric"),
-            UnitSystem::Imperial => String::from("imperial"),
-        }
+impl Display for UnitSystem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match *self {
+            UnitSystem::Metric => "metric",
+            UnitSystem::Imperial => "imperial",
+        })
     }
 }
 

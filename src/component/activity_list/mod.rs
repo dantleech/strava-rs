@@ -1,5 +1,5 @@
-pub mod activity_list;
-pub mod activity_chart;
+pub mod list;
+pub mod chart;
 pub mod sort_dialog;
 
 use tui::{
@@ -12,7 +12,7 @@ use tui_textarea::TextArea;
 use crate::{app::App, event::keymap::MappedKey};
 
 pub fn handle(app: &mut App, key: MappedKey) {
-    activity_list::handle(app, key)
+    list::handle(app, key)
 }
 pub fn draw<B: Backend>(
     app: &mut App,
@@ -21,8 +21,8 @@ pub fn draw<B: Backend>(
 ) -> Result<(), anyhow::Error> {
     let rows =
         Layout::default().constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)]).split(area);
-    activity_list::draw(app, f, rows[0])?;
-    activity_chart::draw(app, f, rows[1])?;
+    list::draw(app, f, rows[0])?;
+    chart::draw(app, f, rows[1])?;
     Ok(())
 }
 
