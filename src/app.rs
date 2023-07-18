@@ -19,17 +19,26 @@ use crate::{
     ui,
 };
 
+pub struct ActivityListState<'a> {
+    pub table_state: TableState,
+    pub filter_text_area: TextArea<'a>,
+    pub filter_dialog: bool,
+    pub sort_dialog: bool,
+}
+
+pub struct ActivityFilters {
+    pub sort_by: SortBy,
+    pub sort_order: SortOrder,
+    pub filter: String,
+}
+
 pub struct App<'a> {
     pub quit: bool,
     pub active_page: ActivePage,
     pub unit_formatter: UnitFormatter,
-    pub activity_list_table_state: TableState,
-    pub activity_list_filter_text_area: TextArea<'a>,
-    pub activity_list_filter_dialog: bool,
-    pub activity_list_sort_dialog: bool,
-    pub activity_list_sort_by: SortBy,
-    pub activity_list_sort_order: SortOrder,
-    pub activity_list_filter: String,
+    pub activity_list: ActivityListState<'a>,
+    pub filters: ActivityFilters,
+
     pub activity_type: Option<String>,
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
@@ -81,15 +90,17 @@ impl App<'_> {
             quit: false,
             active_page: ActivePage::ActivityList,
             unit_formatter: UnitFormatter::imperial(),
-            activity_list_table_state: TableState::default(),
-
-            activity_list_filter_text_area: TextArea::default(),
-            activity_list_filter_dialog: false,
-
-            activity_list_sort_dialog: false,
-            activity_list_sort_by: SortBy::Date,
-            activity_list_sort_order: SortOrder::Desc,
-            activity_list_filter: "".to_string(),
+            activity_list: ActivityListState{
+                table_state: TableState::default(),
+                filter_text_area: TextArea::default(),
+                filter_dialog: false,
+                sort_dialog: false,
+            },
+            filters: ActivityFilters {
+                sort_by: SortBy::Date,
+                sort_order: SortOrder::Desc,
+                filter: "".to_string(),
+            },
             activity: None,
             activities: store.activities(),
             store,
@@ -124,7 +135,7 @@ impl App<'_> {
         activities
             .into_iter()
             .filter(|a| {
-                if !a.title.contains(self.activity_list_filter.as_str()) {
+                if !a.title.contains(self.filters.filter.as_str()) {
                     return false
                 }
                 if let Some(activity_type) = self.activity_type.clone() {
@@ -141,7 +152,7 @@ impl App<'_> {
     pub fn filtered_activities(&self) -> Vec<Activity> {
         let mut activities = self.unsorted_filtered_activities();
         activities.sort_by(|a, b| {
-            let ordering = match self.activity_list_sort_by {
+            let ordering = match self.filters.sort_by {
                 SortBy::Date => a.id.cmp(&b.id),
                 SortBy::Distance => a
                     .distance
@@ -158,7 +169,7 @@ impl App<'_> {
                     .unwrap(),
                 SortBy::Time => a.moving_time.partial_cmp(&b.moving_time).unwrap(),
             };
-            match self.activity_list_sort_order {
+            match self.filters.sort_order {
                 SortOrder::Asc => ordering,
                 SortOrder::Desc => ordering.reverse(),
             }

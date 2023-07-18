@@ -20,13 +20,13 @@ use crate::{
 use super::sort_dialog;
 
 pub fn handle(app: &mut App, key: MappedKey) {
-    if app.activity_list_filter_dialog {
+    if app.activity_list.filter_dialog {
         let matched = match key.strava_event {
             StravaEvent::Enter => {
-                app.activity_list_filter =
-                    app.activity_list_filter_text_area.lines()[0].to_string();
-                app.activity_list_filter_dialog = false;
-                app.activity_list_table_state.select(Some(0));
+                app.filters.filter =
+                    app.activity_list.filter_text_area.lines()[0].to_string();
+                app.activity_list.filter_dialog = false;
+                app.activity_list.table_state.select(Some(0));
                 true
             }
             _ => false,
@@ -35,12 +35,12 @@ pub fn handle(app: &mut App, key: MappedKey) {
             return;
         }
 
-        app.activity_list_filter_text_area
+        app.activity_list.filter_text_area
             .input(key_event_to_input(key.key_event));
         return;
     }
 
-    if app.activity_list_sort_dialog {
+    if app.activity_list.sort_dialog {
         sort_dialog::handle(app, key);
 
         return;
@@ -52,13 +52,13 @@ pub fn handle(app: &mut App, key: MappedKey) {
             app.unit_formatter = app.unit_formatter.toggle();
         }
         StravaEvent::ToggleSortOrder => {
-            app.activity_list_sort_order = match app.activity_list_sort_order {
+            app.filters.sort_order = match app.filters.sort_order {
                 SortOrder::Asc => SortOrder::Desc,
                 SortOrder::Desc => SortOrder::Asc,
             }
         }
-        StravaEvent::Down => table_state_next(&mut app.activity_list_table_state, activities.len()),
-        StravaEvent::Up => table_state_prev(&mut app.activity_list_table_state, activities.len()),
+        StravaEvent::Down => table_state_next(&mut app.activity_list.table_state, activities.len()),
+        StravaEvent::Up => table_state_prev(&mut app.activity_list.table_state, activities.len()),
         StravaEvent::Filter => toggle_filter(app),
         StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),
@@ -67,11 +67,11 @@ pub fn handle(app: &mut App, key: MappedKey) {
 }
 
 fn toggle_filter(app: &mut App) {
-    app.activity_list_filter_dialog = !app.activity_list_filter_dialog;
+    app.activity_list.filter_dialog = !app.activity_list.filter_dialog;
 }
 
 fn toggle_sort(app: &mut App) {
-    app.activity_list_sort_dialog = !app.activity_list_sort_dialog;
+    app.activity_list.sort_dialog = !app.activity_list.sort_dialog;
 }
 
 pub fn draw<B: Backend>(
@@ -81,19 +81,19 @@ pub fn draw<B: Backend>(
 ) -> Result<(), anyhow::Error> {
     let activities = &app.filtered_activities();
 
-    if app.activity_list_table_state.selected().is_none() && !activities.is_empty() {
-        app.activity_list_table_state.select(Some(0));
+    if app.activity_list.table_state.selected().is_none() && !activities.is_empty() {
+        app.activity_list.table_state.select(Some(0));
     }
 
     f.render_stateful_widget(
         activity_list_table(app, activities),
         area,
-        &mut app.activity_list_table_state,
+        &mut app.activity_list.table_state,
     );
 
-    if app.activity_list_filter_dialog {
+    if app.activity_list.filter_dialog {
         let rect = centered_rect_absolute(64, 3, f.size());
-        app.activity_list_filter_text_area.set_block(
+        app.activity_list.filter_text_area.set_block(
             Block::default()
                 .borders(Borders::ALL)
                 .title("Filter")
@@ -101,12 +101,12 @@ pub fn draw<B: Backend>(
         );
 
         f.render_widget(Clear, rect);
-        f.render_widget(app.activity_list_filter_text_area.widget(), rect);
+        f.render_widget(app.activity_list.filter_text_area.widget(), rect);
 
         return Ok(());
     }
 
-    if app.activity_list_sort_dialog {
+    if app.activity_list.sort_dialog {
         sort_dialog::draw(app, f, f.size());
 
         return Ok(());

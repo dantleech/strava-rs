@@ -27,11 +27,11 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Quit => app.active_page = ActivePage::ActivityList,
         StravaEvent::Enter => app.active_page = ActivePage::ActivityList,
         StravaEvent::Down => {
-            table_state_next(&mut app.activity_list_table_state, activities.len());
+            table_state_next(&mut app.activity_list.table_state, activities.len());
             table_status_select_current(app);
         }
         StravaEvent::Up => {
-            table_state_prev(&mut app.activity_list_table_state, activities.len());
+            table_state_prev(&mut app.activity_list.table_state, activities.len());
             table_status_select_current(app);
         }
         _ => (),

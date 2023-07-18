@@ -50,7 +50,7 @@ impl SortBy {
 pub fn handle(app: &mut App, key: MappedKey) {
     let matched = match key.strava_event {
         StravaEvent::Enter => {
-            app.activity_list_sort_dialog = false;
+            app.activity_list.sort_dialog = false;
             true
         }
         _ => false,
@@ -61,8 +61,8 @@ pub fn handle(app: &mut App, key: MappedKey) {
     }
 
     if let Some(sort) = SortBy::from_key(key.key_event.code) {
-        app.activity_list_sort_by = sort;
-        app.activity_list_sort_dialog = false;
+        app.filters.sort_by = sort;
+        app.activity_list.sort_dialog = false;
     }
 }
 

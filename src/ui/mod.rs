@@ -76,13 +76,13 @@ fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
 
 fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
     let mut status: Vec<String> = Vec::new();
-    if app.activity_list_filter != *"" {
-        status.push(format!("filtered by \"{}\"", app.activity_list_filter))
+    if app.filters.filter != *"" {
+        status.push(format!("filtered by \"{}\"", app.filters.filter))
     }
     status.push(format!("{} activities", app.filtered_activities().len()));
     status.push(format!(
         "sorted by {} {}",
-        app.activity_list_sort_by, app.activity_list_sort_order
+        app.filters.sort_by, app.filters.sort_order
     ));
     status.push(format!("{} units", app.unit_formatter.system.to_string()));
 
