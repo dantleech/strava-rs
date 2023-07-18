@@ -62,7 +62,7 @@ async fn main() -> Result<(), anyhow::Error> {
     log::info!("Storage path: {}", storage_path.display());
     log::info!("");
 
-    if args.no_sync != true {
+    if !args.no_sync {
         log::info!("Synchronising...");
         let client = Client::builder().build(connector);
         let mut authenticator = Authenticator::new(

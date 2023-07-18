@@ -28,25 +28,25 @@ pub fn draw<B: Backend>(
     let times: Vec<i64> = activities
         .iter()
         .map(|a| {
-            return a.start_date.unwrap().timestamp();
+            a.start_date.unwrap().timestamp()
         })
         .collect();
     let paces: Vec<i64> = activities
         .iter()
         .map(|a| {
-            return a.meters_per_hour() as i64;
+            a.meters_per_hour() as i64
         })
         .collect();
     let tmax = times.iter().max();
     let tmin = times.iter().min();
     let pmax = paces.iter().max();
     let pmin = paces.iter().min();
-    if None == tmax || None == tmin {
+    if tmax.is_none() || tmin.is_none() {
         return Ok(());
     }
     let pdiff = pmax.unwrap() - pmin.unwrap();
     let tdiff = tmax.unwrap() - tmin.unwrap();
-    if None == pmin || None == pmax {
+    if pmin.is_none() || pmax.is_none() {
         return Ok(());
     }
     let pmin = pmin.unwrap();
@@ -55,7 +55,7 @@ pub fn draw<B: Backend>(
         .iter()
         .map(|a| {
             let ts = a.start_date.unwrap().timestamp();
-            return (ts as f64, a.meters_per_hour() as f64);
+            (ts as f64, a.meters_per_hour() as f64)
         })
         .collect();
     let mut current = vec![];
@@ -64,8 +64,8 @@ pub fn draw<B: Backend>(
         if let Some(a) = activities.get(selected) {
             match app.activities.iter().find(|unsorted|unsorted.id == a.id) {
                 Some(a) => {
-                    current.push((a.start_date.unwrap().timestamp() as f64, pmin.clone() as f64));
-                    current.push((a.start_date.unwrap().timestamp() as f64, pmax.clone() as f64));
+                    current.push((a.start_date.unwrap().timestamp() as f64, *pmin as f64));
+                    current.push((a.start_date.unwrap().timestamp() as f64, *pmax as f64));
                 },
                 None => (),
             }

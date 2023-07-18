@@ -93,7 +93,7 @@ fn sort_option_paragraph<'a>(_app: &'a mut App) -> Paragraph<'a> {
             Style::default().fg(strava),
         ));
         sorts.push(Span::styled(
-            format!("{} ", sort_by.to_label().to_string()),
+            format!("{} ", sort_by.to_label()),
             Style::default().fg(Color::White),
         ));
     }

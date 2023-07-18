@@ -50,7 +50,7 @@ impl Authenticator {
 
         self.token_store.put(&access_token)?;
 
-        return Ok(access_token.access_token);
+        Ok(access_token.access_token)
     }
 }
 
@@ -103,7 +103,7 @@ mod test {
             .as_secs()
             + 10;
 
-        assert_eq!(true, resp.is_valid());
+        assert!(resp.is_valid());
 
         resp.expires_at = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -111,7 +111,7 @@ mod test {
             .as_secs()
             - 10;
 
-        assert_eq!(false, resp.is_valid());
+        assert!(!resp.is_valid());
     }
 
     fn auth_response() -> AuthResponse {

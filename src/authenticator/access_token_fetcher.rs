@@ -47,6 +47,6 @@ impl AccessTokenFetcher {
         let bytes = hyper::body::to_bytes(res.into_body()).await?;
         let deserialized: AuthResponse = serde_json::from_slice(&bytes)?;
 
-        return Ok(deserialized);
+        Ok(deserialized)
     }
 }

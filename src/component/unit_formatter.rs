@@ -76,12 +76,12 @@ impl UnitFormatter {
         }
     }
     pub(crate) fn toggle(&self) -> UnitFormatter {
-        return UnitFormatter {
+        UnitFormatter {
             system: match self.system {
                 UnitSystem::Metric => UnitSystem::Imperial,
                 UnitSystem::Imperial => UnitSystem::Metric,
             },
-        };
+        }
     }
 
     pub(crate) fn speed(&self, distance: f32, elapsed_time: i32) -> String {

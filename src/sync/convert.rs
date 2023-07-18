@@ -12,7 +12,7 @@ pub struct AcitivityConverter<'a> {
 }
 
 impl AcitivityConverter<'_> {
-    pub fn new<'a>(connection: &'a mut SqliteConnection) -> AcitivityConverter<'a> {
+    pub fn new(connection: &mut SqliteConnection) -> AcitivityConverter<'_> {
         AcitivityConverter { connection }
     }
     pub async fn convert(&mut self) -> Result<(), anyhow::Error> {
@@ -25,7 +25,7 @@ impl AcitivityConverter<'_> {
 
         for raw_activity in raw_activities {
             let data: client::Activity =
-                serde_json::from_str(&raw_activity.data.as_str()).expect("Could not decode JSON");
+                serde_json::from_str(raw_activity.data.as_str()).expect("Could not decode JSON");
             let activity = Activity {
                 id: data.id,
                 title: data.name,
@@ -41,10 +41,7 @@ impl AcitivityConverter<'_> {
                 sport_type: data.sport_type.clone(),
                 average_heartrate: data.average_heartrate,
                 max_heartrate: data.max_heartrate,
-                start_date: match data.start_date {
-                    Some(date) => Some(date.naive_utc()),
-                    None => None,
-                },
+                start_date: data.start_date.map(|date| date.naive_utc()),
                 summary_polyline: Some(data.map.summary_polyline),
                 average_cadence: data.average_cadence,
                 kudos: data.kudos_count,

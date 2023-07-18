@@ -64,7 +64,7 @@ pub struct ActivityStore<'a> {
 }
 
 impl ActivityStore<'_> {
-    pub(crate) fn new<'a>(connection: &'a mut SqliteConnection) -> ActivityStore<'a> {
+    pub(crate) fn new(connection: &mut SqliteConnection) -> ActivityStore<'_> {
         ActivityStore { connection }
     }
 
@@ -90,15 +90,15 @@ impl ActivityStore<'_> {
 
 impl Activity {
     pub fn time_for_distance(&self, meters: f32) -> i32 {
-        ((self.moving_time as f32 / self.distance) as f32 * meters) as i32
+        ((self.moving_time as f32 / self.distance) * meters) as i32
     }
 
     pub fn kmph(&self) -> f32 {
-        return (self.distance / 1000.0) / (self.moving_time as f32 / 3600.0);
+        (self.distance / 1000.0) / (self.moving_time as f32 / 3600.0)
     }
 
     pub fn meters_per_hour(&self) -> f32 {
-        return self.distance / (self.moving_time as f32 / 3600.0);
+        self.distance / (self.moving_time as f32 / 3600.0)
     }
 
     pub(crate) fn activity_type_icon(&self) -> String {

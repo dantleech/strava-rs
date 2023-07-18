@@ -56,7 +56,7 @@ pub fn draw<B: Backend>(
         let row = rows[count];
         let cols = master_cols.split(row);
 
-        let percent = ((((split.seconds_per_meter() - min) as f32 / (max - min) as f32) * 100.0) * 0.75) as u16;
+        let percent = ((((split.seconds_per_meter() - min) / (max - min)) * 100.0) * 0.75) as u16;
         f.render_widget(Paragraph::new(format!("{}", count)), cols[0]);
         f.render_widget(
             Gauge::default()

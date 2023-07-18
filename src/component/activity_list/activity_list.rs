@@ -20,7 +20,7 @@ use crate::{
 use super::sort_dialog;
 
 pub fn handle(app: &mut App, key: MappedKey) {
-    if app.activity_list_filter_dialog == true {
+    if app.activity_list_filter_dialog {
         let matched = match key.strava_event {
             StravaEvent::Enter => {
                 app.activity_list_filter =
@@ -40,7 +40,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
         return;
     }
 
-    if app.activity_list_sort_dialog == true {
+    if app.activity_list_sort_dialog {
         sort_dialog::handle(app, key);
 
         return;
@@ -81,7 +81,7 @@ pub fn draw<B: Backend>(
 ) -> Result<(), anyhow::Error> {
     let activities = &app.filtered_activities();
 
-    if app.activity_list_table_state.selected() == None && activities.len() > 0 {
+    if app.activity_list_table_state.selected().is_none() && !activities.is_empty() {
         app.activity_list_table_state.select(Some(0));
     }
 
@@ -91,7 +91,7 @@ pub fn draw<B: Backend>(
         &mut app.activity_list_table_state,
     );
 
-    if app.activity_list_filter_dialog == true {
+    if app.activity_list_filter_dialog {
         let rect = centered_rect_absolute(64, 3, f.size());
         app.activity_list_filter_text_area.set_block(
             Block::default()
@@ -106,7 +106,7 @@ pub fn draw<B: Backend>(
         return Ok(());
     }
 
-    if app.activity_list_sort_dialog == true {
+    if app.activity_list_sort_dialog {
         sort_dialog::draw(app, f, f.size());
 
         return Ok(());

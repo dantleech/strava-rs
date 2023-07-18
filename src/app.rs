@@ -97,9 +97,9 @@ impl App<'_> {
             activity_type: None,
         }
     }
-    pub fn run<'a>(
+    pub fn run(
         &mut self,
-        terminal: &'a mut Terminal<CrosstermBackend<io::Stdout>>,
+        terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     ) -> Result<(), anyhow::Error> {
         loop {
             if self.quit {
@@ -139,20 +139,18 @@ impl App<'_> {
     }
 
     pub fn filtered_activities(&self) -> Vec<Activity> {
-        let mut activities = self.unsorted_filtered_activities().clone();
+        let mut activities = self.unsorted_filtered_activities();
         activities.sort_by(|a, b| {
             let ordering = match self.activity_list_sort_by {
                 SortBy::Date => a.id.cmp(&b.id),
                 SortBy::Distance => a
                     .distance
                     .partial_cmp(&b.distance)
-                    .or(Some(Ordering::Less))
-                    .unwrap(),
+                    .unwrap_or(Ordering::Less),
                 SortBy::Pace => a
                     .kmph()
                     .partial_cmp(&b.kmph())
-                    .or(Some(Ordering::Less))
-                    .unwrap(),
+                    .unwrap_or(Ordering::Less),
                 SortBy::HeartRate => a
                     .average_heartrate
                     .or(Some(0.0))

@@ -25,18 +25,15 @@ pub fn draw<B: Backend>(
         ("Kudos".to_string(), format!("{}", activity.kudos)),
         (
             "Country".to_string(),
-            format!(
-                "{}",
-                match activity.location_country {
-                    Some(c) => c.to_string(),
+            (match activity.location_country {
+                    Some(c) => c,
                     None => "".to_string(),
-                }
-            ),
+                }),
         ),
     ];
 
     let mut text = String::new();
-    if activity.description != "" {
+    if !activity.description.is_empty() {
         text.push_str(format!("{}\n\n", &activity.description).as_str());
     }
     for (name, value) in stats {

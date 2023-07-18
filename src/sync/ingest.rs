@@ -35,7 +35,7 @@ impl StravaSync<'_> {
                 .athlete_activities(page, PAGE_SIZE, last_epoch)
                 .await?;
 
-            if s_activities.len() == 0 {
+            if s_activities.is_empty() {
                 break;
             }
 
@@ -51,12 +51,10 @@ impl StravaSync<'_> {
                     id: s_activity["id"]
                         .as_i64()
                         .expect("could not parse 64 bit ID"),
-                    created_at: NaiveDateTime::from(
-                        match NaiveDateTime::parse_from_str(s_activity["start_date"].as_str().unwrap(), "%Y-%m-%dT%H:%M:%SZ") {
+                    created_at: (match NaiveDateTime::parse_from_str(s_activity["start_date"].as_str().unwrap(), "%Y-%m-%dT%H:%M:%SZ") {
                             Ok(t) => t,
                             Err(_err) => NaiveDateTime::from_timestamp_millis(0).unwrap(),
-                        }
-                    ),
+                        }),
                     data: s_full_activity.to_string(),
                     synced: false,
                 };

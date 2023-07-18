@@ -20,13 +20,13 @@ pub fn draw<B: Backend>(
     f: &mut Frame<B>,
     area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
-    if let None = app.activity {
-        ()
+    if app.activity.is_none() {
+        
     }
     let activity = app.activity.clone().unwrap();
 
-    if None == activity.summary_polyline {
-        ()
+    if activity.summary_polyline.is_none() {
+        
     }
 
     if let Ok(decoded) = activity.polyline() {
@@ -46,7 +46,7 @@ pub fn draw<B: Backend>(
                 let mut prev: Option<(f64, f64)> = None;
                 let mut offset = 0;
                 for coord in &coords {
-                    if None == prev {
+                    if prev.is_none() {
                         prev = Some(*coord);
                         continue;
                     }
@@ -106,33 +106,25 @@ pub fn draw<B: Backend>(
 fn map_coords_to_area(decoded: LineString, width: u16, height: u16) -> (Vec<(f64, f64)>, f64, f64) {
     let x_max = decoded
         .points()
-        .into_iter()
         .map(|p| p.x())
         .reduce(f64::max)
-        .or_else(|| Some(0 as f64))
-        .unwrap();
+        .unwrap_or(0 as f64);
     let x_min = decoded
         .points()
-        .into_iter()
         .map(|p| p.x())
         .reduce(f64::min)
-        .or_else(|| Some(0 as f64))
-        .unwrap();
+        .unwrap_or(0 as f64);
     let x_width = x_max - x_min;
     let y_max = decoded
         .points()
-        .into_iter()
         .map(|p| p.y())
         .reduce(f64::max)
-        .or_else(|| Some(0 as f64))
-        .unwrap();
+        .unwrap_or(0 as f64);
     let y_min = decoded
         .points()
-        .into_iter()
         .map(|p| p.y())
         .reduce(f64::min)
-        .or_else(|| Some(0 as f64))
-        .unwrap();
+        .unwrap_or(0 as f64);
     let y_width = y_max - y_min;
 
     let boundary_size = if width > height { height } else { width } as f64;
