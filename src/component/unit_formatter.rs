@@ -84,6 +84,7 @@ impl UnitFormatter {
         }
     }
 
+    #[allow(unused)]
     pub(crate) fn speed(&self, distance: f32, elapsed_time: i32) -> String {
         let kmph = (distance / 1000.0) / (elapsed_time as f32 / 3600.0);
         match self.system {

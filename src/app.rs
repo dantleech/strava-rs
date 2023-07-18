@@ -1,4 +1,3 @@
-use diesel::prelude::*;
 use std::{cmp::Ordering, fmt::Display, io, time::Duration};
 
 use strum::EnumIter;
@@ -11,20 +10,13 @@ use tui::{
 };
 use tui_textarea::TextArea;
 
-use crate::store::activity::ActivityStore;
+use crate::{store::activity::ActivityStore, component::activity_list::ActivityListState};
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
     store::activity::{Activity, ActivitySplit},
     ui,
 };
-
-pub struct ActivityListState<'a> {
-    pub table_state: TableState,
-    pub filter_text_area: TextArea<'a>,
-    pub filter_dialog: bool,
-    pub sort_dialog: bool,
-}
 
 pub struct ActivityFilters {
     pub sort_by: SortBy,

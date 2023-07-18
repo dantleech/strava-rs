@@ -107,7 +107,7 @@ pub fn draw<B: Backend>(
     }
 
     if app.activity_list.sort_dialog {
-        sort_dialog::draw(app, f, f.size());
+        sort_dialog::draw(app, f, f.size())?;
 
         return Ok(());
     }

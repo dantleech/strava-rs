@@ -20,6 +20,7 @@ impl AuthCodeFetcher {
         }
     }
 
+    #[allow(deprecated)]
     pub(crate) async fn auth_code(&mut self) -> Result<String, anyhow::Error> {
         let (tx, mut rx) = channel::<String>(1);
 

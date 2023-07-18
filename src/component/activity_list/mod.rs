@@ -5,8 +5,9 @@ pub mod sort_dialog;
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout},
-    Frame,
+    Frame, widgets::TableState,
 };
+use tui_textarea::TextArea;
 
 use crate::{app::App, event::keymap::MappedKey};
 
@@ -24,3 +25,11 @@ pub fn draw<B: Backend>(
     activity_chart::draw(app, f, rows[1])?;
     Ok(())
 }
+
+pub struct ActivityListState<'a> {
+    pub table_state: TableState,
+    pub filter_text_area: TextArea<'a>,
+    pub filter_dialog: bool,
+    pub sort_dialog: bool,
+}
+
