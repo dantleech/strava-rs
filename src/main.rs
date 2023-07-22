@@ -23,7 +23,7 @@ use xdg::BaseDirectories;
 
 use crate::{
     store::activity::ActivityStore,
-    sync::{convert::AcitivityConverter, ingest::StravaSync},
+    sync::{convert::AcitivityConverter, ingest::IngestActivitiesTask},
 };
 
 #[derive(Parser, Debug)]
@@ -76,7 +76,7 @@ async fn main() -> Result<(), anyhow::Error> {
             access_token: authenticator.access_token().await?,
         };
         let client = new_strava_client(api_config);
-        StravaSync::new(&client, &mut db).sync().await?;
+        IngestActivitiesTask::new(&client, &mut db).execute().await?;
         log::info!("Converting...");
         AcitivityConverter::new(&mut db).convert().await?;
     }

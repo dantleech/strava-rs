@@ -54,7 +54,7 @@ impl ActivitySplit {
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct RawActivity {
     pub id: i64,
-    pub data: String,
+    pub listed: String,
     pub synced: bool,
     pub created_at: NaiveDateTime,
 }
