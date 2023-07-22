@@ -3,7 +3,7 @@ use std::{cmp::Ordering, fmt::Display, io, time::Duration};
 use strum::EnumIter;
 
 use crossterm::event::{self, poll, Event};
-use tokio::{sync::mpsc::Receiver, task};
+use tokio::{sync::mpsc::Receiver};
 use tui::{
     backend::{Backend, CrosstermBackend},
     widgets::TableState,

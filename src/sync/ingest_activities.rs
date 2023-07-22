@@ -1,6 +1,8 @@
+
 use chrono::{NaiveDateTime};
 use diesel::prelude::*;
 use diesel::{RunQueryDsl, SqliteConnection};
+use tokio::sync::mpsc::Sender;
 
 use crate::{
     client::StravaClient,
@@ -16,6 +18,7 @@ impl IngestActivitiesTask<'_> {
     pub fn new<'a>(
         client: &'a StravaClient,
         connection: &'a mut SqliteConnection,
+        _sender: Sender<String>,
     ) -> IngestActivitiesTask<'a> {
         IngestActivitiesTask { client, connection }
     }
