@@ -120,17 +120,15 @@ async fn main() -> Result<(), anyhow::Error> {
     terminal.clear()?;
 
     // IO thread
-    {
-        thread::spawn(move || {
-            loop {
-                if poll(Duration::from_millis(10)).unwrap() {
-                    if let Event::Key(key) = crossevent::read().unwrap() {
-                        event_sender.blocking_send(key).unwrap();
-                    }
+    thread::spawn(move || {
+        loop {
+            if poll(Duration::from_millis(10)).unwrap() {
+                if let Event::Key(key) = crossevent::read().unwrap() {
+                    event_sender.blocking_send(key).unwrap();
                 }
             }
-        });
-    }
+        }
+    });
 
     let mut app_conn = pool.clone().get().unwrap();
     let mut activity_store = ActivityStore::new(&mut app_conn);
