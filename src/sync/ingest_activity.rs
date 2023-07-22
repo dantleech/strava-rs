@@ -1,14 +1,10 @@
 use std::sync::Arc;
 
-
 use diesel::prelude::*;
 use diesel::{RunQueryDsl, SqliteConnection};
 use tokio::sync::mpsc::Sender;
 
-use crate::{
-    client::StravaClient,
-    store::{activity::RawActivity},
-};
+use crate::{client::StravaClient, store::activity::RawActivity};
 
 pub struct IngestActivityTask<'a> {
     client: &'a StravaClient,
@@ -36,12 +32,24 @@ impl IngestActivityTask<'_> {
             .load(self.connection)?;
 
         for r_activity in activities {
-            self.logger.send(format!("Enhancing activity {}", r_activity.id));
-            let activity = self.client.athlete_activity(format!("{}", r_activity.id)).await?;
-
-            diesel::update(&r_activity)
-                .set(raw_activity::activity.eq(Some(activity.to_string())))
-                .execute(self.connection).unwrap();
+            self.logger
+                .send(format!("Enhancing activity {}", r_activity.id)).await;
+            match self
+                .client
+                .athlete_activity(format!("{}", r_activity.id))
+                .await
+            {
+                Ok(a) => {
+                    diesel::update(&r_activity)
+                        .set(raw_activity::activity.eq(Some(a.to_string())))
+                        .execute(self.connection)
+                        .unwrap();
+                }
+                Err(err) => {
+                    self.logger
+                        .send(format!("ERROR activity {}: {}", r_activity.id, err)).await;
+                }
+            }
         }
         Ok(())
     }
