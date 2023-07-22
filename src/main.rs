@@ -8,17 +8,28 @@ pub mod sync;
 pub mod ui;
 pub mod util;
 
-use std::{io};
+use std::{io, panic, process, sync::Arc, thread, time::Duration};
 
 use app::App;
 use authenticator::Authenticator;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use diesel::{Connection, SqliteConnection};
+use crossterm::event::{self as crossevent};
+use crossterm::{
+    event::{poll, Event},
+    terminal::{disable_raw_mode, enable_raw_mode},
+};
+use diesel::{
+    r2d2::{ConnectionManager, Pool},
+    SqliteConnection,
+};
+use futures_util::future::UnwrapOrElse;
 use hyper::Client;
 use hyper_tls::HttpsConnector;
-use tokio::{sync::{mpsc}, task};
+use tokio::{
+    sync::mpsc::{self, Sender},
+    task,
+};
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
@@ -53,11 +64,12 @@ async fn main() -> Result<(), anyhow::Error> {
         .place_state_file("access_token.json")
         .expect("Could not create state directory");
     let storage_path = dirs.get_data_home();
-    let mut sync_conn = SqliteConnection::establish("sqlite://strava.sqlite")
-            .expect("Could not connect to Sqlite database");
-    let mut app_conn =  SqliteConnection::establish("sqlite://strava.sqlite")
-            .expect("Could not connect to Sqlite database");
-    let (sender, consumer) = mpsc::channel(32);
+    let pool = Pool::builder().build(ConnectionManager::<SqliteConnection>::new(
+        "sqlite://strava.sqlite",
+    ))?;
+    let (logger, log_receiver) = mpsc::channel(32);
+    let (event_sender, event_receiver) = mpsc::channel(32);
+    let logger = Arc::new(logger);
 
     log::info!("Strava TUI");
     log::info!("==========");
@@ -67,7 +79,6 @@ async fn main() -> Result<(), anyhow::Error> {
     log::info!("");
 
     if !args.no_sync {
-        log::info!("Synchronising...");
         let client = Client::builder().build(connector);
         let mut authenticator = Authenticator::new(
             client,
@@ -80,13 +91,27 @@ async fn main() -> Result<(), anyhow::Error> {
             access_token: authenticator.access_token().await?,
         };
         {
-            let _result = task::spawn(async move {
-                let client = new_strava_client(api_config);
-                IngestActivitiesTask::new(&client, &mut sync_conn, sender.clone()).execute().await;
-                AcitivityConverter::new(&mut sync_conn, sender.clone()).convert().await;
+            let mut sync_conn = pool.clone().get().unwrap();
+            task::spawn(async move {
+                let client = new_strava_client(api_config, logger.clone());
+                IngestActivitiesTask::new(&client, &mut sync_conn, logger.clone())
+                    .execute()
+                    .await
+                    .unwrap();
+                AcitivityConverter::new(&mut sync_conn, logger.clone())
+                    .convert()
+                    .await
+                    .unwrap();
+                Ok::<(), anyhow::Error>(())
             });
         }
     }
+
+    let orig_hook = panic::take_hook();
+    panic::set_hook(Box::new(move |panic_info| {
+        orig_hook(panic_info);
+        process::exit(1);
+    }));
 
     let stdout = io::stdout();
     let backend = CrosstermBackend::new(stdout);
@@ -94,8 +119,22 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
+    // IO thread
+    {
+        thread::spawn(move || {
+            loop {
+                if poll(Duration::from_millis(10)).unwrap() {
+                    if let Event::Key(key) = crossevent::read().unwrap() {
+                        event_sender.blocking_send(key).unwrap();
+                    }
+                }
+            }
+        });
+    }
+
+    let mut app_conn = pool.clone().get().unwrap();
     let mut activity_store = ActivityStore::new(&mut app_conn);
-    let mut app = App::new(&mut activity_store, consumer);
+    let mut app = App::new(&mut activity_store, log_receiver, event_receiver);
     app.activity_type = args.activity_type;
     app.run(&mut terminal).await?;
 

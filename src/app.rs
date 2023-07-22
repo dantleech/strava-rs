@@ -2,7 +2,7 @@ use std::{cmp::Ordering, fmt::Display, io, time::Duration};
 
 use strum::EnumIter;
 
-use crossterm::event::{self, poll, Event};
+use crossterm::event::{self, poll, Event, KeyEvent};
 use tokio::{sync::mpsc::Receiver};
 use tui::{
     backend::{Backend, CrosstermBackend},
@@ -36,10 +36,11 @@ pub struct App<'a> {
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
 
-    pub message_receiver: Receiver<String>,
-    pub message: Option<String>,
+    pub log_receiever: Receiver<String>,
+    pub log_message: Option<String>,
 
     store: &'a mut ActivityStore<'a>,
+    event_receiver: Receiver<KeyEvent>,
 }
 
 pub enum ActivePage {
@@ -81,7 +82,7 @@ impl Display for SortOrder {
 }
 
 impl App<'_> {
-    pub fn new<'a>(store: &'a mut ActivityStore<'a>, messages: Receiver<String>) -> App<'a> {
+    pub fn new<'a>(store: &'a mut ActivityStore<'a>, messages: Receiver<String>, event_receiver: Receiver<KeyEvent>) -> App<'a> {
         App {
             quit: false,
             active_page: ActivePage::ActivityList,
@@ -102,8 +103,9 @@ impl App<'_> {
             store,
 
             activity_type: None,
-            message_receiver: messages,
-            message: None,
+            log_receiever: messages,
+            log_message: None,
+            event_receiver
         }
     }
     pub async fn run(
@@ -117,14 +119,13 @@ impl App<'_> {
             terminal.draw(|f| {
                 self.draw(f).expect("Could not draw frame");
             })?;
-            if (poll(Duration::from_millis(1000)))? {
-                if let Event::Key(key) = event::read()? {
-                    let key = map_key(key);
-                    self.handle(key)
-                }
+
+            if let Some(key) = self.event_receiver.recv().await {
+                let key = map_key(key);
+                self.handle(key)
             }
-            match self.message_receiver.try_recv() {
-                Ok(m) => self.message = Some(m),
+            match self.log_receiever.try_recv() {
+                Ok(m) => self.log_message = Some(m),
                 Err(_) => (),
             }
         }

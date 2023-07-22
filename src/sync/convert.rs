@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use diesel::prelude::*;
 use diesel::SqliteConnection;
 use tokio::sync::mpsc::Sender;
@@ -13,7 +15,7 @@ pub struct AcitivityConverter<'a> {
 }
 
 impl AcitivityConverter<'_> {
-    pub fn new(connection: &mut SqliteConnection, _sender: Sender<String>) -> AcitivityConverter<'_> {
+    pub fn new(connection: &mut SqliteConnection, _sender: Arc<Sender<String>>) -> AcitivityConverter<'_> {
         AcitivityConverter { connection }
     }
     pub async fn convert(&mut self) -> Result<(), anyhow::Error> {

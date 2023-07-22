@@ -1,4 +1,6 @@
 
+use std::sync::Arc;
+
 use chrono::{NaiveDateTime};
 use diesel::prelude::*;
 use diesel::{RunQueryDsl, SqliteConnection};
@@ -12,20 +14,21 @@ use crate::{
 pub struct IngestActivitiesTask<'a> {
     client: &'a StravaClient,
     connection: &'a mut SqliteConnection,
+    logger: Arc<Sender<String>>,
 }
 
 impl IngestActivitiesTask<'_> {
     pub fn new<'a>(
         client: &'a StravaClient,
         connection: &'a mut SqliteConnection,
-        _sender: Sender<String>,
+        logger: Arc<Sender<String>>,
     ) -> IngestActivitiesTask<'a> {
-        IngestActivitiesTask { client, connection }
+        IngestActivitiesTask { client, connection, logger }
     }
     pub async fn execute(&mut self) -> Result<(), anyhow::Error> {
         use crate::store::schema::raw_activity::dsl::*;
         let mut page: u32 = 0;
-        const PAGE_SIZE: u32 = 10;
+        const PAGE_SIZE: u32 = 100;
         let last_epoch = raw_activity
             .select(diesel::dsl::max(created_at))
             .limit(1)
@@ -39,11 +42,13 @@ impl IngestActivitiesTask<'_> {
                 .await?;
 
             if s_activities.is_empty() {
+                self.logger.send("No new activities".to_string()).await?;
                 break;
             }
 
             for s_activity in s_activities {
 
+                self.logger.send(format!("[{}] {}", s_activity["id"], s_activity["name"])).await?;
                 let raw = RawActivity {
                     id: s_activity["id"]
                         .as_i64()
@@ -53,9 +58,9 @@ impl IngestActivitiesTask<'_> {
                             Err(_err) => NaiveDateTime::from_timestamp_millis(0).unwrap(),
                         }),
                     listed: s_activity.to_string(),
+                    activity: None,
                     synced: false,
                 };
-                log::info!("[{}] {}", s_activity["id"], s_activity["name"]);
                 diesel::insert_into(schema::raw_activity::table)
                     .values(&raw)
                     .on_conflict(schema::raw_activity::id)

@@ -55,6 +55,7 @@ impl ActivitySplit {
 pub struct RawActivity {
     pub id: i64,
     pub listed: String,
+    pub activity: Option<String>,
     pub synced: bool,
     pub created_at: NaiveDateTime,
 }
