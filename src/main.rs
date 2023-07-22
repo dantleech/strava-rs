@@ -8,22 +8,23 @@ pub mod sync;
 pub mod ui;
 pub mod util;
 
-use std::io;
+use std::{io, rc::Rc, sync::Arc, thread};
 
 use app::App;
 use authenticator::Authenticator;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use diesel::{Connection, SqliteConnection};
+use diesel::{Connection, IntoSql, SqliteConnection};
 use hyper::Client;
 use hyper_tls::HttpsConnector;
+use tokio::{sync::{Mutex, mpsc}, task};
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
 use crate::{
     store::activity::ActivityStore,
-    sync::{convert::AcitivityConverter, ingest::IngestActivitiesTask},
+    sync::{convert::AcitivityConverter, ingest_activities::IngestActivitiesTask},
 };
 
 #[derive(Parser, Debug)]
@@ -52,8 +53,12 @@ async fn main() -> Result<(), anyhow::Error> {
         .place_state_file("access_token.json")
         .expect("Could not create state directory");
     let storage_path = dirs.get_data_home();
-    let mut db = SqliteConnection::establish("sqlite://strava.sqlite")
-        .expect("Could not connect to Sqlite database");
+    let db = Arc::new(Mutex::new(
+        SqliteConnection::establish("sqlite://strava.sqlite")
+            .expect("Could not connect to Sqlite database"),
+    ));
+    let conn = db.clone();
+    let (sender, mut consumer) = mpsc::channel(32);
 
     log::info!("Strava TUI");
     log::info!("==========");
@@ -75,12 +80,18 @@ async fn main() -> Result<(), anyhow::Error> {
             base_url: "https://www.strava.com/api".to_string(),
             access_token: authenticator.access_token().await?,
         };
-        let client = new_strava_client(api_config);
-        IngestActivitiesTask::new(&client, &mut db).execute().await?;
-        log::info!("Converting...");
-        AcitivityConverter::new(&mut db).convert().await?;
+        {
+            let db = db.clone();
+            let result = task::spawn(async move {
+                let client = new_strava_client(api_config);
+                let mut dbc = db.lock().await;
+                sender.send("Ingesting activities".to_string()).await;
+                IngestActivitiesTask::new(&client, &mut dbc).execute().await;
+                sender.send("Converting...".to_string()).await;
+                AcitivityConverter::new(&mut dbc).convert().await;
+            });
+        }
     }
-
 
     let stdout = io::stdout();
     let backend = CrosstermBackend::new(stdout);
@@ -88,10 +99,11 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
-    let mut activity_store = ActivityStore::new(&mut db);
-    let mut app = App::new(&mut activity_store);
+    let mut conn = conn.lock().await;
+    let mut activity_store = ActivityStore::new(&mut conn);
+    let mut app = App::new(&mut activity_store, consumer);
     app.activity_type = args.activity_type;
-    app.run(&mut terminal)?;
+    app.run(&mut terminal).await?;
 
     disable_raw_mode()?;
 

@@ -3,6 +3,7 @@ use std::{cmp::Ordering, fmt::Display, io, time::Duration};
 use strum::EnumIter;
 
 use crossterm::event::{self, poll, Event};
+use tokio::{sync::mpsc::Receiver, task};
 use tui::{
     backend::{Backend, CrosstermBackend},
     widgets::TableState,
@@ -10,7 +11,7 @@ use tui::{
 };
 use tui_textarea::TextArea;
 
-use crate::{store::activity::ActivityStore, component::activity_list::ActivityListState};
+use crate::{component::activity_list::ActivityListState, store::activity::ActivityStore};
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
@@ -34,6 +35,9 @@ pub struct App<'a> {
     pub activity_type: Option<String>,
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
+
+    pub message_receiver: Receiver<String>,
+    pub message: Option<String>,
 
     store: &'a mut ActivityStore<'a>,
 }
@@ -77,12 +81,12 @@ impl Display for SortOrder {
 }
 
 impl App<'_> {
-    pub fn new<'a>(store: &'a mut ActivityStore<'a>) -> App<'a> {
+    pub fn new<'a>(store: &'a mut ActivityStore<'a>, messages: Receiver<String>) -> App<'a> {
         App {
             quit: false,
             active_page: ActivePage::ActivityList,
             unit_formatter: UnitFormatter::imperial(),
-            activity_list: ActivityListState{
+            activity_list: ActivityListState {
                 table_state: TableState::default(),
                 filter_text_area: TextArea::default(),
                 filter_dialog: false,
@@ -98,9 +102,11 @@ impl App<'_> {
             store,
 
             activity_type: None,
+            message_receiver: messages,
+            message: None,
         }
     }
-    pub fn run(
+    pub async fn run(
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     ) -> Result<(), anyhow::Error> {
@@ -117,6 +123,10 @@ impl App<'_> {
                     self.handle(key)
                 }
             }
+            match self.message_receiver.try_recv() {
+                Ok(m) => self.message = Some(m),
+                Err(_) => (),
+            }
         }
         Ok(())
     }
@@ -128,7 +138,7 @@ impl App<'_> {
             .into_iter()
             .filter(|a| {
                 if !a.title.contains(self.filters.filter.as_str()) {
-                    return false
+                    return false;
                 }
                 if let Some(activity_type) = self.activity_type.clone() {
                     if a.activity_type != activity_type {
@@ -150,10 +160,7 @@ impl App<'_> {
                     .distance
                     .partial_cmp(&b.distance)
                     .unwrap_or(Ordering::Less),
-                SortBy::Pace => a
-                    .kmph()
-                    .partial_cmp(&b.kmph())
-                    .unwrap_or(Ordering::Less),
+                SortBy::Pace => a.kmph().partial_cmp(&b.kmph()).unwrap_or(Ordering::Less),
                 SortBy::HeartRate => a
                     .average_heartrate
                     .or(Some(0.0))
@@ -167,7 +174,6 @@ impl App<'_> {
             }
         });
         activities
-
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {

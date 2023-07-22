@@ -1,2 +1,3 @@
 pub mod convert;
-pub mod ingest;
+pub mod ingest_activities;
+pub mod pipeline;

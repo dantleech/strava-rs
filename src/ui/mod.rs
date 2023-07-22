@@ -43,7 +43,11 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
         }
     }
 
-    f.render_widget(status_bar(app), rows[2]);
+    if let Some(message) = app.message.clone() {
+        f.render_widget(Paragraph::new(message), rows[2]);
+    } else {
+        f.render_widget(status_bar(app), rows[2]);
+    }
 
     Ok(())
 }
