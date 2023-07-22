@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use diesel::prelude::*;
+use diesel::{prelude::*};
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
 
@@ -49,7 +49,7 @@ impl ActivitySplit {
     }
 }
 
-#[derive(Queryable, Selectable, Insertable, Serialize, Deserialize)]
+#[derive(Queryable, Selectable, Insertable, Serialize, Deserialize, Identifiable)]
 #[diesel(table_name = crate::store::schema::raw_activity)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct RawActivity {

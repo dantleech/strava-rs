@@ -1,9 +1,9 @@
-use std::{cmp::Ordering, fmt::Display, io, time::Duration};
+use std::{cmp::Ordering, fmt::Display, io};
 
 use strum::EnumIter;
 
-use crossterm::event::{self, poll, Event, KeyEvent};
-use tokio::{sync::mpsc::Receiver};
+use crossterm::event::{KeyEvent};
+use tokio::{sync::mpsc::Receiver, select};
 use tui::{
     backend::{Backend, CrosstermBackend},
     widgets::TableState,
@@ -120,13 +120,17 @@ impl App<'_> {
                 self.draw(f).expect("Could not draw frame");
             })?;
 
-            if let Some(key) = self.event_receiver.recv().await {
-                let key = map_key(key);
-                self.handle(key)
-            }
-            match self.log_receiever.try_recv() {
-                Ok(m) => self.log_message = Some(m),
-                Err(_) => (),
+            let e1 = self.event_receiver.recv();
+            let e2 = self.log_receiever.recv();
+
+            select! {
+                key = e1 => {
+                    let key = map_key(key.unwrap());
+                    self.handle(key);
+                },
+                message = e2 => {
+                    self.log_message = message
+                }
             }
         }
         Ok(())

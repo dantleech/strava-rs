@@ -23,16 +23,17 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
     SqliteConnection,
 };
-use futures_util::future::UnwrapOrElse;
+
 use hyper::Client;
 use hyper_tls::HttpsConnector;
 use tokio::{
-    sync::mpsc::{self, Sender},
+    sync::mpsc::{self},
     task,
 };
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
+use crate::sync::ingest_activity::IngestActivityTask;
 use crate::{
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest_activities::IngestActivitiesTask},
@@ -95,6 +96,10 @@ async fn main() -> Result<(), anyhow::Error> {
             task::spawn(async move {
                 let client = new_strava_client(api_config, logger.clone());
                 IngestActivitiesTask::new(&client, &mut sync_conn, logger.clone())
+                    .execute()
+                    .await
+                    .unwrap();
+                IngestActivityTask::new(&client, &mut sync_conn, logger.clone())
                     .execute()
                     .await
                     .unwrap();
