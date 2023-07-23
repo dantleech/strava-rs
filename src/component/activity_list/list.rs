@@ -11,7 +11,7 @@ use crate::{
     app::{App, SortOrder},
     event::{
         keymap::{MappedKey, StravaEvent},
-        util::{table_state_next, table_state_prev},
+        util::{table_state_next, table_state_prev}, input::InputEvent,
     },
     store::activity::Activity,
     ui::{centered_rect_absolute, color::ColorTheme, key_event_to_input}, component::table_status_select_current,
@@ -62,6 +62,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Filter => toggle_filter(app),
         StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),
+        StravaEvent::Refresh => app.send(InputEvent::Sync),
         _ => (),
     }
 }

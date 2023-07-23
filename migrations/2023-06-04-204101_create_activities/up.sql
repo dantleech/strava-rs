@@ -34,7 +34,8 @@ CREATE TABLE activity_split (
 );
 CREATE TABLE raw_activity (
     id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    data TEXT NOT NULL,
+    listed TEXT NOT NULL,
+    activity TEXT,
     synced BOOLEAN NOT NULL,
     created_at DATETIME NOT NULL
 );

@@ -1,28 +1,37 @@
+
+
+
 use chrono::{NaiveDateTime};
 use diesel::prelude::*;
 use diesel::{RunQueryDsl, SqliteConnection};
 
+
+
+use crate::event::logger::Logger;
 use crate::{
     client::StravaClient,
     store::{activity::RawActivity, schema},
 };
 
-pub struct StravaSync<'a> {
+
+pub struct IngestActivitiesTask<'a> {
     client: &'a StravaClient,
     connection: &'a mut SqliteConnection,
+    logger: Logger,
 }
 
-impl StravaSync<'_> {
+impl IngestActivitiesTask<'_> {
     pub fn new<'a>(
         client: &'a StravaClient,
         connection: &'a mut SqliteConnection,
-    ) -> StravaSync<'a> {
-        StravaSync { client, connection }
+        logger: Logger,
+    ) -> IngestActivitiesTask<'a> {
+        IngestActivitiesTask { client, connection, logger }
     }
-    pub async fn sync(&mut self) -> Result<(), anyhow::Error> {
+    pub async fn execute(&mut self) -> Result<(), anyhow::Error> {
         use crate::store::schema::raw_activity::dsl::*;
         let mut page: u32 = 0;
-        const PAGE_SIZE: u32 = 10;
+        const PAGE_SIZE: u32 = 100;
         let last_epoch = raw_activity
             .select(diesel::dsl::max(created_at))
             .limit(1)
@@ -30,23 +39,24 @@ impl StravaSync<'_> {
 
         loop {
             page += 1;
-            let s_activities = self
+            let s_activities = match self
                 .client
                 .athlete_activities(page, PAGE_SIZE, last_epoch)
-                .await?;
+                .await {
+                    Ok(a) => a,
+                    Err(e) => {
+                        self.logger.error(format!("Error: {}", e)).await;
+                        return Ok(())
+                    },
+                };
 
             if s_activities.is_empty() {
+                self.logger.info("Non new activities".to_string()).await;
                 break;
             }
 
             for s_activity in s_activities {
-
-                // strava has a rate limit of 100 requests per 15 minutes, by requesting each
-                // individual activity we can easily exceed that.
-                //
-                // todo: throttle this?
-                let s_full_activity = self.client.athlete_activity(s_activity["id"].to_string()).await?;
-
+                self.logger.info(format!("[{}] {}", s_activity["id"], s_activity["name"])).await;
                 let raw = RawActivity {
                     id: s_activity["id"]
                         .as_i64()
@@ -55,10 +65,10 @@ impl StravaSync<'_> {
                             Ok(t) => t,
                             Err(_err) => NaiveDateTime::from_timestamp_millis(0).unwrap(),
                         }),
-                    data: s_full_activity.to_string(),
+                    listed: s_activity.to_string(),
+                    activity: None,
                     synced: false,
                 };
-                log::info!("[{}] {}", s_activity["id"], s_activity["name"]);
                 diesel::insert_into(schema::raw_activity::table)
                     .values(&raw)
                     .on_conflict(schema::raw_activity::id)

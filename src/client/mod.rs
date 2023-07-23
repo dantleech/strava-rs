@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::fmt::Display;
+use std::{fmt::Display};
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use hyper::{client::HttpConnector, Body, Client, Method, Request, Response};
@@ -8,7 +8,9 @@ use hyper_tls::HttpsConnector;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 
-pub fn new_strava_client(config: StravaConfig) -> StravaClient {
+use crate::event::{logger::Logger};
+
+pub fn new_strava_client(config: StravaConfig, logger: Logger) -> StravaClient {
     let connector = HttpsConnector::new();
     let client = Client::builder().build(connector);
 
@@ -16,6 +18,7 @@ pub fn new_strava_client(config: StravaConfig) -> StravaClient {
         config,
         client,
         access_token: None,
+        logger,
     }
 }
 
@@ -29,6 +32,7 @@ pub struct StravaClient {
     client: Client<HttpsConnector<HttpConnector>>,
     config: StravaConfig,
     access_token: Option<String>,
+    logger: Logger,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -92,16 +96,18 @@ impl StravaClient {
             .body(Body::default())
             .unwrap();
 
-        log::info!("API request: {}", url);
+        self.logger.info(format!(">> {}", url)).await;
 
         let res: Response<Body> = self.client.request(req).await?;
 
         if res.status() != 200 {
-            return Err(anyhow::Error::msg(format!(
+            let message = format!(
                 "Got {} response for URL {}",
                 res.status(),
                 &url
-            )));
+            );
+            self.logger.error(message.clone()).await;
+            return Err(anyhow::Error::msg(message));
         }
 
         let bytes = hyper::body::to_bytes(res.into_body()).await?;

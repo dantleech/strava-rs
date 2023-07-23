@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 
 use hyper::{client::HttpConnector, Client};
 
+use crate::event::{logger::Logger};
+
 use self::{
     access_token_fetcher::AccessTokenFetcher, auth_code_fetcher::AuthCodeFetcher,
     token_store::TokenStore,
@@ -17,6 +19,7 @@ pub struct Authenticator {
     token_fetch: AuthCodeFetcher,
     token_store: TokenStore,
     access_token_fetcher: AccessTokenFetcher,
+    logger: Logger,
 }
 
 impl Authenticator {
@@ -25,26 +28,25 @@ impl Authenticator {
         client_id: String,
         client_secret: String,
         token_path: String,
+        logger: Logger,
     ) -> Self {
         Authenticator {
-            token_fetch: AuthCodeFetcher::new(client_id.clone()),
+            token_fetch: AuthCodeFetcher::new(client_id.clone(), logger.clone()),
             token_store: TokenStore::new(token_path),
             access_token_fetcher: AccessTokenFetcher::new(client, client_id, client_secret),
+            logger
         }
     }
 
     pub(crate) async fn access_token(&mut self) -> Result<String, anyhow::Error> {
         let token = self.token_store.get()?;
         if let Some(result) = token {
-            log::info!("found existing token");
             if result.is_valid() {
-                log::info!("and it's still valid!");
                 return Ok(result.access_token);
             }
         }
-        log::info!("and it's invalid, we'll need to request a new one");
-        log::info!("");
 
+        self.logger.info("Authenticating".to_string()).await;
         let auth_code = self.token_fetch.auth_code().await?;
         let access_token: AuthResponse = self.access_token_fetcher.access_token(auth_code).await?;
 
@@ -70,11 +72,6 @@ impl AuthResponse {
             .duration_since(UNIX_EPOCH)
             .expect("foo")
             .as_secs();
-        log::info!(
-            "-- token expires at {} and it's now {}",
-            self.expires_at,
-            now
-        );
         self.expires_at >= now
     }
 }

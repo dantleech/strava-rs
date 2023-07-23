@@ -7,16 +7,20 @@ use std::{convert::Infallible, net::SocketAddr, str::FromStr};
 use tokio::sync::mpsc::channel;
 use url::form_urlencoded;
 
+use crate::event::logger::Logger;
+
 pub struct AuthCodeFetcher {
     client_id: String,
     addr: String,
+    logger: Logger,
 }
 
 impl AuthCodeFetcher {
-    pub(crate) fn new(client_id: String) -> Self {
+    pub(crate) fn new(client_id: String, logger: Logger) -> Self {
         Self {
             client_id,
             addr: "127.0.0.1:8112".to_string(),
+            logger,
         }
     }
 
@@ -28,15 +32,10 @@ impl AuthCodeFetcher {
 
         let auth_url = format!("https://www.strava.com/oauth/authorize?client_id={}&response_type=code&redirect_uri=http://{}/exchange_token&approval_prompt=force&scope=activity:read_all,read", self.client_id, self.addr);
 
-        log::info!("trying to open URL: {}", auth_url);
+        self.logger.info(format!("Trying to open URL: {}", auth_url)).await;
 
         // the alternative is blocking and does not start the webserver
-        if !open::that_in_background(&auth_url).is_finished() {
-            log::info!("Could not open browser, visit the following URL to grant Strava TUI access to your Strava data:");
-            log::info!("");
-            log::info!("    {}", auth_url);
-            log::info!("");
-        }
+        open::that_in_background(&auth_url);
 
         let make_svc = make_service_fn(|_con| {
             let tx = tx.clone();

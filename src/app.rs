@@ -1,8 +1,13 @@
-use std::{cmp::Ordering, fmt::Display, io, time::Duration};
+use std::{
+    cmp::Ordering,
+    fmt::Display,
+    io,
+    time::{Duration, SystemTime},
+};
 
 use strum::EnumIter;
 
-use crossterm::event::{self, poll, Event};
+use tokio::{sync::mpsc::{Receiver, Sender}};
 use tui::{
     backend::{Backend, CrosstermBackend},
     widgets::TableState,
@@ -10,7 +15,9 @@ use tui::{
 };
 use tui_textarea::TextArea;
 
-use crate::{store::activity::ActivityStore, component::activity_list::ActivityListState};
+use crate::{
+    component::activity_list::ActivityListState, input::InputEvent, store::activity::ActivityStore, event::input::EventSender,
+};
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
@@ -24,6 +31,29 @@ pub struct ActivityFilters {
     pub filter: String,
 }
 
+pub struct Notification {
+    text: String,
+    created: SystemTime,
+}
+
+impl Notification {
+    pub fn new(text: String) -> Self {
+        Self {
+            text,
+            created: SystemTime::now(),
+        }
+    }
+
+    fn has_expired(&self) -> bool {
+        self.created.elapsed().unwrap() > Duration::from_secs(5)
+    }
+}
+impl Display for Notification {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.text)
+    }
+}
+
 pub struct App<'a> {
     pub quit: bool,
     pub active_page: ActivePage,
@@ -35,7 +65,15 @@ pub struct App<'a> {
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
 
+    pub info_message: Option<Notification>,
+    pub error_message: Option<Notification>,
+
     store: &'a mut ActivityStore<'a>,
+    event_receiver: Receiver<InputEvent>,
+    event_sender: EventSender,
+
+    event_queue: Vec<InputEvent>,
+    sync_sender: Sender<bool>,
 }
 
 pub enum ActivePage {
@@ -77,12 +115,17 @@ impl Display for SortOrder {
 }
 
 impl App<'_> {
-    pub fn new<'a>(store: &'a mut ActivityStore<'a>) -> App<'a> {
+    pub fn new<'a>(
+        store: &'a mut ActivityStore<'a>,
+        event_receiver: Receiver<InputEvent>,
+        event_sender: EventSender,
+        sync_sender: Sender<bool>,
+    ) -> App<'a> {
         App {
             quit: false,
             active_page: ActivePage::ActivityList,
             unit_formatter: UnitFormatter::imperial(),
-            activity_list: ActivityListState{
+            activity_list: ActivityListState {
                 table_state: TableState::default(),
                 filter_text_area: TextArea::default(),
                 filter_dialog: false,
@@ -98,9 +141,15 @@ impl App<'_> {
             store,
 
             activity_type: None,
+            info_message: None,
+            error_message: None,
+            event_receiver,
+            event_sender,
+            event_queue: vec![],
+            sync_sender,
         }
     }
-    pub fn run(
+    pub async fn run(
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     ) -> Result<(), anyhow::Error> {
@@ -111,10 +160,37 @@ impl App<'_> {
             terminal.draw(|f| {
                 self.draw(f).expect("Could not draw frame");
             })?;
-            if (poll(Duration::from_millis(1000)))? {
-                if let Event::Key(key) = event::read()? {
-                    let key = map_key(key);
-                    self.handle(key)
+
+            if let Some(message) = &self.info_message {
+                if message.has_expired() {
+                    self.info_message = None
+                }
+            }
+            if let Some(message) = &self.error_message {
+                if message.has_expired() {
+                    self.error_message = None
+                }
+            }
+
+            while self.event_queue.len() > 1 {
+                self.event_sender.send(self.event_queue.pop().unwrap()).await?;
+            }
+
+            if let Some(event) = self.event_receiver.recv().await {
+                match event {
+                    InputEvent::Input(k) => {
+                        let key = map_key(k);
+                        self.handle(key);
+                    }
+                    InputEvent::InfoMessage(message) => {
+                        self.info_message = Some(Notification::new(message));
+                    }
+                    InputEvent::ErrorMessage(message) => {
+                        self.error_message = Some(Notification::new(message));
+                    }
+                    InputEvent::Tick => (),
+                    InputEvent::Reload => self.activities = self.store.activities(),
+                    InputEvent::Sync => self.sync_sender.send(true).await?,
                 }
             }
         }
@@ -128,7 +204,7 @@ impl App<'_> {
             .into_iter()
             .filter(|a| {
                 if !a.title.contains(self.filters.filter.as_str()) {
-                    return false
+                    return false;
                 }
                 if let Some(activity_type) = self.activity_type.clone() {
                     if a.activity_type != activity_type {
@@ -150,10 +226,7 @@ impl App<'_> {
                     .distance
                     .partial_cmp(&b.distance)
                     .unwrap_or(Ordering::Less),
-                SortBy::Pace => a
-                    .kmph()
-                    .partial_cmp(&b.kmph())
-                    .unwrap_or(Ordering::Less),
+                SortBy::Pace => a.kmph().partial_cmp(&b.kmph()).unwrap_or(Ordering::Less),
                 SortBy::HeartRate => a
                     .average_heartrate
                     .or(Some(0.0))
@@ -167,7 +240,6 @@ impl App<'_> {
             }
         });
         activities
-
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
@@ -183,5 +255,9 @@ impl App<'_> {
 
     pub(crate) fn activity_splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
         self.store.splits(activity)
+    }
+
+    pub fn send(&mut self, event: InputEvent) {
+        self.event_queue.push(event);
     }
 }
