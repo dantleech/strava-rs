@@ -71,15 +71,6 @@ async fn main() -> Result<(), anyhow::Error> {
     log::info!("Storage path: {}", storage_path.display());
     log::info!("");
 
-    let sync_task = spawn_sync(
-        pool.clone(),
-        event_sender.clone(),
-        args.client_id,
-        args.client_secret,
-        access_token_path.to_str().unwrap().to_string(),
-        logger,
-        sync_receiver
-    ).await;
 
     let orig_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
@@ -93,7 +84,19 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
+    // start input thread
     input::start(event_sender.clone());
+
+    // start sync async task
+    let sync_task = spawn_sync(
+        pool.clone(),
+        event_sender.clone(),
+        args.client_id,
+        args.client_secret,
+        access_token_path.to_str().unwrap().to_string(),
+        logger,
+        sync_receiver
+    ).await;
 
     let mut app_conn = pool.clone().get().unwrap();
     let mut activity_store = ActivityStore::new(&mut app_conn);

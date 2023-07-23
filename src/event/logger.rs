@@ -7,10 +7,10 @@ pub struct Logger {
 }
 
 impl Logger {
-    pub async fn info(&mut self, message: String) {
+    pub async fn info(&self, message: String) {
         self.event_sender.send(InputEvent::InfoMessage(message)).await.unwrap();
     }
-    pub async fn error(&mut self, message: String) {
+    pub async fn error(&self, message: String) {
         self.event_sender.send(InputEvent::ErrorMessage(message)).await.unwrap();
     }
 

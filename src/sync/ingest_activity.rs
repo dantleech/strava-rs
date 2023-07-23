@@ -4,25 +4,26 @@ use diesel::prelude::*;
 use diesel::{RunQueryDsl, SqliteConnection};
 
 
-use crate::event::input::{EventSender, InputEvent};
+
+use crate::event::logger::Logger;
 use crate::{client::StravaClient, store::activity::RawActivity};
 
 pub struct IngestActivityTask<'a> {
     client: &'a StravaClient,
     connection: &'a mut SqliteConnection,
-    event_sender: EventSender,
+    logger: Logger,
 }
 
 impl IngestActivityTask<'_> {
     pub fn new<'a>(
         client: &'a StravaClient,
         connection: &'a mut SqliteConnection,
-        event_sender: EventSender,
+        logger: Logger,
     ) -> IngestActivityTask<'a> {
         IngestActivityTask {
             client,
             connection,
-            event_sender,
+            logger,
         }
     }
     pub async fn execute(&mut self) -> Result<(), anyhow::Error> {
@@ -33,9 +34,7 @@ impl IngestActivityTask<'_> {
             .load(self.connection)?;
 
         for r_activity in activities {
-            self.event_sender.send(
-                InputEvent::InfoMessage(format!("Downloading full actiity {}", r_activity.id))
-            );
+            self.logger.info(format!("Downloading full actiity {}", r_activity.id)).await;
 
             let s_activity = match self
                 .client
@@ -43,9 +42,7 @@ impl IngestActivityTask<'_> {
                 .await {
                     Ok(a) => a,
                     Err(err) => {
-                        self.event_sender.send(
-                            InputEvent::InfoMessage(format!("ERROR activity {}: {}", r_activity.id, err))
-                        );
+                        self.logger.info(format!("ERROR activity {}: {}", r_activity.id, err)).await;
                         return Ok(())
                     }
                 };

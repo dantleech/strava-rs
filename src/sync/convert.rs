@@ -4,6 +4,7 @@ use diesel::SqliteConnection;
 use crate::client;
 use crate::event::input::EventSender;
 use crate::event::input::InputEvent;
+use crate::event::logger::Logger;
 use crate::store::activity::Activity;
 use crate::store::activity::ActivitySplit;
 use crate::store::activity::RawActivity;
@@ -12,16 +13,19 @@ use crate::store::schema;
 pub struct AcitivityConverter<'a> {
     connection: &'a mut SqliteConnection,
     event_sender: EventSender,
+    logger: Logger,
 }
 
 impl AcitivityConverter<'_> {
     pub fn new(
         connection: &mut SqliteConnection,
         event_sender: EventSender,
+        logger: Logger,
     ) -> AcitivityConverter<'_> {
         AcitivityConverter {
             connection,
             event_sender,
+            logger,
         }
     }
     pub async fn convert(&mut self) -> Result<(), anyhow::Error> {
@@ -35,12 +39,7 @@ impl AcitivityConverter<'_> {
         for raw_activity in raw_activities {
             let listed: client::Activity =
                 serde_json::from_str(raw_activity.listed.as_str()).expect("Could not decode JSON");
-            self.event_sender
-                .send(InputEvent::InfoMessage(format!(
-                    "Converting activity {}",
-                    listed.name
-                )))
-                .await;
+            self.logger.info(format!("Converting activity {}", listed.name)).await;
             let activity = Activity {
                 id: listed.id,
                 title: listed.name,
@@ -101,9 +100,7 @@ impl AcitivityConverter<'_> {
                 }
             }
         }
-        self.event_sender
-            .send(InputEvent::InfoMessage("Done converting".to_string()))
-            .await?;
+        self.logger.info("Done converting".to_string()).await;
         self.event_sender.send(InputEvent::Reload).await?;
 
         Ok(())

@@ -32,23 +32,23 @@ pub async fn spawn_sync(
             client_id,
             client_secret,
             access_token_path,
-            logger,
+            logger.clone(),
         );
         loop {
             let api_config = StravaConfig {
                 base_url: "https://www.strava.com/api".to_string(),
                 access_token: authenticator.access_token().await.unwrap(),
             };
-            let client = new_strava_client(api_config, event_sender.clone());
-                IngestActivitiesTask::new(&client, &mut sync_conn, event_sender.clone())
+            let client = new_strava_client(api_config, logger.clone());
+                IngestActivitiesTask::new(&client, &mut sync_conn, logger.clone())
                     .execute()
                     .await
                     .unwrap();
-                IngestActivityTask::new(&client, &mut sync_conn, event_sender.clone())
+                IngestActivityTask::new(&client, &mut sync_conn, logger.clone())
                     .execute()
                     .await
                     .unwrap();
-                AcitivityConverter::new(&mut sync_conn, event_sender.clone())
+                AcitivityConverter::new(&mut sync_conn, event_sender.clone(), logger.clone())
                     .convert()
                     .await
                     .unwrap();
