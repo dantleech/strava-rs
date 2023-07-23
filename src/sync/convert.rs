@@ -5,21 +5,21 @@ use diesel::SqliteConnection;
 
 
 use crate::client;
+use crate::event::input::EventSender;
+use crate::event::input::InputEvent;
 use crate::store::activity::Activity;
 use crate::store::activity::ActivitySplit;
 use crate::store::activity::RawActivity;
 use crate::store::schema;
 
-use super::logger::LogSender;
-
 pub struct AcitivityConverter<'a> {
     connection: &'a mut SqliteConnection,
-    logger: LogSender,
+    event_sender: EventSender,
 }
 
 impl AcitivityConverter<'_> {
-    pub fn new(connection: &mut SqliteConnection, logger: LogSender) -> AcitivityConverter<'_> {
-        AcitivityConverter { connection, logger }
+    pub fn new(connection: &mut SqliteConnection, event_sender: EventSender) -> AcitivityConverter<'_> {
+        AcitivityConverter { connection, event_sender }
     }
     pub async fn convert(&mut self) -> Result<(), anyhow::Error> {
         use crate::store::schema::raw_activity;
@@ -32,7 +32,11 @@ impl AcitivityConverter<'_> {
         for raw_activity in raw_activities {
             let listed: client::Activity =
                 serde_json::from_str(raw_activity.listed.as_str()).expect("Could not decode JSON");
-            self.logger.info(format!("Converting activity {}", listed.name)).await;
+            self.event_sender.send(
+                InputEvent::InfoMessage(
+                    format!("Converting activity {}", listed.name)
+                )
+            ).await;
             let activity = Activity {
                 id: listed.id,
                 title: listed.name,

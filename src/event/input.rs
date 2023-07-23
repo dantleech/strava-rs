@@ -9,9 +9,12 @@ pub enum InputEvent {
     Tick,
     InfoMessage(String),
     ErrorMessage(String),
+    Reload,
 }
 
-pub fn start(event_sender: Sender<InputEvent>) {
+pub type EventSender = Sender<InputEvent>;
+
+pub fn start(event_sender: EventSender) {
     thread::spawn(move || {
         loop {
             if poll(Duration::from_millis(10)).unwrap() {

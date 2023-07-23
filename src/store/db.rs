@@ -7,7 +7,8 @@ use diesel::{
 };
 
 pub fn get_pool() -> Pool<ConnectionManager<SqliteConnection>> {
-    let pool = Pool::builder()
+    
+    Pool::builder()
         .connection_customizer(Box::new(ConnectionOptions{
             enable_wal: true,
             enable_foreign_keys: true,
@@ -16,8 +17,7 @@ pub fn get_pool() -> Pool<ConnectionManager<SqliteConnection>> {
         .build(ConnectionManager::<SqliteConnection>::new(
             "sqlite://strava.sqlite",
         ))
-        .unwrap();
-    pool
+        .unwrap()
 }
 
 #[derive(Debug)]

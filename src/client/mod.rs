@@ -8,10 +8,9 @@ use hyper_tls::HttpsConnector;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 
+use crate::event::input::{EventSender, InputEvent};
 
-use crate::sync::logger::LogSender;
-
-pub fn new_strava_client(config: StravaConfig, logger: LogSender) -> StravaClient {
+pub fn new_strava_client(config: StravaConfig, event_sender: EventSender) -> StravaClient {
     let connector = HttpsConnector::new();
     let client = Client::builder().build(connector);
 
@@ -19,7 +18,7 @@ pub fn new_strava_client(config: StravaConfig, logger: LogSender) -> StravaClien
         config,
         client,
         access_token: None,
-        logger,
+        event_sender,
     }
 }
 
@@ -33,7 +32,7 @@ pub struct StravaClient {
     client: Client<HttpsConnector<HttpConnector>>,
     config: StravaConfig,
     access_token: Option<String>,
-    logger: LogSender,
+    event_sender: EventSender,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -97,7 +96,7 @@ impl StravaClient {
             .body(Body::default())
             .unwrap();
 
-        self.logger.info(format!(">> {}", url)).await;
+        self.event_sender.send(InputEvent::InfoMessage(format!(">> {}", url))).await;
 
         let res: Response<Body> = self.client.request(req).await?;
 
@@ -107,7 +106,7 @@ impl StravaClient {
                 res.status(),
                 &url
             );
-            self.logger.error(message.clone()).await;
+            self.event_sender.send(InputEvent::ErrorMessage(message.clone())).await;
             return Err(anyhow::Error::msg(message));
         }
 

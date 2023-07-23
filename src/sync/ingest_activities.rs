@@ -6,26 +6,26 @@ use diesel::prelude::*;
 use diesel::{RunQueryDsl, SqliteConnection};
 
 
+use crate::event::input::{EventSender, InputEvent};
 use crate::{
     client::StravaClient,
     store::{activity::RawActivity, schema},
 };
 
-use super::logger::LogSender;
 
 pub struct IngestActivitiesTask<'a> {
     client: &'a StravaClient,
     connection: &'a mut SqliteConnection,
-    logger: LogSender,
+    event_sender: EventSender,
 }
 
 impl IngestActivitiesTask<'_> {
     pub fn new<'a>(
         client: &'a StravaClient,
         connection: &'a mut SqliteConnection,
-        logger: LogSender,
+        event_sender: EventSender,
     ) -> IngestActivitiesTask<'a> {
-        IngestActivitiesTask { client, connection, logger }
+        IngestActivitiesTask { client, connection, event_sender }
     }
     pub async fn execute(&mut self) -> Result<(), anyhow::Error> {
         use crate::store::schema::raw_activity::dsl::*;
@@ -44,18 +44,18 @@ impl IngestActivitiesTask<'_> {
                 .await {
                     Ok(a) => a,
                     Err(e) => {
-                        self.logger.error(format!("Error: {}", e)).await;
+                        self.event_sender.send(InputEvent::ErrorMessage(format!("Error: {}", e))).await;
                         return Ok(())
                     },
                 };
 
             if s_activities.is_empty() {
-                self.logger.info("No new activities".to_string()).await;
+                self.event_sender.send(InputEvent::InfoMessage("Non new activities".to_string())).await;
                 break;
             }
 
             for s_activity in s_activities {
-                self.logger.info(format!("[{}] {}", s_activity["id"], s_activity["name"])).await;
+                self.event_sender.send(InputEvent::InfoMessage(format!("[{}] {}", s_activity["id"], s_activity["name"]))).await;
                 let raw = RawActivity {
                     id: s_activity["id"]
                         .as_i64()

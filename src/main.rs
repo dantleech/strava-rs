@@ -19,10 +19,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode},
 };
 use event::input;
-use diesel::{
-    r2d2::{ConnectionManager, Pool},
-    SqliteConnection,
-};
+
 
 use hyper::Client;
 use hyper_tls::HttpsConnector;
@@ -33,7 +30,7 @@ use tokio::{
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
-use crate::{sync::{ingest_activity::IngestActivityTask, logger::LogSender}, store::db::get_pool};
+use crate::{sync::{ingest_activity::IngestActivityTask}, store::db::get_pool};
 use crate::{
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest_activities::IngestActivitiesTask},
@@ -89,18 +86,18 @@ async fn main() -> Result<(), anyhow::Error> {
         };
         {
             let mut sync_conn = pool.clone().get().unwrap();
-            let log_sender = LogSender::new(event_sender.clone());
+            let event_sender = event_sender.clone();
             task::spawn(async move {
-                let client = new_strava_client(api_config, log_sender.clone());
-                IngestActivitiesTask::new(&client, &mut sync_conn, log_sender.clone())
+                let client = new_strava_client(api_config, event_sender.clone());
+                IngestActivitiesTask::new(&client, &mut sync_conn, event_sender.clone())
                     .execute()
                     .await
                     .unwrap();
-                IngestActivityTask::new(&client, &mut sync_conn, log_sender.clone())
+                IngestActivityTask::new(&client, &mut sync_conn, event_sender.clone())
                     .execute()
                     .await
                     .unwrap();
-                AcitivityConverter::new(&mut sync_conn, log_sender.clone())
+                AcitivityConverter::new(&mut sync_conn, event_sender.clone())
                     .convert()
                     .await
                     .unwrap();

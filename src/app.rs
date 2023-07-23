@@ -7,7 +7,7 @@ use std::{
 
 use strum::EnumIter;
 
-use tokio::{select, sync::mpsc::Receiver};
+use tokio::{sync::mpsc::Receiver};
 use tui::{
     backend::{Backend, CrosstermBackend},
     widgets::TableState,
@@ -176,6 +176,7 @@ impl App<'_> {
                         self.error_message = Some(Notification::new(message));
                     }
                     InputEvent::Tick => (),
+                    InputEvent::Reload => self.activities = self.store.activities(),
                 }
             }
         }
