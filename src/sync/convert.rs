@@ -1,8 +1,5 @@
-
-
 use diesel::prelude::*;
 use diesel::SqliteConnection;
-
 
 use crate::client;
 use crate::event::input::EventSender;
@@ -18,8 +15,14 @@ pub struct AcitivityConverter<'a> {
 }
 
 impl AcitivityConverter<'_> {
-    pub fn new(connection: &mut SqliteConnection, event_sender: EventSender) -> AcitivityConverter<'_> {
-        AcitivityConverter { connection, event_sender }
+    pub fn new(
+        connection: &mut SqliteConnection,
+        event_sender: EventSender,
+    ) -> AcitivityConverter<'_> {
+        AcitivityConverter {
+            connection,
+            event_sender,
+        }
     }
     pub async fn convert(&mut self) -> Result<(), anyhow::Error> {
         use crate::store::schema::raw_activity;
@@ -32,11 +35,12 @@ impl AcitivityConverter<'_> {
         for raw_activity in raw_activities {
             let listed: client::Activity =
                 serde_json::from_str(raw_activity.listed.as_str()).expect("Could not decode JSON");
-            self.event_sender.send(
-                InputEvent::InfoMessage(
-                    format!("Converting activity {}", listed.name)
-                )
-            ).await;
+            self.event_sender
+                .send(InputEvent::InfoMessage(format!(
+                    "Converting activity {}",
+                    listed.name
+                )))
+                .await;
             let activity = Activity {
                 id: listed.id,
                 title: listed.name,
@@ -71,12 +75,16 @@ impl AcitivityConverter<'_> {
             if let Some(full_activity) = raw_activity.activity {
                 let activity: client::Activity =
                     serde_json::from_str(full_activity.as_str()).expect("Could not decode JSON");
-                diesel::delete(schema::activity_split::table.filter(schema::activity_split::activity_id.eq(activity.id))).execute(self.connection)?;
+                diesel::delete(
+                    schema::activity_split::table
+                        .filter(schema::activity_split::activity_id.eq(activity.id)),
+                )
+                .execute(self.connection)?;
 
                 if let Some(laps) = activity.splits_standard {
                     let mut activity_laps: Vec<ActivitySplit> = vec![];
                     for lap in laps {
-                        activity_laps.push(ActivitySplit{
+                        activity_laps.push(ActivitySplit {
                             activity_id: activity.id,
                             distance: lap.distance,
                             moving_time: lap.moving_time,
@@ -86,13 +94,17 @@ impl AcitivityConverter<'_> {
                             split: lap.split,
                         });
                     }
-                        
+
                     diesel::insert_into(schema::activity_split::table)
                         .values(&activity_laps)
                         .execute(self.connection)?;
                 }
             }
         }
+        self.event_sender
+            .send(InputEvent::InfoMessage("Done converting".to_string()))
+            .await?;
+        self.event_sender.send(InputEvent::Reload).await?;
 
         Ok(())
     }
