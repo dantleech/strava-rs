@@ -7,7 +7,6 @@ use std::{
 
 use strum::EnumIter;
 
-
 use tokio::{select, sync::mpsc::Receiver};
 use tui::{
     backend::{Backend, CrosstermBackend},
@@ -17,8 +16,7 @@ use tui::{
 use tui_textarea::TextArea;
 
 use crate::{
-    component::activity_list::ActivityListState, store::activity::ActivityStore,
-    input::InputEvent,
+    component::activity_list::ActivityListState, input::InputEvent, store::activity::ActivityStore,
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
@@ -165,24 +163,20 @@ impl App<'_> {
                 }
             }
 
-            let e1 = self.event_receiver.recv();
-
-            select! {
-                event = e1 => {
-                    match event.unwrap() {
-                        InputEvent::Input(k) => {
-                            let key = map_key(k);
-                            self.handle(key);
-                        },
-                        InputEvent::Tick => (),
-                        InputEvent::InfoMessage(message) => {
-                            self.info_message = Some(Notification::new(message));
-                        },
-                        InputEvent::ErrorMessage(message) => {
-                            self.error_message = Some(Notification::new(message));
-                        },
+            if let Some(event) = self.event_receiver.recv().await {
+                match event {
+                    InputEvent::Input(k) => {
+                        let key = map_key(k);
+                        self.handle(key);
                     }
-                },
+                    InputEvent::InfoMessage(message) => {
+                        self.info_message = Some(Notification::new(message));
+                    }
+                    InputEvent::ErrorMessage(message) => {
+                        self.error_message = Some(Notification::new(message));
+                    }
+                    InputEvent::Tick => (),
+                }
             }
         }
         Ok(())
