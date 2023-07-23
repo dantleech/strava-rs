@@ -7,7 +7,7 @@ use std::{
 
 use strum::EnumIter;
 
-use tokio::{sync::mpsc::Receiver};
+use tokio::{sync::mpsc::{Receiver, Sender}};
 use tui::{
     backend::{Backend, CrosstermBackend},
     widgets::TableState,
@@ -73,6 +73,7 @@ pub struct App<'a> {
     event_sender: EventSender,
 
     event_queue: Vec<InputEvent>,
+    sync_sender: Sender<bool>,
 }
 
 pub enum ActivePage {
@@ -118,6 +119,7 @@ impl App<'_> {
         store: &'a mut ActivityStore<'a>,
         event_receiver: Receiver<InputEvent>,
         event_sender: EventSender,
+        sync_sender: Sender<bool>,
     ) -> App<'a> {
         App {
             quit: false,
@@ -143,7 +145,8 @@ impl App<'_> {
             error_message: None,
             event_receiver,
             event_sender,
-            event_queue: vec![]
+            event_queue: vec![],
+            sync_sender,
         }
     }
     pub async fn run(
@@ -169,8 +172,8 @@ impl App<'_> {
                 }
             }
 
-            for event in self.event_queue.pop() {
-                self.event_sender.send(event).await?;
+            while self.event_queue.len() > 1 {
+                self.event_sender.send(self.event_queue.pop().unwrap()).await?;
             }
 
             if let Some(event) = self.event_receiver.recv().await {
@@ -187,6 +190,7 @@ impl App<'_> {
                     }
                     InputEvent::Tick => (),
                     InputEvent::Reload => self.activities = self.store.activities(),
+                    InputEvent::Sync => self.sync_sender.send(true).await?,
                 }
             }
         }

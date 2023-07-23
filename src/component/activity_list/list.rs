@@ -62,7 +62,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Filter => toggle_filter(app),
         StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),
-        StravaEvent::Refresh => app.send(InputEvent::Reload),
+        StravaEvent::Refresh => app.send(InputEvent::Sync),
         _ => (),
     }
 }

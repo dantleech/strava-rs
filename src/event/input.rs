@@ -10,6 +10,7 @@ pub enum InputEvent {
     InfoMessage(String),
     ErrorMessage(String),
     Reload,
+    Sync,
 }
 
 pub type EventSender = Sender<InputEvent>;

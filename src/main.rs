@@ -11,9 +11,9 @@ pub mod util;
 use std::{io, panic, process};
 
 use app::App;
-use authenticator::Authenticator;
+
 use clap::Parser;
-use client::{new_strava_client, StravaConfig};
+
 
 use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode},
@@ -21,19 +21,17 @@ use crossterm::{
 use event::input;
 
 
-use hyper::Client;
-use hyper_tls::HttpsConnector;
+
+
 use tokio::{
     sync::mpsc::{self},
-    task,
 };
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
-use crate::{sync::{ingest_activity::IngestActivityTask}, store::db::get_pool};
+use crate::{sync::{spawn_sync}, store::db::get_pool, event::logger::Logger};
 use crate::{
     store::activity::ActivityStore,
-    sync::{convert::AcitivityConverter, ingest_activities::IngestActivitiesTask},
 };
 
 #[derive(Parser, Debug)]
@@ -55,7 +53,6 @@ async fn main() -> Result<(), anyhow::Error> {
         .filter(None, log::LevelFilter::Info)
         .init();
 
-    let connector = HttpsConnector::new();
     let args = Args::parse();
     let dirs: BaseDirectories = xdg::BaseDirectories::with_prefix("strava-rs").unwrap();
     let access_token_path = dirs
@@ -64,6 +61,8 @@ async fn main() -> Result<(), anyhow::Error> {
     let storage_path = dirs.get_data_home();
     let pool = get_pool();
     let (event_sender, event_receiver) = mpsc::channel(32);
+    let (sync_sender, sync_receiver) = mpsc::channel::<bool>(32);
+    let logger = Logger::new(event_sender.clone());
 
     log::info!("Strava TUI");
     log::info!("==========");
@@ -72,39 +71,15 @@ async fn main() -> Result<(), anyhow::Error> {
     log::info!("Storage path: {}", storage_path.display());
     log::info!("");
 
-    if !args.no_sync {
-        let client = Client::builder().build(connector);
-        let mut authenticator = Authenticator::new(
-            client,
-            args.client_id,
-            args.client_secret,
-            access_token_path.to_str().unwrap().to_string(),
-        );
-        let api_config = StravaConfig {
-            base_url: "https://www.strava.com/api".to_string(),
-            access_token: authenticator.access_token().await?,
-        };
-        {
-            let mut sync_conn = pool.clone().get().unwrap();
-            let event_sender = event_sender.clone();
-            task::spawn(async move {
-                let client = new_strava_client(api_config, event_sender.clone());
-                IngestActivitiesTask::new(&client, &mut sync_conn, event_sender.clone())
-                    .execute()
-                    .await
-                    .unwrap();
-                IngestActivityTask::new(&client, &mut sync_conn, event_sender.clone())
-                    .execute()
-                    .await
-                    .unwrap();
-                AcitivityConverter::new(&mut sync_conn, event_sender.clone())
-                    .convert()
-                    .await
-                    .unwrap();
-                Ok::<(), anyhow::Error>(())
-            });
-        }
-    }
+    let sync_task = spawn_sync(
+        pool.clone(),
+        event_sender.clone(),
+        args.client_id,
+        args.client_secret,
+        access_token_path.to_str().unwrap().to_string(),
+        logger,
+        sync_receiver
+    ).await;
 
     let orig_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
@@ -122,9 +97,11 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let mut app_conn = pool.clone().get().unwrap();
     let mut activity_store = ActivityStore::new(&mut app_conn);
-    let mut app = App::new(&mut activity_store, event_receiver, event_sender.clone());
+    let mut app = App::new(&mut activity_store, event_receiver, event_sender.clone(), sync_sender);
     app.activity_type = args.activity_type;
+    app.send(input::InputEvent::Sync);
     app.run(&mut terminal).await?;
+    sync_task.abort();
 
     disable_raw_mode()?;
 
