@@ -36,10 +36,16 @@ impl IngestActivitiesTask<'_> {
 
         loop {
             page += 1;
-            let s_activities = self
+            let s_activities = match self
                 .client
                 .athlete_activities(page, PAGE_SIZE, last_epoch)
-                .await?;
+                .await {
+                    Ok(a) => a,
+                    Err(e) => {
+                        self.logger.send(format!("Error: {}", e.to_string())).await.unwrap();
+                        return Ok(())
+                    },
+                };
 
             if s_activities.is_empty() {
                 self.logger.send("No new activities".to_string()).await?;

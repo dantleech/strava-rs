@@ -33,23 +33,24 @@ impl IngestActivityTask<'_> {
 
         for r_activity in activities {
             self.logger
-                .send(format!("Enhancing activity {}", r_activity.id)).await;
-            match self
+                .send(format!("Downloading full actiity {}", r_activity.id)).await.unwrap();
+
+            let s_activity = match self
                 .client
                 .athlete_activity(format!("{}", r_activity.id))
-                .await
-            {
-                Ok(a) => {
-                    diesel::update(&r_activity)
-                        .set(raw_activity::activity.eq(Some(a.to_string())))
-                        .execute(self.connection)
-                        .unwrap();
-                }
-                Err(err) => {
-                    self.logger
-                        .send(format!("ERROR activity {}: {}", r_activity.id, err)).await;
-                }
-            }
+                .await {
+                    Ok(a) => a,
+                    Err(err) => {
+                        self.logger
+                            .send(format!("ERROR activity {}: {}", r_activity.id, err)).await.unwrap();
+                        return Ok(())
+                    }
+                };
+
+            diesel::update(&r_activity)
+                .set(raw_activity::activity.eq(Some(s_activity.to_string())))
+                .execute(self.connection)
+                .unwrap();
         }
         Ok(())
     }

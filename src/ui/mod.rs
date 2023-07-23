@@ -6,7 +6,7 @@ use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},
     style::Style,
-    text::{Span, Spans},
+    text::{Span, Spans, Text},
     widgets::{Block, Borders, Paragraph},
     Frame,
 };
@@ -26,7 +26,7 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
             [
                 Constraint::Length(3),
                 Constraint::Min(4),
-                Constraint::Length(1),
+                Constraint::Length(2),
             ]
             .as_ref(),
         )
@@ -43,11 +43,7 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
         }
     }
 
-    if let Some(message) = app.log_message.clone() {
-        f.render_widget(Paragraph::new(message), rows[2]);
-    } else {
-        f.render_widget(status_bar(app), rows[2]);
-    }
+    f.render_widget(status_bar(app), rows[2]);
 
     Ok(())
 }
@@ -89,8 +85,12 @@ fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
         app.filters.sort_by, app.filters.sort_order
     ));
     status.push(format!("{} units", app.unit_formatter.system));
+    
+    if let Some(message) = &app.log_message {
+        status.push(format!("\n{}", message));
+    }
 
-    Paragraph::new(status.join(", "))
+    Paragraph::new(Text::from(status.join(", ")))
 }
 
 // borrowed from https://github.com/extrawurst/gitui
