@@ -33,7 +33,7 @@ use tokio::{
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
-use crate::sync::{ingest_activity::IngestActivityTask, logger::LogSender};
+use crate::{sync::{ingest_activity::IngestActivityTask, logger::LogSender}, store::db::get_pool};
 use crate::{
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest_activities::IngestActivitiesTask},
@@ -65,9 +65,7 @@ async fn main() -> Result<(), anyhow::Error> {
         .place_state_file("access_token.json")
         .expect("Could not create state directory");
     let storage_path = dirs.get_data_home();
-    let pool = Pool::builder().build(ConnectionManager::<SqliteConnection>::new(
-        "sqlite://strava.sqlite",
-    ))?;
+    let pool = get_pool();
     let (event_sender, event_receiver) = mpsc::channel(32);
 
     log::info!("Strava TUI");
