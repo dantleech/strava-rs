@@ -1,8 +1,8 @@
-use std::sync::Arc;
+
 
 use diesel::prelude::*;
 use diesel::SqliteConnection;
-use tokio::sync::mpsc::Sender;
+
 
 use crate::client;
 use crate::store::activity::Activity;
@@ -66,7 +66,7 @@ impl AcitivityConverter<'_> {
 
             if let Some(full_activity) = raw_activity.activity {
                 let activity: client::Activity =
-                    serde_json::from_str(&full_activity.as_str()).expect("Could not decode JSON");
+                    serde_json::from_str(full_activity.as_str()).expect("Could not decode JSON");
                 diesel::delete(schema::activity_split::table.filter(schema::activity_split::activity_id.eq(activity.id))).execute(self.connection)?;
 
                 if let Some(laps) = activity.splits_standard {

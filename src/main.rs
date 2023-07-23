@@ -7,19 +7,18 @@ pub mod store;
 pub mod sync;
 pub mod ui;
 pub mod util;
-pub mod input;
 
-use std::{io, panic, process, sync::Arc, thread, time::Duration};
+use std::{io, panic, process};
 
 use app::App;
 use authenticator::Authenticator;
 use clap::Parser;
 use client::{new_strava_client, StravaConfig};
-use crossterm::event::{self as crossevent};
+
 use crossterm::{
-    event::{poll, Event},
     terminal::{disable_raw_mode, enable_raw_mode},
 };
+use event::input;
 use diesel::{
     r2d2::{ConnectionManager, Pool},
     SqliteConnection,

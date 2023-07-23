@@ -21,3 +21,4 @@ pub fn start(event_sender: Sender<InputEvent>) {
         }
     });
 }
+

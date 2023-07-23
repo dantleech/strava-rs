@@ -7,7 +7,7 @@ use std::{
 
 use strum::EnumIter;
 
-use crossterm::event::KeyEvent;
+
 use tokio::{select, sync::mpsc::Receiver};
 use tui::{
     backend::{Backend, CrosstermBackend},

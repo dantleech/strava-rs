@@ -1,13 +1,13 @@
 #![allow(dead_code)]
 
-use std::{fmt::Display, sync::Arc};
+use std::{fmt::Display};
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use hyper::{client::HttpConnector, Body, Client, Method, Request, Response};
 use hyper_tls::HttpsConnector;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
-use tokio::sync::mpsc::Sender;
+
 
 use crate::sync::logger::LogSender;
 

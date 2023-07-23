@@ -1,8 +1,8 @@
-use std::sync::Arc;
+
 
 use diesel::prelude::*;
 use diesel::{RunQueryDsl, SqliteConnection};
-use tokio::sync::mpsc::Sender;
+
 
 use crate::{client::StravaClient, store::activity::RawActivity};
 

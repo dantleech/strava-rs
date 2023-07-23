@@ -1,10 +1,10 @@
 
-use std::sync::Arc;
+
 
 use chrono::{NaiveDateTime};
 use diesel::prelude::*;
 use diesel::{RunQueryDsl, SqliteConnection};
-use tokio::sync::mpsc::Sender;
+
 
 use crate::{
     client::StravaClient,
@@ -44,7 +44,7 @@ impl IngestActivitiesTask<'_> {
                 .await {
                     Ok(a) => a,
                     Err(e) => {
-                        self.logger.error(format!("Error: {}", e.to_string())).await;
+                        self.logger.error(format!("Error: {}", e)).await;
                         return Ok(())
                     },
                 };
