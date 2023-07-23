@@ -33,8 +33,7 @@ use tokio::{
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
-use crate::sync::ingest_activity::IngestActivityTask;
-use crate::sync::logger::Logger;
+use crate::sync::{ingest_activity::IngestActivityTask, logger::LogSender};
 use crate::{
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest_activities::IngestActivitiesTask},
@@ -70,7 +69,6 @@ async fn main() -> Result<(), anyhow::Error> {
         "sqlite://strava.sqlite",
     ))?;
     let (event_sender, event_receiver) = mpsc::channel(32);
-    let logger = Logger::new();
 
     log::info!("Strava TUI");
     log::info!("==========");
@@ -93,7 +91,7 @@ async fn main() -> Result<(), anyhow::Error> {
         };
         {
             let mut sync_conn = pool.clone().get().unwrap();
-            let log_sender = logger.sender();
+            let log_sender = LogSender::new(event_sender.clone());
             task::spawn(async move {
                 let client = new_strava_client(api_config, log_sender.clone());
                 IngestActivitiesTask::new(&client, &mut sync_conn, log_sender.clone())
@@ -129,7 +127,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let mut app_conn = pool.clone().get().unwrap();
     let mut activity_store = ActivityStore::new(&mut app_conn);
-    let mut app = App::new(&mut activity_store, logger, event_receiver);
+    let mut app = App::new(&mut activity_store, event_receiver);
     app.activity_type = args.activity_type;
     app.run(&mut terminal).await?;
 

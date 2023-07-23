@@ -7,6 +7,8 @@ use tokio::sync::mpsc::Sender;
 pub enum InputEvent {
     Input(KeyEvent),
     Tick,
+    InfoMessage(String),
+    ErrorMessage(String),
 }
 
 pub fn start(event_sender: Sender<InputEvent>) {

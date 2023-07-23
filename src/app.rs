@@ -18,7 +18,7 @@ use tui_textarea::TextArea;
 
 use crate::{
     component::activity_list::ActivityListState, store::activity::ActivityStore,
-    sync::logger::Logger, input::InputEvent,
+    input::InputEvent,
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
@@ -67,7 +67,6 @@ pub struct App<'a> {
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
 
-    pub logger: Logger,
     pub info_message: Option<Notification>,
     pub error_message: Option<Notification>,
 
@@ -116,7 +115,6 @@ impl Display for SortOrder {
 impl App<'_> {
     pub fn new<'a>(
         store: &'a mut ActivityStore<'a>,
-        logger: Logger,
         event_receiver: Receiver<InputEvent>,
     ) -> App<'a> {
         App {
@@ -139,7 +137,6 @@ impl App<'_> {
             store,
 
             activity_type: None,
-            logger,
             info_message: None,
             error_message: None,
             event_receiver,
@@ -169,25 +166,23 @@ impl App<'_> {
             }
 
             let e1 = self.event_receiver.recv();
-            let e2 = self.logger.info_receiver.recv();
-            let e3 = self.logger.error_receiver.recv();
 
             select! {
-                key = e1 => {
-                    match key.unwrap() {
+                event = e1 => {
+                    match event.unwrap() {
                         InputEvent::Input(k) => {
                             let key = map_key(k);
                             self.handle(key);
                         },
                         InputEvent::Tick => (),
+                        InputEvent::InfoMessage(message) => {
+                            self.info_message = Some(Notification::new(message));
+                        },
+                        InputEvent::ErrorMessage(message) => {
+                            self.error_message = Some(Notification::new(message));
+                        },
                     }
                 },
-                info_message = e2 => {
-                    self.info_message = Some(Notification::new(info_message.unwrap()))
-                },
-                error_message = e3 => {
-                    self.error_message = Some(Notification::new(error_message.unwrap()))
-                }
             }
         }
         Ok(())
