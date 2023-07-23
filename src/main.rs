@@ -118,11 +118,11 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
-    input::start(event_sender);
+    input::start(event_sender.clone());
 
     let mut app_conn = pool.clone().get().unwrap();
     let mut activity_store = ActivityStore::new(&mut app_conn);
-    let mut app = App::new(&mut activity_store, event_receiver);
+    let mut app = App::new(&mut activity_store, event_receiver, event_sender.clone());
     app.activity_type = args.activity_type;
     app.run(&mut terminal).await?;
 

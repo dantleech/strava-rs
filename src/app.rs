@@ -16,7 +16,7 @@ use tui::{
 use tui_textarea::TextArea;
 
 use crate::{
-    component::activity_list::ActivityListState, input::InputEvent, store::activity::ActivityStore,
+    component::activity_list::ActivityListState, input::InputEvent, store::activity::ActivityStore, event::input::EventSender,
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
@@ -70,6 +70,9 @@ pub struct App<'a> {
 
     store: &'a mut ActivityStore<'a>,
     event_receiver: Receiver<InputEvent>,
+    event_sender: EventSender,
+
+    event_queue: Vec<InputEvent>,
 }
 
 pub enum ActivePage {
@@ -114,6 +117,7 @@ impl App<'_> {
     pub fn new<'a>(
         store: &'a mut ActivityStore<'a>,
         event_receiver: Receiver<InputEvent>,
+        event_sender: EventSender,
     ) -> App<'a> {
         App {
             quit: false,
@@ -138,6 +142,8 @@ impl App<'_> {
             info_message: None,
             error_message: None,
             event_receiver,
+            event_sender,
+            event_queue: vec![]
         }
     }
     pub async fn run(
@@ -161,6 +167,10 @@ impl App<'_> {
                 if message.has_expired() {
                     self.error_message = None
                 }
+            }
+
+            for event in self.event_queue.pop() {
+                self.event_sender.send(event).await?;
             }
 
             if let Some(event) = self.event_receiver.recv().await {
@@ -243,5 +253,7 @@ impl App<'_> {
         self.store.splits(activity)
     }
 
-    fn tick(&self) {}
+    pub fn send(&mut self, event: InputEvent) {
+        self.event_queue.push(event);
+    }
 }
