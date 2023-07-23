@@ -9,7 +9,9 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 use tokio::sync::mpsc::Sender;
 
-pub fn new_strava_client(config: StravaConfig, logger: Arc<Sender<String>>) -> StravaClient {
+use crate::sync::logger::LogSender;
+
+pub fn new_strava_client(config: StravaConfig, logger: LogSender) -> StravaClient {
     let connector = HttpsConnector::new();
     let client = Client::builder().build(connector);
 
@@ -31,7 +33,7 @@ pub struct StravaClient {
     client: Client<HttpsConnector<HttpConnector>>,
     config: StravaConfig,
     access_token: Option<String>,
-    logger: Arc<Sender<String>>,
+    logger: LogSender,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -95,7 +97,7 @@ impl StravaClient {
             .body(Body::default())
             .unwrap();
 
-        self.logger.send(format!(">> {}", url)).await?;
+        self.logger.info(format!(">> {}", url)).await;
 
         let res: Response<Body> = self.client.request(req).await?;
 
@@ -105,10 +107,9 @@ impl StravaClient {
                 res.status(),
                 &url
             );
-            self.logger.send(message.clone()).await?;
+            self.logger.error(message.clone()).await;
             return Err(anyhow::Error::msg(message));
         }
-        self.logger.send("OK".to_string()).await?;
 
         let bytes = hyper::body::to_bytes(res.into_body()).await?;
         let deserialized: T = serde_json::from_slice(&bytes)?;

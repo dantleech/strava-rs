@@ -7,6 +7,7 @@ pub mod store;
 pub mod sync;
 pub mod ui;
 pub mod util;
+pub mod input;
 
 use std::{io, panic, process, sync::Arc, thread, time::Duration};
 
@@ -34,6 +35,7 @@ use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
 use crate::sync::ingest_activity::IngestActivityTask;
+use crate::sync::logger::Logger;
 use crate::{
     store::activity::ActivityStore,
     sync::{convert::AcitivityConverter, ingest_activities::IngestActivitiesTask},
@@ -68,9 +70,8 @@ async fn main() -> Result<(), anyhow::Error> {
     let pool = Pool::builder().build(ConnectionManager::<SqliteConnection>::new(
         "sqlite://strava.sqlite",
     ))?;
-    let (logger, log_receiver) = mpsc::channel(32);
     let (event_sender, event_receiver) = mpsc::channel(32);
-    let logger = Arc::new(logger);
+    let logger = Logger::new();
 
     log::info!("Strava TUI");
     log::info!("==========");
@@ -93,17 +94,18 @@ async fn main() -> Result<(), anyhow::Error> {
         };
         {
             let mut sync_conn = pool.clone().get().unwrap();
+            let log_sender = logger.sender();
             task::spawn(async move {
-                let client = new_strava_client(api_config, logger.clone());
-                IngestActivitiesTask::new(&client, &mut sync_conn, logger.clone())
+                let client = new_strava_client(api_config, log_sender.clone());
+                IngestActivitiesTask::new(&client, &mut sync_conn, log_sender.clone())
                     .execute()
                     .await
                     .unwrap();
-                IngestActivityTask::new(&client, &mut sync_conn, logger.clone())
+                IngestActivityTask::new(&client, &mut sync_conn, log_sender.clone())
                     .execute()
                     .await
                     .unwrap();
-                AcitivityConverter::new(&mut sync_conn, logger.clone())
+                AcitivityConverter::new(&mut sync_conn, log_sender.clone())
                     .convert()
                     .await
                     .unwrap();
@@ -124,20 +126,11 @@ async fn main() -> Result<(), anyhow::Error> {
     enable_raw_mode()?;
     terminal.clear()?;
 
-    // IO thread
-    thread::spawn(move || {
-        loop {
-            if poll(Duration::from_millis(10)).unwrap() {
-                if let Event::Key(key) = crossevent::read().unwrap() {
-                    event_sender.blocking_send(key).unwrap();
-                }
-            }
-        }
-    });
+    input::start(event_sender);
 
     let mut app_conn = pool.clone().get().unwrap();
     let mut activity_store = ActivityStore::new(&mut app_conn);
-    let mut app = App::new(&mut activity_store, log_receiver, event_receiver);
+    let mut app = App::new(&mut activity_store, logger, event_receiver);
     app.activity_type = args.activity_type;
     app.run(&mut terminal).await?;
 

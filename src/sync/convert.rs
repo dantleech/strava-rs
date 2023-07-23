@@ -10,12 +10,15 @@ use crate::store::activity::ActivitySplit;
 use crate::store::activity::RawActivity;
 use crate::store::schema;
 
+use super::logger::LogSender;
+
 pub struct AcitivityConverter<'a> {
     connection: &'a mut SqliteConnection,
+    logger: LogSender,
 }
 
 impl AcitivityConverter<'_> {
-    pub fn new(connection: &mut SqliteConnection, logger: Arc<Sender<String>>) -> AcitivityConverter<'_> {
+    pub fn new(connection: &mut SqliteConnection, logger: LogSender) -> AcitivityConverter<'_> {
         AcitivityConverter { connection, logger }
     }
     pub async fn convert(&mut self) -> Result<(), anyhow::Error> {
@@ -29,6 +32,7 @@ impl AcitivityConverter<'_> {
         for raw_activity in raw_activities {
             let listed: client::Activity =
                 serde_json::from_str(raw_activity.listed.as_str()).expect("Could not decode JSON");
+            self.logger.info(format!("Converting activity {}", listed.name)).await;
             let activity = Activity {
                 id: listed.id,
                 title: listed.name,

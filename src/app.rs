@@ -1,9 +1,14 @@
-use std::{cmp::Ordering, fmt::Display, io};
+use std::{
+    cmp::Ordering,
+    fmt::Display,
+    io,
+    time::{Duration, SystemTime},
+};
 
 use strum::EnumIter;
 
-use crossterm::event::{KeyEvent};
-use tokio::{sync::mpsc::Receiver, select};
+use crossterm::event::KeyEvent;
+use tokio::{select, sync::mpsc::Receiver};
 use tui::{
     backend::{Backend, CrosstermBackend},
     widgets::TableState,
@@ -11,7 +16,10 @@ use tui::{
 };
 use tui_textarea::TextArea;
 
-use crate::{component::activity_list::ActivityListState, store::activity::ActivityStore};
+use crate::{
+    component::activity_list::ActivityListState, store::activity::ActivityStore,
+    sync::logger::Logger, input::InputEvent,
+};
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
@@ -25,6 +33,29 @@ pub struct ActivityFilters {
     pub filter: String,
 }
 
+pub struct Notification {
+    text: String,
+    created: SystemTime,
+}
+
+impl Notification {
+    pub fn new(text: String) -> Self {
+        Self {
+            text,
+            created: SystemTime::now(),
+        }
+    }
+
+    fn has_expired(&self) -> bool {
+        self.created.elapsed().unwrap() > Duration::from_secs(5)
+    }
+}
+impl Display for Notification {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.text)
+    }
+}
+
 pub struct App<'a> {
     pub quit: bool,
     pub active_page: ActivePage,
@@ -36,11 +67,12 @@ pub struct App<'a> {
     pub activity: Option<Activity>,
     pub activities: Vec<Activity>,
 
-    pub log_receiever: Receiver<String>,
-    pub log_message: Option<String>,
+    pub logger: Logger,
+    pub info_message: Option<Notification>,
+    pub error_message: Option<Notification>,
 
     store: &'a mut ActivityStore<'a>,
-    event_receiver: Receiver<KeyEvent>,
+    event_receiver: Receiver<InputEvent>,
 }
 
 pub enum ActivePage {
@@ -82,7 +114,11 @@ impl Display for SortOrder {
 }
 
 impl App<'_> {
-    pub fn new<'a>(store: &'a mut ActivityStore<'a>, messages: Receiver<String>, event_receiver: Receiver<KeyEvent>) -> App<'a> {
+    pub fn new<'a>(
+        store: &'a mut ActivityStore<'a>,
+        logger: Logger,
+        event_receiver: Receiver<InputEvent>,
+    ) -> App<'a> {
         App {
             quit: false,
             active_page: ActivePage::ActivityList,
@@ -103,9 +139,10 @@ impl App<'_> {
             store,
 
             activity_type: None,
-            log_receiever: messages,
-            log_message: None,
-            event_receiver
+            logger,
+            info_message: None,
+            error_message: None,
+            event_receiver,
         }
     }
     pub async fn run(
@@ -120,16 +157,36 @@ impl App<'_> {
                 self.draw(f).expect("Could not draw frame");
             })?;
 
+            if let Some(message) = &self.info_message {
+                if message.has_expired() {
+                    self.info_message = None
+                }
+            }
+            if let Some(message) = &self.error_message {
+                if message.has_expired() {
+                    self.error_message = None
+                }
+            }
+
             let e1 = self.event_receiver.recv();
-            let e2 = self.log_receiever.recv();
+            let e2 = self.logger.info_receiver.recv();
+            let e3 = self.logger.error_receiver.recv();
 
             select! {
                 key = e1 => {
-                    let key = map_key(key.unwrap());
-                    self.handle(key);
+                    match key.unwrap() {
+                        InputEvent::Input(k) => {
+                            let key = map_key(k);
+                            self.handle(key);
+                        },
+                        InputEvent::Tick => (),
+                    }
                 },
-                message = e2 => {
-                    self.log_message = message
+                info_message = e2 => {
+                    self.info_message = Some(Notification::new(info_message.unwrap()))
+                },
+                error_message = e3 => {
+                    self.error_message = Some(Notification::new(error_message.unwrap()))
                 }
             }
         }
@@ -195,4 +252,6 @@ impl App<'_> {
     pub(crate) fn activity_splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
         self.store.splits(activity)
     }
+
+    fn tick(&self) {}
 }

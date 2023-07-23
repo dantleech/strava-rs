@@ -6,17 +6,19 @@ use tokio::sync::mpsc::Sender;
 
 use crate::{client::StravaClient, store::activity::RawActivity};
 
+use super::logger::LogSender;
+
 pub struct IngestActivityTask<'a> {
     client: &'a StravaClient,
     connection: &'a mut SqliteConnection,
-    logger: Arc<Sender<String>>,
+    logger: LogSender,
 }
 
 impl IngestActivityTask<'_> {
     pub fn new<'a>(
         client: &'a StravaClient,
         connection: &'a mut SqliteConnection,
-        logger: Arc<Sender<String>>,
+        logger: LogSender,
     ) -> IngestActivityTask<'a> {
         IngestActivityTask {
             client,
@@ -33,7 +35,7 @@ impl IngestActivityTask<'_> {
 
         for r_activity in activities {
             self.logger
-                .send(format!("Downloading full actiity {}", r_activity.id)).await.unwrap();
+                .info(format!("Downloading full actiity {}", r_activity.id)).await;
 
             let s_activity = match self
                 .client
@@ -42,7 +44,7 @@ impl IngestActivityTask<'_> {
                     Ok(a) => a,
                     Err(err) => {
                         self.logger
-                            .send(format!("ERROR activity {}: {}", r_activity.id, err)).await.unwrap();
+                            .error(format!("ERROR activity {}: {}", r_activity.id, err)).await;
                         return Ok(())
                     }
                 };

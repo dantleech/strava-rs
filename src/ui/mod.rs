@@ -26,7 +26,7 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
             [
                 Constraint::Length(3),
                 Constraint::Min(4),
-                Constraint::Length(2),
+                Constraint::Length(if app.error_message.is_none() { 1 } else { 2 }),
             ]
             .as_ref(),
         )
@@ -76,17 +76,21 @@ fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
 
 fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
     let mut status: Vec<String> = Vec::new();
-    if app.filters.filter != *"" {
-        status.push(format!("filtered by \"{}\"", app.filters.filter))
+    if let Some(message) = &app.info_message {
+        status.push(message.to_string());
+    } else {
+        if app.filters.filter != *"" {
+            status.push(format!("filtered by \"{}\"", app.filters.filter))
+        }
+        status.push(format!("{} activities", app.filtered_activities().len()));
+        status.push(format!(
+            "sorted by {} {}",
+            app.filters.sort_by, app.filters.sort_order
+        ));
+        status.push(format!("{} units", app.unit_formatter.system));
     }
-    status.push(format!("{} activities", app.filtered_activities().len()));
-    status.push(format!(
-        "sorted by {} {}",
-        app.filters.sort_by, app.filters.sort_order
-    ));
-    status.push(format!("{} units", app.unit_formatter.system));
-    
-    if let Some(message) = &app.log_message {
+
+    if let Some(message) = &app.error_message {
         status.push(format!("\n{}", message));
     }
 
