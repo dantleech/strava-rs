@@ -8,8 +8,8 @@ pub mod sync;
 pub mod ui;
 pub mod util;
 
-use std::{io, panic, process, borrow::BorrowMut, ops::DerefMut};
-use diesel_migrations::MigrationHarness;
+use std::{io, panic, process, ops::DerefMut};
+
 
 use app::App;
 
@@ -19,7 +19,7 @@ use clap::Parser;
 use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode},
 };
-use diesel_migrations::{EmbeddedMigrations, embed_migrations};
+
 use event::input;
 use tokio::{
     sync::mpsc::{self},

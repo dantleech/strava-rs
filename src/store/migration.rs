@@ -1,6 +1,6 @@
-use std::error::Error;
 
-use diesel::{sqlite::Sqlite, SqliteConnection};
+
+use diesel::{SqliteConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
