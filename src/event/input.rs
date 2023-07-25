@@ -23,7 +23,10 @@ pub fn start(event_sender: EventSender) {
                     event_sender.blocking_send(InputEvent::Input(key)).unwrap();
                 }
             }
-            event_sender.blocking_send(InputEvent::Tick).unwrap();
+            match event_sender.blocking_send(InputEvent::Tick) {
+                Ok(_) => (),
+                Err(_) => (),
+            }
         }
     });
 }

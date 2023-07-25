@@ -6,7 +6,7 @@ use diesel::{
     SqliteConnection,
 };
 
-pub fn get_pool() -> Pool<ConnectionManager<SqliteConnection>> {
+pub fn get_pool(path: String) -> Pool<ConnectionManager<SqliteConnection>> {
     
     Pool::builder()
         .connection_customizer(Box::new(ConnectionOptions{
@@ -15,13 +15,13 @@ pub fn get_pool() -> Pool<ConnectionManager<SqliteConnection>> {
             busy_timeout: Some(Duration::from_secs(30)),
         }))
         .build(ConnectionManager::<SqliteConnection>::new(
-            "sqlite://strava.sqlite",
+            format!("sqlite://{}", path),
         ))
         .unwrap()
 }
 
 #[derive(Debug)]
-pub struct ConnectionOptions {
+struct ConnectionOptions {
     pub enable_wal: bool,
     pub enable_foreign_keys: bool,
     pub busy_timeout: Option<Duration>,

@@ -8,7 +8,8 @@ pub mod sync;
 pub mod ui;
 pub mod util;
 
-use std::{io, panic, process};
+use std::{io, panic, process, borrow::BorrowMut, ops::DerefMut};
+use diesel_migrations::MigrationHarness;
 
 use app::App;
 
@@ -18,18 +19,15 @@ use clap::Parser;
 use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode},
 };
+use diesel_migrations::{EmbeddedMigrations, embed_migrations};
 use event::input;
-
-
-
-
 use tokio::{
     sync::mpsc::{self},
 };
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
-use crate::{sync::{spawn_sync}, store::db::get_pool, event::logger::Logger};
+use crate::{sync::{spawn_sync}, store::{db::get_pool, migration::run_migrations}, event::logger::Logger};
 use crate::{
     store::activity::ActivityStore,
 };
@@ -47,6 +45,7 @@ struct Args {
     pub client_secret: String,
 }
 
+
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     env_logger::Builder::new()
@@ -59,7 +58,7 @@ async fn main() -> Result<(), anyhow::Error> {
         .place_state_file("access_token.json")
         .expect("Could not create state directory");
     let storage_path = dirs.get_data_home();
-    let pool = get_pool();
+    let pool = get_pool(format!("{}/strava.sqlite", storage_path.display()));
     let (event_sender, event_receiver) = mpsc::channel(32);
     let (sync_sender, sync_receiver) = mpsc::channel::<bool>(32);
     let logger = Logger::new(event_sender.clone());
@@ -71,6 +70,8 @@ async fn main() -> Result<(), anyhow::Error> {
     log::info!("Storage path: {}", storage_path.display());
     log::info!("");
 
+    let mut c = pool.get()?;
+    run_migrations(c.deref_mut());
 
     let orig_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {

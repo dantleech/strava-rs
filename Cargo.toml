@@ -32,3 +32,4 @@ polyline = "0.10.1"
 geo-types = "0.7.10"
 geoutils = "0.5.1"
 strum = { version = "0.25.0", features = ["derive"] }
+diesel_migrations = { version = "2.1.0", features = ["sqlite"] }
