@@ -32,3 +32,4 @@ strum = { version = "0.25.0", features = ["derive"] }
 diesel_migrations = { version = "2.1.0", features = ["sqlite"] }
 tui = { package = "ratatui", version = "0.22.0", features = ["all-widgets"]}
 tui-input = "0.7.1"
+confy = "0.5.1"

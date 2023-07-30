@@ -23,10 +23,9 @@ pub fn start(event_sender: EventSender) {
                     event_sender.blocking_send(InputEvent::Input(key)).unwrap();
                 }
             }
-            match event_sender.blocking_send(InputEvent::Tick) {
-                Ok(_) => (),
-                Err(_) => (),
-            }
+
+            // ignore errors from tick - it causes panics on shutdown
+            let _ = event_sender.blocking_send(InputEvent::Tick);
         }
     });
 }

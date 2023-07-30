@@ -10,7 +10,9 @@ pub fn get_pool(path: String) -> Pool<ConnectionManager<SqliteConnection>> {
     
     Pool::builder()
         .connection_customizer(Box::new(ConnectionOptions{
-            enable_wal: true,
+            // disabling prevents "database locked" errors on startup, but causes
+            // concurrent queries to block eachother
+            enable_wal: false,
             enable_foreign_keys: true,
             busy_timeout: Some(Duration::from_secs(30)),
         }))

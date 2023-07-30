@@ -3,7 +3,7 @@ use strum::IntoEnumIterator;
 use tui::{
     backend::Backend,
     style::{Color, Style},
-    text::{Span, Spans},
+    text::{Span, Line},
     widgets::{Block, Borders, Clear, Paragraph},
     Frame,
 };
@@ -107,7 +107,7 @@ fn sort_option_paragraph<'a>(_app: &'a mut App) -> Paragraph<'a> {
         Style::default().fg(Color::White),
     ));
 
-    let text: Vec<Spans> = vec![Spans::from(sorts)];
+    let text: Vec<Line> = vec![Line::from(sorts)];
 
     Paragraph::new(text).block(
         Block::default()
