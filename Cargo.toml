@@ -8,15 +8,13 @@ edition = "2021"
 
 [dependencies]
 diesel = { version = "2.1.0", features = ["sqlite","chrono","r2d2"] }
-dotenvy = "0.15"
 anyhow = "1.0.68"
 chrono = { version = "0.4.23", features = ["serde"] }
 clap = { version = "4.1.4", features = ["derive"] }
 crossterm = "0.26.0"
 libsqlite3-sys = { version = ">=0.17.2, <0.27.0", features = ["bundled_bindings", "bundled"] }
 env_logger = "0.10.0"
-futures-util = "0.3.25"
-hyper = { version = "0.14.23", features = ["client", "full"] }
+hyper = { version = "0.14.23", features = ["client", "http1"] }
 log = "0.4.17"
 open = "3.2.0"
 serde = { version = "1.0.152", features = ["derive"] }
