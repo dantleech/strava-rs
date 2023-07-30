@@ -16,7 +16,6 @@ jobs:
       matrix:
         name: [
             linux,
-            windows,
             macos
         ]
 
@@ -25,11 +24,7 @@ jobs:
             os: ubuntu-latest
             artifact_name: target/release/strava-rs
             asset_name: strava-rs-linux
-          - name: windows
-            os: windows-latest
-            artifact_name: target/release/strava-rs.exe
-            asset_name: strava-rs-windows
-          - name: macos
+         - name: macos
             os: macos-latest
             artifact_name: target/release/strava-rs
             asset_name: strava-rs-macos
@@ -46,3 +41,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: ${{ matrix.asset_name }}
+
+    - name: Test
+      run: chmod a+x && ./${{ matrix.asset_name }}
