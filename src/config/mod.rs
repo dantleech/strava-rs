@@ -27,8 +27,8 @@ pub struct Config {
 }
 
 pub enum ConfigResult {
-    Great(Config),
-    Error(String)
+    Ok(Config),
+    Instructions(String)
 }
 
 pub fn load_config() -> ConfigResult {
@@ -36,7 +36,7 @@ pub fn load_config() -> ConfigResult {
     let config: ConfigFile = confy::load("strava-rs", "config").expect("Could not load config");
 
     if None == config.client_id {
-        return ConfigResult::Error(format!("
+        return ConfigResult::Instructions(format!("
 Welcome to Strava RS!
 ---------------------
 
@@ -55,7 +55,7 @@ And run the application again, alternatively you can use the `--client-id` and `
                                    ", get_configuration_file_path("strava-rs", "config").unwrap().to_str().unwrap()))
     }
 
-    ConfigResult::Great(Config {
+    ConfigResult::Ok(Config {
         activity_type: args.activity_type.or(config.activity_type),
         client_id: args.client_id.or(config.client_id).unwrap(),
         client_secret:args.client_secret.or(config.client_secret).unwrap() 

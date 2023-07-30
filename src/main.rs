@@ -53,8 +53,8 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let config_result = load_config();
     let config: Config = match config_result {
-        ConfigResult::Great(c) => c,
-        ConfigResult::Error(m) => {
+        ConfigResult::Ok(c) => c,
+        ConfigResult::Instructions(m) => {
             println!("{}", m);
             return Ok(());
         }

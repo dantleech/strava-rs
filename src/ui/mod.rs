@@ -6,7 +6,7 @@ use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},
     style::Style,
-    text::{Span, Spans, Text},
+    text::{Span, Line, Text},
     widgets::{Block, Borders, Paragraph},
     Frame,
 };
@@ -48,7 +48,7 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
 
 fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
     let strava = ColorTheme::Orange.to_color();
-    let text: Vec<Spans> = vec![Spans::from(vec![
+    let text: Vec<Line> = vec![Line::from(vec![
         Span::styled("[k]", Style::default().fg(strava)),
         Span::raw("up "),
         Span::styled("[j]", Style::default().fg(strava)),
