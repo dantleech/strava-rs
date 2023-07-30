@@ -35,7 +35,7 @@ pub fn load_config() -> ConfigResult {
     let args = Args::parse();
     let config: ConfigFile = confy::load("strava-rs", "config").expect("Could not load config");
 
-    if None == config.client_id {
+    if config.client_id.is_none() {
         return ConfigResult::Instructions(format!("
 Welcome to Strava RS!
 ---------------------

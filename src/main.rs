@@ -9,13 +9,13 @@ pub mod sync;
 pub mod ui;
 pub mod util;
 
-use std::{io, panic, process, ops::DerefMut, os};
+use std::{io, panic, process, ops::DerefMut};
 
 
 use config::ConfigResult;
 use app::App;
 
-use clap::Parser;
+
 
 
 use crossterm::{
@@ -23,7 +23,7 @@ use crossterm::{
 };
 
 use event::input;
-use serde::{Serialize, Deserialize};
+
 use tokio::{
     sync::mpsc::{self},
 };
