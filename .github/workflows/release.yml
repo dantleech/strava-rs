@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install deps
-      run: apt-get update && apt-get install -y openssl-dev
+      run: sudo apt-get update && sudo apt-get install -y openssl-dev
     - name: Build
       run: env OPENSSL_LIB_DIR=/usr/local/lib/ OPENSSL_INCLUDE_DIR=/usr/local/include OPENSSL_STATIC=yes  cargo build --release --locked
 
