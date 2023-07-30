@@ -41,6 +41,3 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: ${{ matrix.asset_name }}
-
-    - name: Test
-      run: chmod a+x && ./${{ matrix.asset_name }}

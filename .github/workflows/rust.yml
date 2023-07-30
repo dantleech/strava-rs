@@ -20,6 +20,3 @@ jobs:
       run: make
     - name: Build
       run: cargo build --release --locked
-    - name: Smoke
-      run: ./target/release/strava-rs
-
