@@ -1,6 +1,7 @@
 pub mod app;
 pub mod authenticator;
 pub mod client;
+pub mod config;
 pub mod component;
 pub mod event;
 pub mod store;
@@ -8,9 +9,10 @@ pub mod sync;
 pub mod ui;
 pub mod util;
 
-use std::{io, panic, process, ops::DerefMut};
+use std::{io, panic, process, ops::DerefMut, os};
 
 
+use config::ConfigResult;
 use app::App;
 
 use clap::Parser;
@@ -20,7 +22,6 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode},
 };
 
-use diesel::internal::derives::multiconnection::array_comparison::AsInExpression;
 use event::input;
 use serde::{Serialize, Deserialize};
 use tokio::{
@@ -29,30 +30,10 @@ use tokio::{
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
-use crate::{sync::{spawn_sync}, store::{db::get_pool, migration::run_migrations}, event::logger::Logger};
+use crate::{sync::{spawn_sync}, store::{db::get_pool, migration::run_migrations}, event::logger::Logger, config::{load_config, Config}};
 use crate::{
     store::activity::ActivityStore,
 };
-
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    #[arg(short, long)]
-    pub activity_type: Option<String>,
-    #[arg(short, long)]
-    pub no_sync: bool,
-    #[arg(long)]
-    pub client_id: Option<String>,
-    #[arg(long)]
-    pub client_secret: Option<String>,
-}
-
-#[derive(Default, Debug, Serialize, Deserialize)]
-pub struct Config {
-    pub client_id: Option<String>,
-    pub client_secret: Option<String>,
-}
-
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
@@ -60,7 +41,6 @@ async fn main() -> Result<(), anyhow::Error> {
         .filter(None, log::LevelFilter::Info)
         .init();
 
-    let args = Args::parse();
     let dirs: BaseDirectories = xdg::BaseDirectories::with_prefix("strava-rs").unwrap();
     let access_token_path = dirs
         .place_state_file("access_token.json")
@@ -70,9 +50,15 @@ async fn main() -> Result<(), anyhow::Error> {
     let (event_sender, event_receiver) = mpsc::channel(32);
     let (sync_sender, sync_receiver) = mpsc::channel::<bool>(32);
     let logger = Logger::new(event_sender.clone());
-    let config: Config = confy::load("strava-rs", "config").expect("Could not load config");
-    let client_id = args.client_id.or(config.client_id).expect("--client-id must be specified");
-    let client_secret = args.client_secret.or(config.client_secret).expect("--client-secret must be specified");
+
+    let config_result = load_config();
+    let config: Config = match config_result {
+        ConfigResult::Great(c) => c,
+        ConfigResult::Error(m) => {
+            println!("{}", m);
+            return Ok(());
+        }
+    };
 
     log::info!("Strava TUI");
     log::info!("==========");
@@ -103,8 +89,8 @@ async fn main() -> Result<(), anyhow::Error> {
     let sync_task = spawn_sync(
         pool.clone(),
         event_sender.clone(),
-        client_id,
-        client_secret,
+        config.client_id,
+        config.client_secret,
         access_token_path.to_str().unwrap().to_string(),
         logger,
         sync_receiver
@@ -113,7 +99,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut app_conn = pool.clone().get().unwrap();
     let mut activity_store = ActivityStore::new(&mut app_conn);
     let mut app = App::new(&mut activity_store, event_receiver, event_sender.clone(), sync_sender);
-    app.activity_type = args.activity_type;
+    app.activity_type = config.activity_type;
     app.send(input::InputEvent::Sync);
     app.run(&mut terminal).await?;
     sync_task.abort();
