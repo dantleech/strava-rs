@@ -3,7 +3,7 @@ mod auth_code_fetcher;
 mod token_store;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use hyper_tls::HttpsConnector;
+use hyper_rustls::HttpsConnector;
 use serde::{Deserialize, Serialize};
 
 use hyper::{client::HttpConnector, Client};

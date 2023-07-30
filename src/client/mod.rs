@@ -4,14 +4,14 @@ use std::{fmt::Display};
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use hyper::{client::HttpConnector, Body, Client, Method, Request, Response};
-use hyper_tls::HttpsConnector;
+use hyper_rustls::{HttpsConnectorBuilder, HttpsConnector};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::event::{logger::Logger};
 
 pub fn new_strava_client(config: StravaConfig, logger: Logger) -> StravaClient {
-    let connector = HttpsConnector::new();
+    let connector = HttpsConnectorBuilder::new().with_native_roots().https_only().enable_http1().build();
     let client = Client::builder().build(connector);
 
     StravaClient {

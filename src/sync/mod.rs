@@ -1,7 +1,7 @@
 
 use diesel::{r2d2::{ConnectionManager, Pool}, SqliteConnection};
 use hyper::Client;
-use hyper_tls::HttpsConnector;
+use hyper_rustls::HttpsConnectorBuilder;
 use tokio::{task, sync::mpsc::Receiver};
 
 use crate::{authenticator::Authenticator, event::{input::EventSender, logger::Logger}, client::{StravaConfig, new_strava_client}};
@@ -21,7 +21,7 @@ pub async fn spawn_sync(
     logger: Logger,
     mut sync_receiver: Receiver<bool>,
 ) -> task::JoinHandle<()> {
-    let connector = HttpsConnector::new();
+    let connector = HttpsConnectorBuilder::new().with_native_roots().https_only().enable_http1().build();
     let mut sync_conn = pool.get().unwrap();
     let event_sender = event_sender;
 

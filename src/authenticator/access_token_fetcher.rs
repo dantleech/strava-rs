@@ -1,5 +1,5 @@
 use hyper::{client::HttpConnector, Body, Client, Request, Response};
-use hyper_tls::HttpsConnector;
+use hyper_rustls::HttpsConnector;
 
 use super::AuthResponse;
 

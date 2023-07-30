@@ -25,13 +25,19 @@ jobs:
             os: ubuntu-latest
             artifact_name: target/release/strava-rs
             asset_name: strava-rs-linux
+          - name: windows
+            os: windows-latest
+            artifact_name: target/release/strava-rs.exe
+            asset_name: strava-rs-windows
+          - name: macos
+            os: macos-latest
+            artifact_name: target/release/strava-rs
+            asset_name: strava-rs-macos
 
     steps:
     - uses: actions/checkout@v3
-    - name: Install deps
-      run: sudo apt-get update && sudo apt-get install -y openssl-dev
     - name: Build
-      run: env OPENSSL_LIB_DIR=/usr/local/lib/ OPENSSL_INCLUDE_DIR=/usr/local/include OPENSSL_STATIC=yes  cargo build --release --locked
+      run: cargo build --release --locked
 
     - name: Rename
       run: mv ${{ matrix.artifact_name }} ${{ matrix.asset_name }}
