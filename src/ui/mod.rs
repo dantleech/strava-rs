@@ -1,6 +1,6 @@
 pub mod color;
 
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+
 
 use tui::{
     backend::Backend,
