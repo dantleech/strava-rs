@@ -20,7 +20,9 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode},
 };
 
+use diesel::internal::derives::multiconnection::array_comparison::AsInExpression;
 use event::input;
+use serde::{Serialize, Deserialize};
 use tokio::{
     sync::mpsc::{self},
 };
@@ -40,9 +42,15 @@ struct Args {
     #[arg(short, long)]
     pub no_sync: bool,
     #[arg(long)]
-    pub client_id: String,
+    pub client_id: Option<String>,
     #[arg(long)]
-    pub client_secret: String,
+    pub client_secret: Option<String>,
+}
+
+#[derive(Default, Debug, Serialize, Deserialize)]
+pub struct Config {
+    pub client_id: Option<String>,
+    pub client_secret: Option<String>,
 }
 
 
@@ -62,6 +70,9 @@ async fn main() -> Result<(), anyhow::Error> {
     let (event_sender, event_receiver) = mpsc::channel(32);
     let (sync_sender, sync_receiver) = mpsc::channel::<bool>(32);
     let logger = Logger::new(event_sender.clone());
+    let config: Config = confy::load("strava-rs", "config").expect("Could not load config");
+    let client_id = args.client_id.or(config.client_id).expect("--client-id must be specified");
+    let client_secret = args.client_secret.or(config.client_secret).expect("--client-secret must be specified");
 
     log::info!("Strava TUI");
     log::info!("==========");
@@ -92,8 +103,8 @@ async fn main() -> Result<(), anyhow::Error> {
     let sync_task = spawn_sync(
         pool.clone(),
         event_sender.clone(),
-        args.client_id,
-        args.client_secret,
+        client_id,
+        client_secret,
         access_token_path.to_str().unwrap().to_string(),
         logger,
         sync_receiver
