@@ -21,8 +21,8 @@ pub fn draw<B: Backend>(
 ) -> Result<(), anyhow::Error> {
     let rows =
         Layout::default().constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)]).split(area);
-    list::draw(app, f, rows[0])?;
     chart::draw(app, f, rows[1])?;
+    list::draw(app, f, rows[0])?;
     Ok(())
 }
 
