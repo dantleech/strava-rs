@@ -10,9 +10,7 @@ pub fn get_pool(path: String) -> Pool<ConnectionManager<SqliteConnection>> {
     
     Pool::builder()
         .connection_customizer(Box::new(ConnectionOptions{
-            // disabling prevents "database locked" errors on startup, but causes
-            // concurrent queries to block eachother
-            enable_wal: false,
+            enable_wal: true,
             enable_foreign_keys: true,
             busy_timeout: Some(Duration::from_secs(30)),
         }))
@@ -34,14 +32,14 @@ impl diesel::r2d2::CustomizeConnection<SqliteConnection, diesel::r2d2::Error>
 {
     fn on_acquire(&self, conn: &mut SqliteConnection) -> Result<(), diesel::r2d2::Error> {
         (|| {
+            if let Some(d) = self.busy_timeout {
+                conn.batch_execute(&format!("PRAGMA busy_timeout = {};", d.as_millis()))?;
+            }
             if self.enable_wal {
                 conn.batch_execute("PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL;")?;
             }
             if self.enable_foreign_keys {
                 conn.batch_execute("PRAGMA foreign_keys = ON;")?;
-            }
-            if let Some(d) = self.busy_timeout {
-                conn.batch_execute(&format!("PRAGMA busy_timeout = {};", d.as_millis()))?;
             }
             Ok(())
         })()
