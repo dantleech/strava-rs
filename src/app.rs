@@ -13,7 +13,7 @@ use tui::{
     widgets::TableState,
     Frame, Terminal,
 };
-use tui_textarea::TextArea;
+use tui_input::Input;
 
 use crate::{
     component::activity_list::ActivityListState, input::InputEvent, store::activity::ActivityStore, event::input::EventSender,
@@ -58,7 +58,7 @@ pub struct App<'a> {
     pub quit: bool,
     pub active_page: ActivePage,
     pub unit_formatter: UnitFormatter,
-    pub activity_list: ActivityListState<'a>,
+    pub activity_list: ActivityListState,
     pub filters: ActivityFilters,
 
     pub activity_type: Option<String>,
@@ -127,7 +127,7 @@ impl App<'_> {
             unit_formatter: UnitFormatter::imperial(),
             activity_list: ActivityListState {
                 table_state: TableState::default(),
-                filter_text_area: TextArea::default(),
+                filter_text_area: Input::default(),
                 filter_dialog: false,
                 sort_dialog: false,
             },

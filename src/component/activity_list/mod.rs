@@ -7,7 +7,7 @@ use tui::{
     layout::{Constraint, Layout},
     Frame, widgets::TableState,
 };
-use tui_textarea::TextArea;
+use tui_input::Input;
 
 use crate::{app::App, event::keymap::MappedKey};
 
@@ -26,9 +26,9 @@ pub fn draw<B: Backend>(
     Ok(())
 }
 
-pub struct ActivityListState<'a> {
+pub struct ActivityListState {
     pub table_state: TableState,
-    pub filter_text_area: TextArea<'a>,
+    pub filter_text_area: Input,
     pub filter_dialog: bool,
     pub sort_dialog: bool,
 }

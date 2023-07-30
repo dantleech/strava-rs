@@ -1,11 +1,13 @@
+use crossterm::event::Event;
 use tui::{
     backend::Backend,
     layout::Constraint,
     style::{Color, Modifier, Style},
     text::Span,
-    widgets::{Block, Borders, Cell, Clear, Row, Table},
+    widgets::{Block, Borders, Cell, Clear, Row, Table, Paragraph},
     Frame,
 };
+use tui_input::backend::crossterm::EventHandler;
 
 use crate::{
     app::{App, SortOrder},
@@ -14,7 +16,7 @@ use crate::{
         util::{table_state_next, table_state_prev}, input::InputEvent,
     },
     store::activity::Activity,
-    ui::{centered_rect_absolute, color::ColorTheme, key_event_to_input}, component::table_status_select_current,
+    ui::{centered_rect_absolute, color::ColorTheme}, component::table_status_select_current,
 };
 
 use super::sort_dialog;
@@ -24,7 +26,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
         let matched = match key.strava_event {
             StravaEvent::Enter => {
                 app.filters.filter =
-                    app.activity_list.filter_text_area.lines()[0].to_string();
+                    app.activity_list.filter_text_area.value().to_string();
                 app.activity_list.filter_dialog = false;
                 app.activity_list.table_state.select(Some(0));
                 true
@@ -35,8 +37,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
             return;
         }
 
-        app.activity_list.filter_text_area
-            .input(key_event_to_input(key.key_event));
+        app.activity_list.filter_text_area.handle_event(&Event::Key(key.key_event));
         return;
     }
 
@@ -94,15 +95,20 @@ pub fn draw<B: Backend>(
 
     if app.activity_list.filter_dialog {
         let rect = centered_rect_absolute(64, 3, f.size());
-        app.activity_list.filter_text_area.set_block(
-            Block::default()
+        let p = Paragraph::new(app.activity_list.filter_text_area.value())
+            .block(Block::default()
                 .borders(Borders::ALL)
                 .title("Filter")
-                .border_style(Style::default().fg(ColorTheme::Dialog.to_color())),
-        );
+                .border_style(Style::default().fg(ColorTheme::Dialog.to_color()))
+            );
+
+        f.set_cursor(
+                1 + rect.x + app.activity_list.filter_text_area.visual_cursor() as u16,
+                rect.y + 1,
+            );
 
         f.render_widget(Clear, rect);
-        f.render_widget(app.activity_list.filter_text_area.widget(), rect);
+        f.render_widget(p, rect);
 
         return Ok(());
     }
