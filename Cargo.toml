@@ -12,7 +12,7 @@ dotenvy = "0.15"
 anyhow = "1.0.68"
 chrono = { version = "0.4.23", features = ["serde"] }
 clap = { version = "4.1.4", features = ["derive"] }
-crossterm = "0.25.0"
+crossterm = "0.26.0"
 libsqlite3-sys = { version = ">=0.17.2, <0.27.0", features = ["bundled_bindings", "bundled"] }
 env_logger = "0.10.0"
 futures-util = "0.3.25"
@@ -22,10 +22,7 @@ log = "0.4.17"
 open = "3.2.0"
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.91"
-termion = "2.0.1"
-tui-textarea = "0.2.0"
 tokio = { version = "1.24.2", features = ["full"] }
-tui = "0.19.0"
 url = "2.3.1"
 xdg = "2.4.1"
 polyline = "0.10.1"
@@ -33,3 +30,5 @@ geo-types = "0.7.10"
 geoutils = "0.5.1"
 strum = { version = "0.25.0", features = ["derive"] }
 diesel_migrations = { version = "2.1.0", features = ["sqlite"] }
+tui = { package = "ratatui", version = "0.22.0", features = ["all-widgets"]}
+tui-input = "0.7.1"
