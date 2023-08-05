@@ -5,19 +5,11 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
     SqliteConnection,
 };
+use sqlx::SqlitePool;
 
-pub fn get_pool(path: String) -> Pool<ConnectionManager<SqliteConnection>> {
+pub async fn get_pool(path: String) -> SqlitePool {
     
-    Pool::builder()
-        .connection_customizer(Box::new(ConnectionOptions{
-            enable_wal: true,
-            enable_foreign_keys: true,
-            busy_timeout: Some(Duration::from_secs(30)),
-        }))
-        .build(ConnectionManager::<SqliteConnection>::new(
-            format!("sqlite://{}", path),
-        ))
-        .unwrap()
+    return SqlitePool::connect(format!("sqlite://{}", path).as_str()).await.expect("Could not connect to DB");
 }
 
 #[derive(Debug)]
