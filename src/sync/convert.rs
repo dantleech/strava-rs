@@ -1,7 +1,7 @@
 
 use libsqlite3_sys::sqlite3_expired;
 use sqlx::QueryBuilder;
-use sqlx::SqliteConnection;
+use sqlx::SqlitePool;
 
 use crate::client;
 use crate::event::input::EventSender;
@@ -11,19 +11,19 @@ use crate::store::activity::Activity;
 use crate::store::activity::ActivitySplit;
 
 pub struct AcitivityConverter<'a> {
-    connection: &'a mut SqliteConnection,
+    pool: &'a SqlitePool,
     event_sender: EventSender,
     logger: Logger,
 }
 
 impl AcitivityConverter<'_> {
     pub fn new(
-        connection: &mut SqliteConnection,
+        pool: &SqlitePool,
         event_sender: EventSender,
         logger: Logger,
     ) -> AcitivityConverter<'_> {
         AcitivityConverter {
-            connection,
+            pool,
             event_sender,
             logger,
         }
@@ -33,7 +33,7 @@ impl AcitivityConverter<'_> {
             r#"
             SELECT activity, listed FROM raw_activity WHERE synced = false
             "#
-        ).fetch_all(self.connection).await?;
+        ).fetch_all(self.pool).await?;
 
         for raw_activity in raw_activities {
             let listed: client::Activity =
@@ -41,9 +41,9 @@ impl AcitivityConverter<'_> {
             self.logger.info(format!("Converting activity {}", listed.name)).await;
             let activity = Activity {
                 id: listed.id,
-                title: listed.name,
-                description: match listed.description {
-                    Some(d) => d,
+                title: listed.name.clone(),
+                description: match &listed.description {
+                    Some(d) => d.clone(),
                     None => "".to_string(),
                 },
                 activity_type: listed.sport_type.clone(),
@@ -55,12 +55,12 @@ impl AcitivityConverter<'_> {
                 average_heartrate: listed.average_heartrate,
                 max_heartrate: listed.max_heartrate,
                 start_date: listed.start_date.map(|date| date.naive_utc()),
-                summary_polyline: Some(listed.map.summary_polyline),
+                summary_polyline: Some(listed.map.summary_polyline.clone()),
                 average_cadence: listed.average_cadence,
                 kudos: listed.kudos_count,
-                location_country: listed.location_country,
-                location_state: listed.location_state,
-                location_city: listed.location_city,
+                location_country: listed.location_country.clone(),
+                location_state: listed.location_state.clone(),
+                location_city: listed.location_city.clone(),
                 athletes: listed.athlete_count,
             };
 
@@ -89,29 +89,26 @@ impl AcitivityConverter<'_> {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT DO NOTHING
                 "#,
-                listed.id,
-                listed.name,
-                match listed.description {
-                    Some(d) => d,
-                    None => "".to_string(),
-                },
-                listed.sport_type.clone(),
-                listed.distance,
-                listed.moving_time,
-                listed.elapsed_time,
-                listed.total_elevation_gain,
-                listed.sport_type.clone(),
-                listed.average_heartrate,
-                listed.max_heartrate,
-                listed.start_date.map(|date| date.naive_utc()),
-                Some(listed.map.summary_polyline),
-                listed.average_cadence,
-                listed.kudos_count,
-                listed.location_country,
-                listed.location_state,
-                listed.location_city,
-                listed.athlete_count,
-            ).execute(self.connection).await;
+                activity.id,
+                activity.title,
+                activity.description,
+                activity.sport_type,
+                activity.distance,
+                activity.moving_time,
+                activity.elapsed_time,
+                activity.total_elevation_gain,
+                activity.sport_type,
+                activity.average_heartrate,
+                activity.max_heartrate,
+                activity.start_date,
+                activity.summary_polyline,
+                activity.average_cadence,
+                activity.kudos,
+                activity.location_country,
+                activity.location_state,
+                activity.location_city,
+                activity.athletes,
+            ).execute(self.pool).await?;
 
             if let Some(full_activity) = raw_activity.activity {
                 let activity: client::Activity =
@@ -121,7 +118,7 @@ impl AcitivityConverter<'_> {
                     DELETE FROM activity_split WHERE activity_id = ?
                     "#,
                     activity.id
-                ).execute(self.connection).await?;
+                ).execute(self.pool).await?;
 
                 if let Some(laps) = activity.splits_standard {
                     let mut activity_laps: Vec<ActivitySplit> = vec![];
@@ -136,13 +133,13 @@ impl AcitivityConverter<'_> {
                             split: lap.split,
                         });
                     }
-                    let qb = QueryBuilder::new(
+                    let mut qb = QueryBuilder::new(
                         r#"
                         INSERT INTO activity_lap (activity_id, distance, moving_time, elapsed-time, average_speed, elevation_difference, split)")
                         "#
                     );
                     qb.push_values(activity_laps, |mut b, activity_lap| {
-                        b.push_bind(activity_lap.id);
+                        b.push_bind(activity_lap.activity_id);
                         b.push_bind(activity_lap.distance);
                         b.push_bind(activity_lap.moving_time);
                         b.push_bind(activity_lap.elapsed_time);
@@ -150,7 +147,7 @@ impl AcitivityConverter<'_> {
                         b.push_bind(activity_lap.elevation_difference);
                         b.push_bind(activity_lap.split);
                     });
-                    qb.build().execute(self.connection).await?;
+                    qb.build().execute(self.pool).await?;
                 }
             }
         }

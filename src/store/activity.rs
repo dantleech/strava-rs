@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
-use sqlx::{SqliteConnection, FromRow};
+use sqlx::{SqliteConnection, FromRow, SqlitePool};
 
 #[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
 pub struct Activity {
@@ -44,12 +44,12 @@ impl ActivitySplit {
 }
 
 pub struct ActivityStore<'a> {
-    connection: &'a mut SqliteConnection,
+    pool: &'a SqlitePool,
 }
 
 impl ActivityStore<'_> {
-    pub(crate) fn new(connection: &mut SqliteConnection) -> ActivityStore<'_> {
-        ActivityStore { connection }
+    pub(crate) fn new(pool: &SqlitePool) -> ActivityStore<'_> {
+        ActivityStore { pool }
     }
 
     pub(crate) async fn activities(&mut self) -> Vec<Activity> {
@@ -57,7 +57,7 @@ impl ActivityStore<'_> {
             r#"
             SELECT * FROM activity ORDER BY start_date DESC
             "#
-        ).fetch_all(self.connection).await.unwrap()
+        ).fetch_all(self.pool).await.unwrap()
     }
 
     pub(crate) async fn splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
@@ -65,7 +65,7 @@ impl ActivityStore<'_> {
             r#"
             SELECT * FROM activity_split WHERE activity_id = ? ORDER BY split ASC
             "#
-        ).fetch_all(self.connection).await.expect("Could not load activity splits")
+        ).fetch_all(self.pool).await.expect("Could not load activity splits")
     }
 }
 

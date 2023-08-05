@@ -1,32 +1,32 @@
-use sqlx::SqliteConnection;
+use sqlx::SqlitePool;
 
 use crate::event::logger::Logger;
 use crate::{client::StravaClient};
 
 pub struct IngestActivityTask<'a> {
     client: &'a StravaClient,
-    connection: &'a mut SqliteConnection,
+    pool: &'a SqlitePool,
     logger: Logger,
 }
 
 impl IngestActivityTask<'_> {
     pub fn new<'a>(
         client: &'a StravaClient,
-        connection: &'a mut SqliteConnection,
+        pool: &'a SqlitePool,
         logger: Logger,
     ) -> IngestActivityTask<'a> {
         IngestActivityTask {
             client,
-            connection,
+            pool,
             logger,
         }
     }
     pub async fn execute(&mut self) -> Result<(), anyhow::Error> {
-        let activity_records = sqlx::query(
+        let activity_records = sqlx::query!(
             r#"
             SELECT id FROM raw_activity WHERE activity IS NULL
             "#
-        ).fetch_all(self.connection).await;
+        ).fetch_all(self.pool).await?;
 
         for activity_record in activity_records {
             self.logger.info(format!("Downloading full actiity {}", activity_record.id)).await;
@@ -42,13 +42,15 @@ impl IngestActivityTask<'_> {
                     }
                 };
 
-            sqlx::query!(
+            sqlx::query(
                 r#"
                 UPDATE raw_activity SET activity = ? WHERE id = ?
                 "#,
+            ).bind(
                 s_activity.to_string(),
+            ).bind(
                 activity_record.id,
-            );
+            ).execute(self.pool).await?;
         }
         Ok(())
     }

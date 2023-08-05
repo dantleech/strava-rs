@@ -1,5 +1,4 @@
 
-use diesel::{r2d2::{ConnectionManager, Pool}, SqliteConnection};
 use hyper::Client;
 use hyper_rustls::HttpsConnectorBuilder;
 use sqlx::SqlitePool;
@@ -13,8 +12,8 @@ pub mod convert;
 pub mod ingest_activities;
 pub mod ingest_activity;
 
-pub async fn spawn_sync(
-    pool: &SqlitePool,
+pub async fn spawn_sync<'a>(
+    pool: SqlitePool,
     event_sender: EventSender,
     client_id: String,
     client_secret: String,
@@ -23,7 +22,6 @@ pub async fn spawn_sync(
     mut sync_receiver: Receiver<bool>,
 ) -> task::JoinHandle<()> {
     let connector = HttpsConnectorBuilder::new().with_native_roots().https_only().enable_http1().build();
-    let mut sync_conn = pool.acquire().await.unwrap();
     let event_sender = event_sender;
 
     task::spawn(async move {
@@ -41,15 +39,15 @@ pub async fn spawn_sync(
                 access_token: authenticator.access_token().await.unwrap(),
             };
             let client = new_strava_client(api_config, logger.clone());
-                IngestActivitiesTask::new(&client, &mut sync_conn, logger.clone())
+                IngestActivitiesTask::new(&client, &pool, logger.clone())
                     .execute()
                     .await
                     .unwrap();
-                IngestActivityTask::new(&client, &mut sync_conn, logger.clone())
+                IngestActivityTask::new(&client, &pool, logger.clone())
                     .execute()
                     .await
                     .unwrap();
-                AcitivityConverter::new(&mut sync_conn, event_sender.clone(), logger.clone())
+                AcitivityConverter::new(&pool, event_sender.clone(), logger.clone())
                     .convert()
                     .await
                     .unwrap();

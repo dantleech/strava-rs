@@ -137,7 +137,7 @@ impl App<'_> {
                 filter: "".to_string(),
             },
             activity: None,
-            activities: store.activities(),
+            activities: vec![],
             store,
 
             activity_type: None,
@@ -153,6 +153,8 @@ impl App<'_> {
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     ) -> Result<(), anyhow::Error> {
+        self.activities = self.store.activities().await;
+
         loop {
             if self.quit {
                 break;
@@ -254,7 +256,7 @@ impl App<'_> {
     }
 
     pub(crate) async fn activity_splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
-        self.store.splits(activity)
+        self.store.splits(activity).await
     }
 
     pub fn send(&mut self, event: InputEvent) {
