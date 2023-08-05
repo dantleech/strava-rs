@@ -1,5 +1,4 @@
 name: Rust
-
 on:
   push:
     branches: [ "master" ]
@@ -19,4 +18,8 @@ jobs:
     - name: Lint and test
       run: make
     - name: Build
-      run: cargo build --release --locked
+      run: |
+        cargo sqlx database create
+        cargo sqlx migrate run
+        export DATABASE_URL=sqlite://strava.sqlite
+        cargo build --release --locked
