@@ -19,7 +19,7 @@ jobs:
       run: make
     - name: Build
       run: |
+        export DATABASE_URL=sqlite://strava.sqlite
         cargo sqlx database create
         cargo sqlx migrate run
-        export DATABASE_URL=sqlite://strava.sqlite
         cargo build --release --locked
