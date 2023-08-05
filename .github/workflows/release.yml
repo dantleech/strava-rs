@@ -32,11 +32,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build
-      run: |
-        cargo sqlx database create
-        cargo sqlx migrate run
-        export DATABASE_URL=sqlite://strava.sqlite
-        cargo build --release --locked
+      run: cargo build --release --locked
 
     - name: Rename
       run: mv ${{ matrix.artifact_name }} ${{ matrix.asset_name }}
