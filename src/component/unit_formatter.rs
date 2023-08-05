@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, f64::INFINITY};
 
 pub struct UnitFormatter {
     pub system: UnitSystem,
@@ -56,14 +56,15 @@ impl UnitFormatter {
     }
 
     pub fn pace(&self, time: i64, distance: f64) -> String {
+        let spm = time as f64 / distance;
+        if spm == INFINITY {
+            return "N/A".to_string();
+        }
         match self.system {
             UnitSystem::Metric => {
-                let spm = time as f64 / distance;
-
                 format!("{} /km", self.stopwatch_time((spm * 1000.0).round() as i64))
             }
             UnitSystem::Imperial => {
-                let spm = time as f64 / distance;
                 format!(
                     "{} /mi",
                     self.stopwatch_time(((spm * 1000.0) / 0.621371).round() as i64)
