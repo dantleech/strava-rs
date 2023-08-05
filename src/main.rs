@@ -86,7 +86,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     // start sync async task
     let sync_task = spawn_sync(
-        pool.clone(),
+        &pool,
         event_sender.clone(),
         config.client_id,
         config.client_secret,

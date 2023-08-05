@@ -1,16 +1,9 @@
-
-
-
 use chrono::{NaiveDateTime};
-use diesel::prelude::*;
-use diesel::{RunQueryDsl, SqliteConnection};
-
-
+use sqlx::SqliteConnection;
 
 use crate::event::logger::Logger;
 use crate::{
     client::StravaClient,
-    store::{activity::RawActivity, schema},
 };
 
 
@@ -29,19 +22,19 @@ impl IngestActivitiesTask<'_> {
         IngestActivitiesTask { client, connection, logger }
     }
     pub async fn execute(&mut self) -> Result<(), anyhow::Error> {
-        use crate::store::schema::raw_activity::dsl::*;
         let mut page: u32 = 0;
         const PAGE_SIZE: u32 = 100;
-        let last_epoch = raw_activity
-            .select(diesel::dsl::max(created_at))
-            .limit(1)
-            .first::<Option<NaiveDateTime>>(self.connection)?;
+        let last = sqlx::query!(
+            r#"
+SELECT MAX(created_at) as epoch FROM raw_activity LIMIT 1
+            "#
+        ).fetch_one(&mut self.connection).await?;
 
         loop {
             page += 1;
             let s_activities = match self
                 .client
-                .athlete_activities(page, PAGE_SIZE, last_epoch)
+                .athlete_activities(page, PAGE_SIZE, last.epoch)
                 .await {
                     Ok(a) => a,
                     Err(e) => {
@@ -57,23 +50,19 @@ impl IngestActivitiesTask<'_> {
 
             for s_activity in s_activities {
                 self.logger.info(format!("[{}] {}", s_activity["id"], s_activity["name"])).await;
-                let raw = RawActivity {
-                    id: s_activity["id"]
+                sqlx::query!(
+                    r#"
+INSERT INTO raw_activity (id, created_at, listed, synced) VALUES (?, ?, ?, false) ON CONFLICT(id) DO NOTHING
+                    "#,
+                    s_activity["id"]
                         .as_i64()
                         .expect("could not parse 64 bit ID"),
-                    created_at: (match NaiveDateTime::parse_from_str(s_activity["start_date"].as_str().unwrap(), "%Y-%m-%dT%H:%M:%SZ") {
+                    (match NaiveDateTime::parse_from_str(s_activity["start_date"].as_str().unwrap(), "%Y-%m-%dT%H:%M:%SZ") {
                             Ok(t) => t,
                             Err(_err) => NaiveDateTime::from_timestamp_millis(0).unwrap(),
-                        }),
-                    listed: s_activity.to_string(),
-                    activity: None,
-                    synced: false,
-                };
-                diesel::insert_into(schema::raw_activity::table)
-                    .values(&raw)
-                    .on_conflict(schema::raw_activity::id)
-                    .do_nothing()
-                    .execute(self.connection)?;
+                    }),
+                    s_activity.to_string()
+                );
             }
         }
         Ok(())

@@ -33,11 +33,10 @@
 
           buildInputs = [
             pkgs.rustup
-            pkgs.openssl
             pkgs.pkg-config
             pkgs.sqlite-interactive
             pkgs.sqlite
-            pkgs.diesel-cli
+            pkgs.sqlx-cli
           ];
           
         };
