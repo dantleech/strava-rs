@@ -1,5 +1,5 @@
 
-use libsqlite3_sys::sqlite3_expired;
+
 use sqlx::QueryBuilder;
 use sqlx::SqlitePool;
 
@@ -135,19 +135,19 @@ impl AcitivityConverter<'_> {
                     }
                     let mut qb = QueryBuilder::new(
                         r#"
-                        INSERT INTO activity_lap (activity_id, distance, moving_time, elapsed-time, average_speed, elevation_difference, split)")
+INSERT INTO activity_split (activity_id, distance, moving_time, elapsed_time, average_speed, split, elevation_difference)
                         "#
                     );
                     qb.push_values(activity_laps, |mut b, activity_lap| {
-                        b.push_bind(activity_lap.activity_id);
+                        b.push_bind(activity.id);
                         b.push_bind(activity_lap.distance);
                         b.push_bind(activity_lap.moving_time);
                         b.push_bind(activity_lap.elapsed_time);
                         b.push_bind(activity_lap.average_speed);
-                        b.push_bind(activity_lap.elevation_difference);
                         b.push_bind(activity_lap.split);
+                        b.push_bind(activity_lap.elevation_difference);
                     });
-                    qb.build().execute(self.pool).await?;
+                    qb.build().execute(self.pool).await.unwrap();
                 }
             }
         }

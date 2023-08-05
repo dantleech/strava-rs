@@ -9,7 +9,7 @@ pub mod sync;
 pub mod ui;
 pub mod util;
 
-use std::{io, panic, process, ops::DerefMut};
+use std::{io, panic, process};
 
 
 use config::ConfigResult;

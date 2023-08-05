@@ -20,8 +20,6 @@ pub fn draw<B: Backend>(
     if app.activity.is_none() {
         return Ok(());
     }
-    let activity = app.activity.clone().unwrap();
-
     // TODO: cant use async DB access here
     let splits: Vec<ActivitySplit> = vec![];
     let mut constraints = vec![];

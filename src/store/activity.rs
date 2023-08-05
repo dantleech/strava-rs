@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
-use sqlx::{SqliteConnection, FromRow, SqlitePool};
+use sqlx::{FromRow, SqlitePool};
 
 #[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
 pub struct Activity {
@@ -60,7 +60,7 @@ impl ActivityStore<'_> {
         ).fetch_all(self.pool).await.unwrap()
     }
 
-    pub(crate) async fn splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
+    pub(crate) async fn splits(&mut self, _activity: Activity) -> Vec<ActivitySplit> {
         sqlx::query_as::<_, ActivitySplit>(
             r#"
             SELECT * FROM activity_split WHERE activity_id = ? ORDER BY split ASC
