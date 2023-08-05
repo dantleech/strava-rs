@@ -59,7 +59,7 @@ pub fn draw<B: Backend>(
                         Span::from(format!(
                             "{} → ",
                             app.unit_formatter
-                                .distance(x_distance_meters.meters() as f64)
+                                .distance(x_distance_meters.meters())
                         )),
                     );
 
@@ -68,7 +68,7 @@ pub fn draw<B: Backend>(
                         area.height as f64,
                         Span::from(
                             app.unit_formatter
-                                .distance(y_distance_meters.meters() as f64),
+                                .distance(y_distance_meters.meters()),
                         ),
                     );
                     ctx.print(0.0, area.height as f64 - 2.0, Span::from("↓"));

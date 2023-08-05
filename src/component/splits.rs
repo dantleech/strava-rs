@@ -70,8 +70,8 @@ pub fn draw<B: Backend>(
                         gradiant(
                             Rgb { red: 0, green: 255, blue: 0 },
                             Rgb { red: 255, green: 0, blue: 0 },
-                            (split.seconds_per_meter() - min) as f64,
-                            (max - min) as f64,
+                            split.seconds_per_meter() - min,
+                            max - min,
                         ).to_color()
                 ).bg(Color::Black)),
 

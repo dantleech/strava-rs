@@ -55,7 +55,7 @@ pub fn draw<B: Backend>(
         .iter()
         .map(|a| {
             let ts = a.start_date.unwrap().timestamp();
-            (ts as f64, a.meters_per_hour() as f64)
+            (ts as f64, a.meters_per_hour())
         })
         .collect();
     let mut current = vec![];

@@ -62,7 +62,7 @@ impl ActivityStore<'_> {
 
         return activities.iter().map(|rec| {
             let splits: Vec<ActivitySplit> = if let Some(splits) = &rec.activity_splits {
-                serde_json::from_str(&splits).unwrap()
+                serde_json::from_str(splits).unwrap()
             } else {
                 vec![]
             };
@@ -71,22 +71,22 @@ impl ActivityStore<'_> {
                 title: rec.title.clone(),
                 activity_type: rec.activity_type.clone(),
                 description: rec.description.clone(),
-                distance: rec.distance.clone(),
-                average_speed: rec.average_speed.clone(),
-                moving_time: rec.moving_time.clone(),
-                elapsed_time: rec.elapsed_time.clone(),
-                total_elevation_gain: rec.total_elevation_gain.clone(),
+                distance: rec.distance,
+                average_speed: rec.average_speed,
+                moving_time: rec.moving_time,
+                elapsed_time: rec.elapsed_time,
+                total_elevation_gain: rec.total_elevation_gain,
                 sport_type: rec.sport_type.clone(),
-                average_heartrate: rec.average_heartrate.clone(),
-                max_heartrate: rec.max_heartrate.clone(),
-                start_date: rec.start_date.clone(),
+                average_heartrate: rec.average_heartrate,
+                max_heartrate: rec.max_heartrate,
+                start_date: rec.start_date,
                 summary_polyline: rec.summary_polyline.clone(),
-                average_cadence: rec.average_cadence.clone(),
-                kudos: rec.kudos.clone(),
+                average_cadence: rec.average_cadence,
+                kudos: rec.kudos,
                 location_country: rec.location_country.clone(),
                 location_state: rec.location_state.clone(),
                 location_city: rec.location_city.clone(),
-                athletes: rec.athletes.clone(),
+                athletes: rec.athletes,
                 splits,
             }
         }).collect()

@@ -1,6 +1,6 @@
 
 
-use sqlx::QueryBuilder;
+
 use sqlx::SqlitePool;
 
 use crate::client;
@@ -8,7 +8,7 @@ use crate::event::input::EventSender;
 use crate::event::input::InputEvent;
 use crate::event::logger::Logger;
 use crate::store::activity::Activity;
-use crate::store::activity::ActivitySplit;
+
 
 pub struct AcitivityConverter<'a> {
     pool: &'a SqlitePool,

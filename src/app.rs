@@ -21,7 +21,7 @@ use crate::{
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
-    store::activity::{Activity, ActivitySplit},
+    store::activity::{Activity},
     ui,
 };
 
