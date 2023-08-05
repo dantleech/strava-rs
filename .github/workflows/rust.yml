@@ -7,6 +7,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  DATABASE_URL: sqlite://strava.sqlite
 
 jobs:
   build:
@@ -17,13 +18,10 @@ jobs:
     - uses: actions/checkout@v3
     - name: Lint and test
       run: |
-        export DATABASE_URL=sqlite://strava.sqlite
+        cargo build -p sqlx
         cargo sqlx database create
         cargo sqlx migrate run
         make
     - name: Build
       run: |
-        export DATABASE_URL=sqlite://strava.sqlite
-        cargo sqlx database create
-        cargo sqlx migrate run
         cargo build --release --locked
