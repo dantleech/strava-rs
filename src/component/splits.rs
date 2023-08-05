@@ -10,7 +10,7 @@ use tui::{
     Frame,
 };
 
-use crate::{app::App, ui::color::{gradiant, Rgb}};
+use crate::{app::App, ui::color::{gradiant, Rgb}, store::activity::ActivitySplit};
 
 pub fn draw<B: Backend>(
     app: &mut App,
@@ -22,7 +22,8 @@ pub fn draw<B: Backend>(
     }
     let activity = app.activity.clone().unwrap();
 
-    let splits = app.activity_splits(activity);
+    // TODO: cant use async DB access here
+    let splits: Vec<ActivitySplit> = vec![];
     let mut constraints = vec![];
     constraints.push(Constraint::Max(1));
 

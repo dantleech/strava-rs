@@ -95,8 +95,7 @@ async fn main() -> Result<(), anyhow::Error> {
         sync_receiver
     ).await;
 
-    let mut app_conn = pool.clone().get().unwrap();
-    let mut activity_store = ActivityStore::new(&mut app_conn);
+    let mut activity_store = ActivityStore::new(&pool);
     let mut app = App::new(&mut activity_store, event_receiver, event_sender.clone(), sync_sender);
     app.activity_type = config.activity_type;
     app.send(input::InputEvent::Sync);

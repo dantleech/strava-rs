@@ -1,12 +1,9 @@
 use chrono::NaiveDateTime;
-use diesel::{prelude::*};
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
+use sqlx::{SqliteConnection, FromRow};
 
-#[derive(Queryable, Selectable, Insertable)]
-#[diesel(table_name = crate::store::schema::activity)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
 pub struct Activity {
     pub id: i64,
     pub title: String,
@@ -29,10 +26,7 @@ pub struct Activity {
     pub athletes: i32,
 }
 
-#[derive(Queryable, Selectable, Insertable)]
-#[diesel(table_name = crate::store::schema::activity_split)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
 pub struct ActivitySplit {
     pub activity_id: i64,
     pub distance: f32,
@@ -49,17 +43,6 @@ impl ActivitySplit {
     }
 }
 
-#[derive(Queryable, Selectable, Insertable, Serialize, Deserialize, Identifiable)]
-#[diesel(table_name = crate::store::schema::raw_activity)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct RawActivity {
-    pub id: i64,
-    pub listed: String,
-    pub activity: Option<String>,
-    pub synced: bool,
-    pub created_at: NaiveDateTime,
-}
-
 pub struct ActivityStore<'a> {
     connection: &'a mut SqliteConnection,
 }
@@ -69,23 +52,20 @@ impl ActivityStore<'_> {
         ActivityStore { connection }
     }
 
-    pub(crate) fn activities(&mut self) -> Vec<Activity> {
-        use crate::store::schema::activity;
-        activity::table
-            .order(activity::start_date.desc())
-            .select(Activity::as_select())
-            .load(self.connection)
-            .expect("Could not load activities")
+    pub(crate) async fn activities(&mut self) -> Vec<Activity> {
+        sqlx::query_as::<_, Activity>(
+            r#"
+            SELECT * FROM activity ORDER BY start_date DESC
+            "#
+        ).fetch_all(self.connection).await.unwrap()
     }
 
-    pub(crate) fn splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
-        use crate::store::schema::activity_split;
-        activity_split::table
-            .order(activity_split::split.asc())
-            .filter(activity_split::activity_id.eq(activity.id))
-            .select(ActivitySplit::as_select())
-            .load(self.connection)
-            .expect("Could not load activity splits")
+    pub(crate) async fn splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
+        sqlx::query_as::<_, ActivitySplit>(
+            r#"
+            SELECT * FROM activity_split WHERE activity_id = ? ORDER BY split ASC
+            "#
+        ).fetch_all(self.connection).await.expect("Could not load activity splits")
     }
 }
 

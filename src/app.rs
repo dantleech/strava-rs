@@ -189,7 +189,7 @@ impl App<'_> {
                         self.error_message = Some(Notification::new(message));
                     }
                     InputEvent::Tick => (),
-                    InputEvent::Reload => self.activities = self.store.activities(),
+                    InputEvent::Reload => self.activities = self.store.activities().await,
                     InputEvent::Sync => self.sync_sender.send(true).await?,
                 }
             }
@@ -253,7 +253,7 @@ impl App<'_> {
         }
     }
 
-    pub(crate) fn activity_splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
+    pub(crate) async fn activity_splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
         self.store.splits(activity)
     }
 
