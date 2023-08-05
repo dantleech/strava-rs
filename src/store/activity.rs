@@ -10,6 +10,7 @@ pub struct Activity {
     pub activity_type: String,
     pub description: String,
     pub distance: f32,
+    pub average_speed: f32,
     pub moving_time: i32,
     pub elapsed_time: i32,
     pub total_elevation_gain: f32,
@@ -53,19 +54,36 @@ impl ActivityStore<'_> {
     }
 
     pub(crate) async fn activities(&mut self) -> Vec<Activity> {
-        sqlx::query_as::<_, Activity>(
+        let activities = sqlx::query!(
             r#"
             SELECT * FROM activity ORDER BY start_date DESC
             "#
-        ).fetch_all(self.pool).await.unwrap()
-    }
+        ).fetch_all(self.pool).await.unwrap();
 
-    pub(crate) async fn splits(&mut self, _activity: Activity) -> Vec<ActivitySplit> {
-        sqlx::query_as::<_, ActivitySplit>(
-            r#"
-            SELECT * FROM activity_split WHERE activity_id = ? ORDER BY split ASC
-            "#
-        ).fetch_all(self.pool).await.expect("Could not load activity splits")
+        return activities.iter().map(|rec| {
+            Activity{
+                id: rec.id,
+                title: rec.title,
+                activity_type: todo!(),
+                description: todo!(),
+                distance: todo!(),
+                average_speed: todo!(),
+                moving_time: todo!(),
+                elapsed_time: todo!(),
+                total_elevation_gain: todo!(),
+                sport_type: todo!(),
+                average_heartrate: todo!(),
+                max_heartrate: todo!(),
+                start_date: todo!(),
+                summary_polyline: todo!(),
+                average_cadence: todo!(),
+                kudos: todo!(),
+                location_country: todo!(),
+                location_state: todo!(),
+                location_city: todo!(),
+                athletes: todo!(),
+            }
+        }).collect()
     }
 }
 

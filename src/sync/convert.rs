@@ -113,41 +113,16 @@ impl AcitivityConverter<'_> {
             if let Some(full_activity) = raw_activity.activity {
                 let activity: client::Activity =
                     serde_json::from_str(full_activity.as_str()).expect("Could not decode JSON");
-                sqlx::query!(
-                    r#"
-                    DELETE FROM activity_split WHERE activity_id = ?
-                    "#,
-                    activity.id
-                ).execute(self.pool).await?;
 
                 if let Some(laps) = activity.splits_standard {
-                    let mut activity_laps: Vec<ActivitySplit> = vec![];
-                    for lap in laps {
-                        activity_laps.push(ActivitySplit {
-                            activity_id: activity.id,
-                            distance: lap.distance,
-                            moving_time: lap.moving_time,
-                            elapsed_time: lap.elapsed_time,
-                            average_speed: lap.average_speed,
-                            elevation_difference: lap.elevation_difference,
-                            split: lap.split,
-                        });
-                    }
-                    let mut qb = QueryBuilder::new(
+                    let json = serde_json::to_string(&laps).unwrap();
+                    sqlx::query!(
                         r#"
-INSERT INTO activity_split (activity_id, distance, moving_time, elapsed_time, average_speed, split, elevation_difference)
-                        "#
-                    );
-                    qb.push_values(activity_laps, |mut b, activity_lap| {
-                        b.push_bind(activity.id);
-                        b.push_bind(activity_lap.distance);
-                        b.push_bind(activity_lap.moving_time);
-                        b.push_bind(activity_lap.elapsed_time);
-                        b.push_bind(activity_lap.average_speed);
-                        b.push_bind(activity_lap.split);
-                        b.push_bind(activity_lap.elevation_difference);
-                    });
-                    qb.build().execute(self.pool).await.unwrap();
+                        UPDATE activity SET activity_splits = ? WHERE id = ?
+                        "#,
+                        json,
+                        activity.id
+                    ).execute(self.pool).await?;
                 }
             }
         }
