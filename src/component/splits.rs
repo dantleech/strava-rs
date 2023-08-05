@@ -1,5 +1,5 @@
 
-use std::f32::MAX;
+use std::f64::MAX;
 
 
 use tui::{
@@ -20,8 +20,9 @@ pub fn draw<B: Backend>(
     if app.activity.is_none() {
         return Ok(());
     }
+    let activity = app.activity.as_ref().unwrap();
     // TODO: cant use async DB access here
-    let splits: Vec<ActivitySplit> = vec![];
+    let splits: &Vec<ActivitySplit> = activity.splits.as_ref();
     let mut constraints = vec![];
     constraints.push(Constraint::Max(1));
 

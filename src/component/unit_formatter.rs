@@ -19,7 +19,7 @@ impl Display for UnitSystem {
 }
 
 impl UnitFormatter {
-    pub fn stopwatch_time(&self, seconds: i32) -> String {
+    pub fn stopwatch_time(&self, seconds: i64) -> String {
         if seconds == 0 {
             return "00:00".to_string();
         }
@@ -33,7 +33,7 @@ impl UnitFormatter {
         format!("{:0>2}:{:0>2}:{:0>2}", hours, minutes, seconds)
     }
 
-    pub fn distance(&self, quantity: f32) -> String {
+    pub fn distance(&self, quantity: f64) -> String {
         match self.system {
             UnitSystem::Metric => {
                 format!("{:.2}km", (quantity / 1000.0))
@@ -44,7 +44,7 @@ impl UnitFormatter {
         }
     }
 
-    pub fn elevation(&self, elevation: f32) -> String {
+    pub fn elevation(&self, elevation: f64) -> String {
         match self.system {
             UnitSystem::Metric => {
                 format!("{:.2}m", elevation)
@@ -55,18 +55,18 @@ impl UnitFormatter {
         }
     }
 
-    pub fn pace(&self, time: i32, distance: f32) -> String {
+    pub fn pace(&self, time: i64, distance: f64) -> String {
         match self.system {
             UnitSystem::Metric => {
-                let spm = time as f32 / distance;
+                let spm = time as f64 / distance;
 
-                format!("{} /km", self.stopwatch_time((spm * 1000.0).round() as i32))
+                format!("{} /km", self.stopwatch_time((spm * 1000.0).round() as i64))
             }
             UnitSystem::Imperial => {
-                let spm = time as f32 / distance;
+                let spm = time as f64 / distance;
                 format!(
                     "{} /mi",
-                    self.stopwatch_time(((spm * 1000.0) / 0.621371).round() as i32)
+                    self.stopwatch_time(((spm * 1000.0) / 0.621371).round() as i64)
                 )
             }
         }
@@ -87,8 +87,8 @@ impl UnitFormatter {
     }
 
     #[allow(unused)]
-    pub(crate) fn speed(&self, distance: f32, elapsed_time: i32) -> String {
-        let kmph = (distance / 1000.0) / (elapsed_time as f32 / 3600.0);
+    pub(crate) fn speed(&self, distance: f64, elapsed_time: i64) -> String {
+        let kmph = (distance / 1000.0) / (elapsed_time as f64 / 3600.0);
         match self.system {
             UnitSystem::Metric => {
                 format!("{:.2}km/h", kmph)

@@ -118,7 +118,7 @@ pub fn draw<B: Backend>(
                 .bounds([*pmin as f64, *pmax as f64 + (pdiff as f64 / activities.len() as f64)])
                 .labels(
                     yaxis
-                        .map(|p| Span::from(app.unit_formatter.pace(3600, p as f32)))
+                        .map(|p| Span::from(app.unit_formatter.pace(3600, p as f64)))
                         .collect(),
                 ),
         );

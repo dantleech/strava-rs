@@ -46,6 +46,7 @@ impl AcitivityConverter<'_> {
                     Some(d) => d.clone(),
                     None => "".to_string(),
                 },
+                average_speed: listed.average_speed,
                 activity_type: listed.sport_type.clone(),
                 distance: listed.distance,
                 moving_time: listed.moving_time,
@@ -62,6 +63,7 @@ impl AcitivityConverter<'_> {
                 location_state: listed.location_state.clone(),
                 location_city: listed.location_city.clone(),
                 athletes: listed.athlete_count,
+                splits: vec![]
             };
 
             sqlx::query!(

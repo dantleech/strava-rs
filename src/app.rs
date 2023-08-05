@@ -255,10 +255,6 @@ impl App<'_> {
         }
     }
 
-    pub(crate) async fn activity_splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
-        self.store.splits(activity).await
-    }
-
     pub fn send(&mut self, event: InputEvent) {
         self.event_queue.push(event);
     }
