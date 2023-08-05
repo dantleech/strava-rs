@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "\nSELECT MAX(created_at) as epoch FROM raw_activity LIMIT 1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "epoch",
+        "ordinal": 0,
+        "type_info": "Datetime"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "a98401502878315ec3145f66e7378c5a2ada1a7a3195be75ba271f108d126efa"
+}
