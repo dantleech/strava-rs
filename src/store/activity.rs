@@ -1,105 +1,109 @@
 use chrono::NaiveDateTime;
-use diesel::{prelude::*};
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
+use sqlx::{FromRow, SqlitePool};
 
-#[derive(Queryable, Selectable, Insertable)]
-#[diesel(table_name = crate::store::schema::activity)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
 pub struct Activity {
     pub id: i64,
     pub title: String,
     pub activity_type: String,
     pub description: String,
-    pub distance: f32,
-    pub moving_time: i32,
-    pub elapsed_time: i32,
-    pub total_elevation_gain: f32,
+    pub distance: f64,
+    pub average_speed: Option<f64>,
+    pub moving_time: i64,
+    pub elapsed_time: i64,
+    pub total_elevation_gain: f64,
     pub sport_type: String,
-    pub average_heartrate: Option<f32>,
-    pub max_heartrate: Option<f32>,
+    pub average_heartrate: Option<f64>,
+    pub max_heartrate: Option<f64>,
     pub start_date: Option<NaiveDateTime>,
     pub summary_polyline: Option<String>,
-    pub average_cadence: Option<f32>,
-    pub kudos: i32,
+    pub average_cadence: Option<f64>,
+    pub kudos: i64,
     pub location_country: Option<String>,
     pub location_state: Option<String>,
     pub location_city: Option<String>,
-    pub athletes: i32,
+    pub athletes: i64,
+    pub splits: Vec<ActivitySplit>,
 }
 
-#[derive(Queryable, Selectable, Insertable)]
-#[diesel(table_name = crate::store::schema::activity_split)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
 pub struct ActivitySplit {
-    pub activity_id: i64,
-    pub distance: f32,
-    pub moving_time: i32,
-    pub elapsed_time: i32,
-    pub average_speed: f32,
-    pub elevation_difference: f32,
-    pub split: i32,
+    pub distance: f64,
+    pub moving_time: i64,
+    pub elapsed_time: i64,
+    pub average_speed: f64,
+    pub elevation_difference: f64,
+    pub split: i64,
 }
 
 impl ActivitySplit {
-    pub fn seconds_per_meter(&self) -> f32 {
-        self.moving_time as f32 / self.distance
+    pub fn seconds_per_meter(&self) -> f64 {
+        self.moving_time as f64 / self.distance
     }
-}
-
-#[derive(Queryable, Selectable, Insertable, Serialize, Deserialize, Identifiable)]
-#[diesel(table_name = crate::store::schema::raw_activity)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct RawActivity {
-    pub id: i64,
-    pub listed: String,
-    pub activity: Option<String>,
-    pub synced: bool,
-    pub created_at: NaiveDateTime,
 }
 
 pub struct ActivityStore<'a> {
-    connection: &'a mut SqliteConnection,
+    pool: &'a SqlitePool,
 }
 
 impl ActivityStore<'_> {
-    pub(crate) fn new(connection: &mut SqliteConnection) -> ActivityStore<'_> {
-        ActivityStore { connection }
+    pub(crate) fn new(pool: &SqlitePool) -> ActivityStore<'_> {
+        ActivityStore { pool }
     }
 
-    pub(crate) fn activities(&mut self) -> Vec<Activity> {
-        use crate::store::schema::activity;
-        activity::table
-            .order(activity::start_date.desc())
-            .select(Activity::as_select())
-            .load(self.connection)
-            .expect("Could not load activities")
-    }
+    pub(crate) async fn activities(&mut self) -> Vec<Activity> {
+        let activities = sqlx::query!(
+            r#"
+            SELECT * FROM activity ORDER BY start_date DESC
+            "#
+        ).fetch_all(self.pool).await.unwrap();
 
-    pub(crate) fn splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
-        use crate::store::schema::activity_split;
-        activity_split::table
-            .order(activity_split::split.asc())
-            .filter(activity_split::activity_id.eq(activity.id))
-            .select(ActivitySplit::as_select())
-            .load(self.connection)
-            .expect("Could not load activity splits")
+        return activities.iter().map(|rec| {
+            let splits: Vec<ActivitySplit> = if let Some(splits) = &rec.activity_splits {
+                serde_json::from_str(splits).unwrap()
+            } else {
+                vec![]
+            };
+            Activity{
+                id: rec.id,
+                title: rec.title.clone(),
+                activity_type: rec.activity_type.clone(),
+                description: rec.description.clone(),
+                distance: rec.distance,
+                average_speed: rec.average_speed,
+                moving_time: rec.moving_time,
+                elapsed_time: rec.elapsed_time,
+                total_elevation_gain: rec.total_elevation_gain,
+                sport_type: rec.sport_type.clone(),
+                average_heartrate: rec.average_heartrate,
+                max_heartrate: rec.max_heartrate,
+                start_date: rec.start_date,
+                summary_polyline: rec.summary_polyline.clone(),
+                average_cadence: rec.average_cadence,
+                kudos: rec.kudos,
+                location_country: rec.location_country.clone(),
+                location_state: rec.location_state.clone(),
+                location_city: rec.location_city.clone(),
+                athletes: rec.athletes,
+                splits,
+            }
+        }).collect()
     }
 }
 
 impl Activity {
-    pub fn time_for_distance(&self, meters: f32) -> i32 {
-        ((self.moving_time as f32 / self.distance) * meters) as i32
+    pub fn time_for_distance(&self, meters: f64) -> i64 {
+        ((self.moving_time as f64 / self.distance) * meters) as i64
     }
 
-    pub fn kmph(&self) -> f32 {
-        (self.distance / 1000.0) / (self.moving_time as f32 / 3600.0)
+    pub fn kmph(&self) -> f64 {
+        (self.distance / 1000.0) / (self.moving_time as f64 / 3600.0)
     }
 
-    pub fn meters_per_hour(&self) -> f32 {
-        self.distance / (self.moving_time as f32 / 3600.0)
+    pub fn meters_per_hour(&self) -> f64 {
+        self.distance / (self.moving_time as f64 / 3600.0)
     }
 
     pub(crate) fn activity_type_icon(&self) -> String {

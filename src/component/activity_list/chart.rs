@@ -55,7 +55,7 @@ pub fn draw<B: Backend>(
         .iter()
         .map(|a| {
             let ts = a.start_date.unwrap().timestamp();
-            (ts as f64, a.meters_per_hour() as f64)
+            (ts as f64, a.meters_per_hour())
         })
         .collect();
     let mut current = vec![];
@@ -118,7 +118,7 @@ pub fn draw<B: Backend>(
                 .bounds([*pmin as f64, *pmax as f64 + (pdiff as f64 / activities.len() as f64)])
                 .labels(
                     yaxis
-                        .map(|p| Span::from(app.unit_formatter.pace(3600, p as f32)))
+                        .map(|p| Span::from(app.unit_formatter.pace(3600, p as f64)))
                         .collect(),
                 ),
         );

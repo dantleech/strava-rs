@@ -21,7 +21,7 @@ use crate::{
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
-    store::activity::{Activity, ActivitySplit},
+    store::activity::{Activity},
     ui,
 };
 
@@ -137,7 +137,7 @@ impl App<'_> {
                 filter: "".to_string(),
             },
             activity: None,
-            activities: store.activities(),
+            activities: vec![],
             store,
 
             activity_type: None,
@@ -153,6 +153,8 @@ impl App<'_> {
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     ) -> Result<(), anyhow::Error> {
+        self.activities = self.store.activities().await;
+
         loop {
             if self.quit {
                 break;
@@ -189,7 +191,7 @@ impl App<'_> {
                         self.error_message = Some(Notification::new(message));
                     }
                     InputEvent::Tick => (),
-                    InputEvent::Reload => self.activities = self.store.activities(),
+                    InputEvent::Reload => self.activities = self.store.activities().await,
                     InputEvent::Sync => self.sync_sender.send(true).await?,
                 }
             }
@@ -251,10 +253,6 @@ impl App<'_> {
             ActivePage::ActivityList => activity_list::handle(self, key),
             ActivePage::Activity => activity_view::handle(self, key),
         }
-    }
-
-    pub(crate) fn activity_splits(&mut self, activity: Activity) -> Vec<ActivitySplit> {
-        self.store.splits(activity)
     }
 
     pub fn send(&mut self, event: InputEvent) {

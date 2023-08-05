@@ -1,0 +1,140 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT * FROM activity ORDER BY start_date DESC\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "title",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "description",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "activity_type",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "activity_splits",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "distance",
+        "ordinal": 5,
+        "type_info": "Float"
+      },
+      {
+        "name": "moving_time",
+        "ordinal": 6,
+        "type_info": "Int64"
+      },
+      {
+        "name": "elapsed_time",
+        "ordinal": 7,
+        "type_info": "Int64"
+      },
+      {
+        "name": "total_elevation_gain",
+        "ordinal": 8,
+        "type_info": "Float"
+      },
+      {
+        "name": "sport_type",
+        "ordinal": 9,
+        "type_info": "Text"
+      },
+      {
+        "name": "average_heartrate",
+        "ordinal": 10,
+        "type_info": "Float"
+      },
+      {
+        "name": "max_heartrate",
+        "ordinal": 11,
+        "type_info": "Float"
+      },
+      {
+        "name": "start_date",
+        "ordinal": 12,
+        "type_info": "Datetime"
+      },
+      {
+        "name": "summary_polyline",
+        "ordinal": 13,
+        "type_info": "Text"
+      },
+      {
+        "name": "average_cadence",
+        "ordinal": 14,
+        "type_info": "Float"
+      },
+      {
+        "name": "average_speed",
+        "ordinal": 15,
+        "type_info": "Float"
+      },
+      {
+        "name": "kudos",
+        "ordinal": 16,
+        "type_info": "Int64"
+      },
+      {
+        "name": "location_country",
+        "ordinal": 17,
+        "type_info": "Text"
+      },
+      {
+        "name": "location_state",
+        "ordinal": 18,
+        "type_info": "Text"
+      },
+      {
+        "name": "location_city",
+        "ordinal": 19,
+        "type_info": "Text"
+      },
+      {
+        "name": "athletes",
+        "ordinal": 20,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "b1777053c7f35e506713dfa51b4a47d21889b03be958c7644facfedc1ac60cc2"
+}

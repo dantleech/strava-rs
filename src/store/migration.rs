@@ -1,12 +1,10 @@
 
 
-use diesel::{SqliteConnection};
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use sqlx::SqlitePool;
 
-const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
+pub async fn run_migrations(pool: &SqlitePool) {
 
-pub fn run_migrations(conn: &mut SqliteConnection) {
+    sqlx::migrate!("./migrations").run(pool).await.unwrap();
 
-    conn.run_pending_migrations(MIGRATIONS).unwrap();
 
 }

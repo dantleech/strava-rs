@@ -1,5 +1,5 @@
 
-use std::f32::MAX;
+use std::f64::MAX;
 
 
 use tui::{
@@ -10,7 +10,7 @@ use tui::{
     Frame,
 };
 
-use crate::{app::App, ui::color::{gradiant, Rgb}};
+use crate::{app::App, ui::color::{gradiant, Rgb}, store::activity::ActivitySplit};
 
 pub fn draw<B: Backend>(
     app: &mut App,
@@ -20,9 +20,9 @@ pub fn draw<B: Backend>(
     if app.activity.is_none() {
         return Ok(());
     }
-    let activity = app.activity.clone().unwrap();
-
-    let splits = app.activity_splits(activity);
+    let activity = app.activity.as_ref().unwrap();
+    // TODO: cant use async DB access here
+    let splits: &Vec<ActivitySplit> = activity.splits.as_ref();
     let mut constraints = vec![];
     constraints.push(Constraint::Max(1));
 
@@ -70,8 +70,8 @@ pub fn draw<B: Backend>(
                         gradiant(
                             Rgb { red: 0, green: 255, blue: 0 },
                             Rgb { red: 255, green: 0, blue: 0 },
-                            (split.seconds_per_meter() - min) as f64,
-                            (max - min) as f64,
+                            split.seconds_per_meter() - min,
+                            max - min,
                         ).to_color()
                 ).bg(Color::Black)),
 

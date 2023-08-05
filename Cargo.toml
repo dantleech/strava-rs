@@ -1,22 +1,18 @@
 [package]
 name = "strava-rs"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
-
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-diesel = { version = "2.1.0", features = ["sqlite","chrono","r2d2"] }
-dotenvy = "0.15"
 anyhow = "1.0.68"
 chrono = { version = "0.4.23", features = ["serde"] }
 clap = { version = "4.1.4", features = ["derive"] }
 crossterm = "0.26.0"
 libsqlite3-sys = { version = ">=0.17.2, <0.27.0", features = ["bundled_bindings", "bundled"] }
 env_logger = "0.10.0"
-futures-util = "0.3.25"
-hyper = { version = "0.14.23", features = ["client", "full"] }
+hyper = { version = "0.14.23", features = ["client", "http1"] }
 log = "0.4.17"
 open = "3.2.0"
 serde = { version = "1.0.152", features = ["derive"] }
@@ -28,8 +24,8 @@ polyline = "0.10.1"
 geo-types = "0.7.10"
 geoutils = "0.5.1"
 strum = { version = "0.25.0", features = ["derive"] }
-diesel_migrations = { version = "2.1.0", features = ["sqlite"] }
 tui = { package = "ratatui", version = "0.22.0", features = ["all-widgets"]}
 tui-input = "0.7.1"
 confy = "0.5.1"
 hyper-rustls = "0.24.1"
+sqlx = { version = "0.7.1", features = ["sqlx-sqlite", "sqlite", "runtime-tokio", "chrono"] }

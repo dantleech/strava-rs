@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            SELECT activity, listed FROM raw_activity WHERE synced = false\n            ",
+  "describe": {
+    "columns": [
+      {
+        "name": "activity",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "listed",
+        "ordinal": 1,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true,
+      false
+    ]
+  },
+  "hash": "83581c9fe3c082bb1c13d410e5bafeec5262825b6faa8594376939acd9a95b3f"
+}

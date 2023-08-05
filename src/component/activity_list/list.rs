@@ -155,7 +155,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Vec<Activity>) -> Tabl
             Cell::from(
                 activity
                     .average_heartrate
-                    .map_or_else(|| "n/a".to_string(), |v| v.to_string()),
+                    .map_or_else(|| "n/a".to_string(), |v| format!("{:.2}", v)),
             ),
             Cell::from(app.unit_formatter.elevation(activity.total_elevation_gain)),
         ]));
