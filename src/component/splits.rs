@@ -10,7 +10,7 @@ use tui::{
     Frame,
 };
 
-use crate::{app::App, ui::color::{gradiant, Rgb}, store::activity::ActivitySplit};
+use crate::{app::App, ui::color::{gradient, Rgb}, store::activity::ActivitySplit};
 
 pub fn draw<B: Backend>(
     app: &mut App,
@@ -67,7 +67,7 @@ pub fn draw<B: Backend>(
                 .use_unicode(true)
                 .style(Style::default().fg(Color::White))
                 .gauge_style(Style::default().fg(
-                        gradiant(
+                        gradient(
                             Rgb { red: 0, green: 255, blue: 0 },
                             Rgb { red: 255, green: 0, blue: 0 },
                             split.seconds_per_meter() - min,

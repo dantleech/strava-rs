@@ -10,19 +10,19 @@ use crate::event::logger::Logger;
 use crate::store::activity::Activity;
 
 
-pub struct AcitivityConverter<'a> {
+pub struct ActivityConverter<'a> {
     pool: &'a SqlitePool,
     event_sender: EventSender,
     logger: Logger,
 }
 
-impl AcitivityConverter<'_> {
+impl ActivityConverter<'_> {
     pub fn new(
         pool: &SqlitePool,
         event_sender: EventSender,
         logger: Logger,
-    ) -> AcitivityConverter<'_> {
-        AcitivityConverter {
+    ) -> ActivityConverter<'_> {
+        ActivityConverter {
             pool,
             event_sender,
             logger,

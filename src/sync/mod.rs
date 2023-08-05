@@ -6,7 +6,7 @@ use tokio::{task, sync::mpsc::Receiver};
 
 use crate::{authenticator::Authenticator, event::{input::EventSender, logger::Logger}, client::{StravaConfig, new_strava_client}};
 
-use self::{ingest_activities::IngestActivitiesTask, ingest_activity::IngestActivityTask, convert::AcitivityConverter};
+use self::{ingest_activities::IngestActivitiesTask, ingest_activity::IngestActivityTask, convert::ActivityConverter};
 
 pub mod convert;
 pub mod ingest_activities;
@@ -47,7 +47,7 @@ pub async fn spawn_sync<'a>(
                     .execute()
                     .await
                     .unwrap();
-                AcitivityConverter::new(&pool, event_sender.clone(), logger.clone())
+                ActivityConverter::new(&pool, event_sender.clone(), logger.clone())
                     .convert()
                     .await
                     .unwrap();
