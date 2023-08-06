@@ -93,6 +93,8 @@ impl ActivityStore<'_> {
     }
 }
 
+pub type Polyline = LineString;
+
 impl Activity {
     pub fn time_for_distance(&self, meters: f64) -> i64 {
         ((self.moving_time as f64 / self.distance) * meters) as i64
@@ -116,7 +118,7 @@ impl Activity {
         }
     }
 
-    pub(crate) fn polyline(&self) -> Result<LineString, String> {
+    pub(crate) fn polyline(&self) -> Result<Polyline, String> {
         if let Some(p) = &self.summary_polyline {
             return polyline::decode_polyline(p.as_str(), 5);
         }

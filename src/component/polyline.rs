@@ -12,7 +12,7 @@ use tui::{
 
 use crate::{
     app::App,
-    ui::color::{gradiant, Rgb},
+    ui::color::{gradiant, Rgb}, store::polyline_compare::normalize,
 };
 
 pub fn draw<B: Backend>(
@@ -30,6 +30,7 @@ pub fn draw<B: Backend>(
     }
 
     if let Ok(decoded) = activity.polyline() {
+        let decoded = normalize(&decoded, 50.0);
         let (coords, x_width, y_width) =
             map_coords_to_area(decoded, area.width - 4, area.height - 4);
         let x_distance_meters = Location::new(0.0, 0.0)
