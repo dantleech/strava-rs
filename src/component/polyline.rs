@@ -12,7 +12,7 @@ use tui::{
 
 use crate::{
     app::App,
-    ui::color::{gradiant, Rgb}, store::polyline_compare::normalize,
+    ui::color::{gradiant, Rgb},
 };
 
 pub fn draw<B: Backend>(
