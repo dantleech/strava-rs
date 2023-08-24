@@ -5,7 +5,7 @@ use std::f64::MAX;
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout},
-    style::{Color, Style, Styled},
+    style::{Color, Style, Styled, Modifier},
     widgets::{Gauge, Paragraph, Row, Cell, Table},
     Frame, symbols::line::HORIZONTAL_DOWN,
 };
@@ -63,7 +63,7 @@ pub fn draw<B: Backend>(
             ]),
         );
     }
-    f.render_widget(
+    f.render_stateful_widget(
         Table::new(rows)
             .header(
                 Row::new(header)
@@ -75,7 +75,10 @@ pub fn draw<B: Backend>(
                 Constraint::Min(3),
                 Constraint::Min(10),
                 Constraint::Min(10),
-            ]), area
+            ])
+            .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+            .highlight_symbol("")
+            , area, &mut app.activity_view.pace_table_state
     );
     Ok(())
 }

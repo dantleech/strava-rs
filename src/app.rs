@@ -16,7 +16,7 @@ use tui::{
 use tui_input::Input;
 
 use crate::{
-    component::activity_list::{ActivityListState, ActivityListMode},
+    component::activity_list::{ActivityListState, ActivityListMode, ActivityViewState},
     event::input::EventSender,
     input::InputEvent,
     store::{
@@ -76,6 +76,7 @@ pub struct App<'a> {
     pub active_page: ActivePage,
     pub unit_formatter: UnitFormatter,
     pub activity_list: ActivityListState,
+    pub activity_view: ActivityViewState,
     pub filters: ActivityFilters,
 
     pub activity_type: Option<String>,
@@ -151,6 +152,9 @@ impl App<'_> {
                 filter_text_area: Input::default(),
                 filter_dialog: false,
                 sort_dialog: false,
+            },
+            activity_view: ActivityViewState {
+                pace_table_state: TableState::default(),
             },
             filters: ActivityFilters {
                 sort_by: SortBy::Date,
