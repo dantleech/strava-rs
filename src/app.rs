@@ -7,7 +7,7 @@ use std::{
 
 use strum::EnumIter;
 
-use tokio::{sync::mpsc::{Receiver, Sender}};
+use tokio::sync::mpsc::{Receiver, Sender};
 use tui::{
     backend::{Backend, CrosstermBackend},
     widgets::TableState,
@@ -16,12 +16,18 @@ use tui::{
 use tui_input::Input;
 
 use crate::{
-    component::{activity_list::{ActivityListState}}, input::InputEvent, store::{activity::ActivityStore, polyline_compare::{self, compare}}, event::input::EventSender,
+    component::activity_list::{ActivityListState, ActivityListMode},
+    event::input::EventSender,
+    input::InputEvent,
+    store::{
+        activity::ActivityStore,
+        polyline_compare::{self, compare},
+    },
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
-    store::activity::{Activity},
+    store::activity::Activity,
     ui,
 };
 
@@ -128,7 +134,9 @@ impl App<'_> {
             active_page: ActivePage::ActivityList,
             unit_formatter: UnitFormatter::imperial(),
             activity_list: ActivityListState {
+                mode: activity_list::ActivityListMode::Normal,
                 table_state: TableState::default(),
+                anchored_table_state: TableState::default(),
                 filter_text_area: Input::default(),
                 filter_dialog: false,
                 sort_dialog: false,
@@ -179,7 +187,9 @@ impl App<'_> {
             }
 
             while self.event_queue.len() > 1 {
-                self.event_sender.send(self.event_queue.pop().unwrap()).await?;
+                self.event_sender
+                    .send(self.event_queue.pop().unwrap())
+                    .await?;
             }
 
             if let Some(event) = self.event_receiver.recv().await {
@@ -228,11 +238,7 @@ impl App<'_> {
                 if !anchored.polyline().is_ok() || !a.polyline().is_ok() {
                     return false;
                 }
-                return compare(
-                    &anchored.polyline().unwrap(),
-                    &a.polyline().unwrap(),
-                    100
-                ) < 0.001;
+                return compare(&anchored.polyline().unwrap(), &a.polyline().unwrap(), 100) < 0.001;
             })
             .collect()
     }
@@ -280,5 +286,22 @@ impl App<'_> {
 
     pub fn send(&mut self, event: InputEvent) {
         self.event_queue.push(event);
+    }
+
+    pub(crate) fn anchor_selected(&mut self) -> () {
+        let activities = self.filtered_activities();
+        if let Some(selected) = self.activity_list.table_state().selected() {
+            if let Some(a) = activities.get(selected) {
+                if self.activity_anchored.is_some() {
+                    self.activity_anchored = None;
+                    self.activity_list.mode = ActivityListMode::Normal;
+                    return;
+                }
+
+                self.activity_anchored = Some(a.clone());
+                self.activity_list.mode = ActivityListMode::Anchored;
+                self.activity_list.table_state().select(Some(0));
+            }
+        }
     }
 }

@@ -16,7 +16,7 @@ use crate::{
         util::{table_state_next, table_state_prev}, input::InputEvent,
     },
     store::activity::Activity,
-    ui::{centered_rect_absolute, color::ColorTheme}, component::{table_status_select_current, table_status_anchor_current},
+    ui::{centered_rect_absolute, color::ColorTheme}, component::{table_status_select_current},
 };
 
 use super::sort_dialog;
@@ -28,7 +28,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
                 app.filters.filter =
                     app.activity_list.filter_text_area.value().to_string();
                 app.activity_list.filter_dialog = false;
-                app.activity_list.table_state.select(Some(0));
+                app.activity_list.table_state().select(Some(0));
                 app.send(InputEvent::Reload);
                 true
             }
@@ -59,16 +59,15 @@ pub fn handle(app: &mut App, key: MappedKey) {
                 SortOrder::Desc => SortOrder::Asc,
             }
         }
-        StravaEvent::Down => table_state_next(&mut app.activity_list.table_state, activities.len()),
-        StravaEvent::Up => table_state_prev(&mut app.activity_list.table_state, activities.len()),
+        StravaEvent::Down => table_state_next(&mut app.activity_list.table_state(), activities.len()),
+        StravaEvent::Up => table_state_prev(&mut app.activity_list.table_state(), activities.len()),
         StravaEvent::Filter => toggle_filter(app),
         StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),
         StravaEvent::Refresh => app.send(InputEvent::Sync),
         StravaEvent::Anchor => {
-            table_status_anchor_current(app);
+            app.anchor_selected();
             app.send(InputEvent::Reload);
-            app.activity_list.table_state.select(Some(0));
         }
         _ => (),
     }
@@ -89,14 +88,14 @@ pub fn draw<B: Backend>(
 ) -> Result<(), anyhow::Error> {
     let activities = &app.filtered_activities();
 
-    if app.activity_list.table_state.selected().is_none() && !activities.is_empty() {
-        app.activity_list.table_state.select(Some(0));
+    if app.activity_list.table_state().selected().is_none() && !activities.is_empty() {
+        app.activity_list.table_state().select(Some(0));
     }
 
     f.render_stateful_widget(
         activity_list_table(app, activities),
         area,
-        &mut app.activity_list.table_state,
+        &mut app.activity_list.table_state(),
     );
 
     if app.activity_list.filter_dialog {

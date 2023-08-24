@@ -59,7 +59,7 @@ pub fn draw<B: Backend>(
         })
         .collect();
     let mut current = vec![];
-    if let Some(selected) = app.activity_list.table_state.selected() {
+    if let Some(selected) = app.activity_list.table_state().selected() {
         let activities = app.filtered_activities();
         if let Some(a) = activities.get(selected) {
             if let Some(a) = app.activities.iter().find(|unsorted|unsorted.id == a.id) {

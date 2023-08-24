@@ -26,9 +26,26 @@ pub fn draw<B: Backend>(
     Ok(())
 }
 
+pub enum ActivityListMode {
+    Normal,
+    Anchored,
+}
+
 pub struct ActivityListState {
+    pub mode: ActivityListMode,
     pub table_state: TableState,
+    pub anchored_table_state: TableState,
     pub filter_text_area: Input,
     pub filter_dialog: bool,
     pub sort_dialog: bool,
+}
+
+impl ActivityListState {
+    pub fn table_state(&mut self) -> &mut TableState
+    {
+        match self.mode {
+            ActivityListMode::Normal => &mut self.table_state,
+            ActivityListMode::Anchored => &mut self.anchored_table_state,
+        }
+    }
 }

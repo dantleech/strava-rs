@@ -15,7 +15,7 @@ use crate::{
 
 use super::{
     polyline, race_predictor, stats,
-    table_status_select_current, splits, activity_list::list::activity_list_table, table_status_anchor_current,
+    table_status_select_current, splits, activity_list::list::activity_list_table,
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
@@ -27,15 +27,15 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Quit => app.active_page = ActivePage::ActivityList,
         StravaEvent::Enter => app.active_page = ActivePage::ActivityList,
         StravaEvent::Down => {
-            table_state_next(&mut app.activity_list.table_state, activities.len());
+            table_state_next(&mut app.activity_list.table_state(), activities.len());
             table_status_select_current(app);
         },
         StravaEvent::Up => {
-            table_state_prev(&mut app.activity_list.table_state, activities.len());
+            table_state_prev(&mut app.activity_list.table_state(), activities.len());
             table_status_select_current(app);
         },
         StravaEvent::Anchor => {
-            table_status_anchor_current(app);
+            app.anchor_selected();
             app.send(InputEvent::Reload);
         }
         _ => (),
