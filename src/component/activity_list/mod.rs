@@ -32,8 +32,3 @@ pub struct ActivityListState {
     pub filter_dialog: bool,
     pub sort_dialog: bool,
 }
-
-pub struct ActivityPerformancesState {
-    pub table_state: TableState,
-}
-

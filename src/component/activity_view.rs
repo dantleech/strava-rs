@@ -34,9 +34,6 @@ pub fn handle(app: &mut App, key: MappedKey) {
             table_state_prev(&mut app.activity_list.table_state, activities.len());
             table_status_select_current(app);
         },
-        StravaEvent::AlternateView => {
-            app.active_page = ActivePage::ActivityPerformances;
-        }
         _ => (),
     }
 }

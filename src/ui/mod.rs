@@ -12,7 +12,7 @@ use tui::{
 };
 use crate::{
     app::{ActivePage, App},
-    component::{activity_list, activity_view, activity_performances},
+    component::{activity_list, activity_view},
 };
 
 use self::color::ColorTheme;
@@ -38,9 +38,6 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
         }
         ActivePage::Activity => {
             activity_view::draw(app, f, rows[1])?;
-        }
-        ActivePage::ActivityPerformances => {
-            activity_performances::draw(app, f, rows[1])?;
         }
     }
 
