@@ -16,7 +16,7 @@ use tui::{
 use tui_input::Input;
 
 use crate::{
-    component::activity_list::ActivityListState, input::InputEvent, store::activity::ActivityStore, event::input::EventSender,
+    component::{activity_list::ActivityListState, activity_performances}, input::InputEvent, store::activity::ActivityStore, event::input::EventSender,
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
@@ -78,6 +78,7 @@ pub struct App<'a> {
 
 pub enum ActivePage {
     ActivityList,
+    ActivityPerformances,
     Activity,
 }
 
@@ -252,6 +253,7 @@ impl App<'_> {
         match self.active_page {
             ActivePage::ActivityList => activity_list::handle(self, key),
             ActivePage::Activity => activity_view::handle(self, key),
+            ActivePage::ActivityPerformances => activity_performances::handle(self, key),
         }
     }
 
