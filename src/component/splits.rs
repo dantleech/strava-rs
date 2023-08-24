@@ -5,9 +5,9 @@ use std::f64::MAX;
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout},
-    style::{Color, Style},
-    widgets::{Gauge, Paragraph},
-    Frame,
+    style::{Color, Style, Styled},
+    widgets::{Gauge, Paragraph, Row, Cell, Table},
+    Frame, symbols::line::HORIZONTAL_DOWN,
 };
 
 use crate::{app::App, ui::color::{gradient, Rgb}, store::activity::ActivitySplit};
@@ -39,46 +39,43 @@ pub fn draw<B: Backend>(
     }
     constraints.push(Constraint::Max(0));
 
-    let rows = Layout::default().constraints(constraints).split(area);
-    let master_cols = Layout::default().direction(tui::layout::Direction::Horizontal).constraints(vec![
-         Constraint::Length(3),
-         Constraint::Min(1),
-         Constraint::Length(10),
-    ]);
-    let header = master_cols.split(area);
-    f.render_widget(Paragraph::new("#"), header[0]);
-    f.render_widget(Paragraph::new("👣 Pace"), header[1]);
-    f.render_widget(Paragraph::new("🌄"), header[2]);
+    let mut rows = vec![];
+    let header = vec![
+        "#",
+        "👣 Pace",
+        "🌄",
+    ];
 
-    let mut count = 1;
-    let _split_count = splits.len();
+    let mut count = 0;
     for split in splits {
-        let row = rows[count];
-        let cols = master_cols.split(row);
-
-        let percent = ((((split.seconds_per_meter() - min) / (max - min)) * 100.0) * 0.75) as u16;
-        f.render_widget(Paragraph::new(format!("{}", count)), cols[0]);
-        f.render_widget(
-            Gauge::default()
-                .percent(percent + 25)
-                .label(
-                    app.unit_formatter.pace(split.moving_time, split.distance),
-                )
-                .use_unicode(true)
-                .style(Style::default().fg(Color::White))
-                .gauge_style(Style::default().fg(
-                        gradient(
-                            Rgb { red: 0, green: 255, blue: 0 },
-                            Rgb { red: 255, green: 0, blue: 0 },
-                            split.seconds_per_meter() - min,
-                            max - min,
-                        ).to_color()
-                ).bg(Color::Black)),
-
-            cols[1],
-        );
-        f.render_widget(Paragraph::new(app.unit_formatter.elevation(split.elevation_difference)), cols[2]);
         count += 1;
+        let color = gradient(
+            Rgb { red: 0, green: 255, blue: 0 },
+            Rgb { red: 255, green: 0, blue: 0 },
+            split.seconds_per_meter() - min,
+            max - min,
+        ).to_color();
+        rows.push(
+            Row::new([
+                Cell::from(format!("{}", count)).set_style(Style::default().bg(color)),
+                Cell::from(app.unit_formatter.pace(split.moving_time, split.distance)),
+                Cell::from(app.unit_formatter.elevation(split.elevation_difference)),
+            ]),
+        );
     }
+    f.render_widget(
+        Table::new(rows)
+            .header(
+                Row::new(header)
+                    .height(1)
+                    .bottom_margin(1)
+                    .style(Style::default()),
+
+            ).widths(&[
+                Constraint::Min(3),
+                Constraint::Min(10),
+                Constraint::Min(10),
+            ]), area
+    );
     Ok(())
 }
