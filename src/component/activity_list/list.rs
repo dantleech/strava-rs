@@ -29,6 +29,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
                     app.activity_list.filter_text_area.value().to_string();
                 app.activity_list.filter_dialog = false;
                 app.activity_list.table_state.select(Some(0));
+                app.send(InputEvent::Reload);
                 true
             }
             _ => false,
@@ -64,7 +65,11 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),
         StravaEvent::Refresh => app.send(InputEvent::Sync),
-        StravaEvent::Anchor => table_status_anchor_current(app),
+        StravaEvent::Anchor => {
+            table_status_anchor_current(app);
+            app.send(InputEvent::Reload);
+            app.activity_list.table_state.select(Some(0));
+        }
         _ => (),
     }
 }

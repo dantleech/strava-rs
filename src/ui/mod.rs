@@ -91,6 +91,9 @@ fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
         ));
         status.push(format!("{} units", app.unit_formatter.system));
     }
+    if let Some(anchored) = &app.activity_anchored {
+        status.push(format!("anchored to \"{}\"", anchored.title));
+    }
 
     if let Some(message) = &app.error_message {
         status.push(format!("\n{}", message));

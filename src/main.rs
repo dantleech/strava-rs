@@ -97,6 +97,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let mut activity_store = ActivityStore::new(&pool);
     let mut app = App::new(&mut activity_store, event_receiver, event_sender.clone(), sync_sender);
+    app.send(input::InputEvent::Reload);
     app.activity_type = config.activity_type;
     app.send(input::InputEvent::Sync);
     app.run(&mut terminal).await?;

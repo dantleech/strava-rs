@@ -9,13 +9,13 @@ use crate::{
     app::{ActivePage, App},
     event::{
         keymap::{MappedKey, StravaEvent},
-        util::{table_state_next, table_state_prev},
+        util::{table_state_next, table_state_prev}, input::InputEvent,
     },
 };
 
 use super::{
     polyline, race_predictor, stats,
-    table_status_select_current, splits, activity_list::list::activity_list_table,
+    table_status_select_current, splits, activity_list::list::activity_list_table, table_status_anchor_current,
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
@@ -34,6 +34,10 @@ pub fn handle(app: &mut App, key: MappedKey) {
             table_state_prev(&mut app.activity_list.table_state, activities.len());
             table_status_select_current(app);
         },
+        StravaEvent::Anchor => {
+            table_status_anchor_current(app);
+            app.send(InputEvent::Reload);
+        }
         _ => (),
     }
 }

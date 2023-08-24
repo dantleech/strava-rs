@@ -65,6 +65,7 @@ pub struct App<'a> {
     pub activity: Option<Activity>,
     pub activity_anchored: Option<Activity>,
     pub activities: Vec<Activity>,
+    pub activities_filtered: Vec<Activity>,
 
     pub info_message: Option<Notification>,
     pub error_message: Option<Notification>,
@@ -140,6 +141,7 @@ impl App<'_> {
             activity: None,
             activity_anchored: None,
             activities: vec![],
+            activities_filtered: vec![],
             store,
 
             activity_type: None,
@@ -193,7 +195,7 @@ impl App<'_> {
                         self.error_message = Some(Notification::new(message));
                     }
                     InputEvent::Tick => (),
-                    InputEvent::Reload => self.activities = self.store.activities().await,
+                    InputEvent::Reload => self.reload().await,
                     InputEvent::Sync => self.sync_sender.send(true).await?,
                 }
             }
@@ -201,10 +203,10 @@ impl App<'_> {
         Ok(())
     }
 
-    // TODO: Add a collection object
-    pub fn unsorted_filtered_activities(&self) -> Vec<Activity> {
+    pub async fn reload(&mut self) {
+        self.activities = self.store.activities().await;
         let activities = self.activities.clone();
-        activities
+        self.activities_filtered = activities
             .into_iter()
             .filter(|a| {
                 if !a.title.contains(self.filters.filter.as_str()) {
@@ -230,9 +232,14 @@ impl App<'_> {
                     &anchored.polyline().unwrap(),
                     &a.polyline().unwrap(),
                     100
-                ) < 0.01;
+                ) < 0.001;
             })
             .collect()
+    }
+
+    // TODO: Add a collection object
+    pub fn unsorted_filtered_activities(&self) -> Vec<Activity> {
+        return self.activities_filtered.clone();
     }
 
     pub fn filtered_activities(&self) -> Vec<Activity> {

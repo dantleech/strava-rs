@@ -23,16 +23,13 @@ fn table_status_anchor_current(app: &mut App) {
 
         if let Some(a) = activities.get(selected) {
 
-            if let Some(existing) = &app.activity_anchored {
-
-                if existing.id == a.id {
-                    app.activity_anchored = None;
-                    return;
-                }
-
+            if app.activity_anchored.is_some() {
+                app.activity_anchored = None;
+                return;
             }
 
             app.activity_anchored = Some(a.clone());
         }
+        app.activity_list.table_state.select(Some(0));
     }
 }
