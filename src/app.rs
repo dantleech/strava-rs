@@ -16,7 +16,7 @@ use tui::{
 use tui_input::Input;
 
 use crate::{
-    component::{activity_list::ActivityListState, activity_performances}, input::InputEvent, store::activity::ActivityStore, event::input::EventSender,
+    component::{activity_list::{ActivityListState, ActivityPerformancesState}, activity_performances}, input::InputEvent, store::{activity::ActivityStore, polyline_compare::{self, compare}}, event::input::EventSender,
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
@@ -59,6 +59,7 @@ pub struct App<'a> {
     pub active_page: ActivePage,
     pub unit_formatter: UnitFormatter,
     pub activity_list: ActivityListState,
+    pub activity_performances: ActivityPerformancesState,
     pub filters: ActivityFilters,
 
     pub activity_type: Option<String>,
@@ -131,6 +132,9 @@ impl App<'_> {
                 filter_text_area: Input::default(),
                 filter_dialog: false,
                 sort_dialog: false,
+            },
+            activity_performances: ActivityPerformancesState {
+                table_state: TableState::default(),
             },
             filters: ActivityFilters {
                 sort_by: SortBy::Date,
@@ -243,6 +247,24 @@ impl App<'_> {
             }
         });
         activities
+    }
+
+    pub fn similar_activities(&self, activity: Activity) -> Vec<Activity>
+    {
+        let activities = self.activities.clone();
+        activities
+            .into_iter()
+            .filter(|a| {
+                if !activity.polyline().is_ok() || !a.polyline().is_ok() {
+                    return false;
+                }
+                return compare(
+                    &activity.polyline().unwrap(),
+                    &a.polyline().unwrap(),
+                    100
+                ) < 0.01;
+            })
+            .collect()
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {

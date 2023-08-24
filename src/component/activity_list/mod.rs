@@ -33,3 +33,7 @@ pub struct ActivityListState {
     pub sort_dialog: bool,
 }
 
+pub struct ActivityPerformancesState {
+    pub table_state: TableState,
+}
+

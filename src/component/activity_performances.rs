@@ -10,6 +10,8 @@ use crate::{
     },
 };
 
+use super::activity_list::list::activity_list_table;
+
 
 
 pub fn handle(app: &mut App, key: MappedKey) {
@@ -27,10 +29,21 @@ pub fn handle(app: &mut App, key: MappedKey) {
 }
 
 pub fn draw<B: Backend>(
-    _app: &mut App,
-    _f: &mut Frame<B>,
-    _area: tui::layout::Rect,
+    app: &mut App,
+    f: &mut Frame<B>,
+    area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
+    if app.activity.is_none() {
+        return Ok(());
+    }
+    // todo: refactor to collection
+    let activities = app.similar_activities(app.activity.clone().unwrap());
+
+    f.render_stateful_widget(
+        activity_list_table(app, &activities),
+        area,
+        &mut app.activity_performances.table_state,
+    );
 
     Ok(())
 }

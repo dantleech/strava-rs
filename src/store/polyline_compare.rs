@@ -7,12 +7,7 @@ pub fn compare(p1: &Polyline, p2: &Polyline, segments: i64) -> f64 {
     let n2 = normalize(p2, segments);
 
     if n1.0.len() != n2.0.len() {
-        panic!(
-            r#"Length of normalized polyline 1 ({})
-            is not equal to length of normalized polyline 2 ({})
-            this should not happen
-            "#, n1.0.len(), n2.0.len()
-        );
+        return f64::MAX;
     }
     
     let mut distance = 0.0; 
