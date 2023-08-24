@@ -34,8 +34,8 @@
           buildInputs = [
             pkgs.rustup
             pkgs.pkg-config
-            pkgs.sqlite-interactive
             pkgs.sqlite
+            pkgs.rlwrap
             pkgs.sqlx-cli
           ];
           
