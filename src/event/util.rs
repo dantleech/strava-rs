@@ -3,6 +3,9 @@ use tui::widgets::TableState;
 pub fn table_state_next(table_state: &mut TableState, max: usize) {
     let i = match table_state.selected() {
         Some(i) => {
+            if max == 0 {
+                return;
+            }
             if i >= max - 1 {
                 i
             } else {

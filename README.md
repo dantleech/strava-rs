@@ -3,6 +3,16 @@ Strava TUI
 
 Strava TUI written in Rust! This is an experimental TUI for Strava.
 
+Features:
+
+- List activities in a comparable way
+- Filter activites by name
+- Sort listed activities
+- Display the route
+- Show laps
+- Race predictions
+- Filter by route similarity ("anchoring")
+
 ### List activities
 
 ![image](https://github.com/dantleech/strava-rs/assets/530801/7187befb-65e2-4fbc-b5b4-8710510c5e1a)

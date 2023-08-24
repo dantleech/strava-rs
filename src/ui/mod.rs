@@ -63,6 +63,9 @@ fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
         Span::raw("rder "),
         Span::styled("[r]", Style::default().fg(strava)),
         Span::raw("efresh "),
+        Span::styled("[a]", Style::default().fg(strava)),
+        Span::raw("nchor"),
+        Span::styled("[+/-] ", Style::default().fg(strava)),
         Span::styled("[q]", Style::default().fg(strava)),
         Span::raw("uit"),
     ])];
@@ -88,6 +91,9 @@ fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
             app.filters.sort_by, app.filters.sort_order
         ));
         status.push(format!("{} units", app.unit_formatter.system));
+        if let Some(anchored) = &app.activity_anchored {
+            status.push(format!("anchored to \"{}\" ± {:.3}", anchored.title, app.filters.anchor_tolerance));
+        }
     }
 
     if let Some(message) = &app.error_message {

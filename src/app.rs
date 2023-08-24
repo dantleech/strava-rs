@@ -7,7 +7,7 @@ use std::{
 
 use strum::EnumIter;
 
-use tokio::{sync::mpsc::{Receiver, Sender}};
+use tokio::sync::mpsc::{Receiver, Sender};
 use tui::{
     backend::{Backend, CrosstermBackend},
     widgets::TableState,
@@ -16,19 +16,36 @@ use tui::{
 use tui_input::Input;
 
 use crate::{
-    component::activity_list::ActivityListState, input::InputEvent, store::activity::ActivityStore, event::input::EventSender,
+    component::activity_list::{ActivityListState, ActivityListMode},
+    event::input::EventSender,
+    input::InputEvent,
+    store::{
+        activity::ActivityStore,
+        polyline_compare::{self, compare},
+    },
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
-    store::activity::{Activity},
+    store::activity::Activity,
     ui,
 };
 
 pub struct ActivityFilters {
     pub sort_by: SortBy,
     pub sort_order: SortOrder,
+    pub anchor_tolerance: f64,
     pub filter: String,
+}
+
+impl ActivityFilters {
+    pub fn anchor_tolerance_add(&mut self, delta: f64) -> () {
+        self.anchor_tolerance += delta;
+        if self.anchor_tolerance < 0.0 {
+            self.anchor_tolerance = 0.0;
+        }
+    }
+
 }
 
 pub struct Notification {
@@ -63,7 +80,9 @@ pub struct App<'a> {
 
     pub activity_type: Option<String>,
     pub activity: Option<Activity>,
+    pub activity_anchored: Option<Activity>,
     pub activities: Vec<Activity>,
+    pub activities_filtered: Vec<Activity>,
 
     pub info_message: Option<Notification>,
     pub error_message: Option<Notification>,
@@ -126,7 +145,9 @@ impl App<'_> {
             active_page: ActivePage::ActivityList,
             unit_formatter: UnitFormatter::imperial(),
             activity_list: ActivityListState {
+                mode: activity_list::ActivityListMode::Normal,
                 table_state: TableState::default(),
+                anchored_table_state: TableState::default(),
                 filter_text_area: Input::default(),
                 filter_dialog: false,
                 sort_dialog: false,
@@ -135,9 +156,12 @@ impl App<'_> {
                 sort_by: SortBy::Date,
                 sort_order: SortOrder::Desc,
                 filter: "".to_string(),
+                anchor_tolerance: 0.005,
             },
             activity: None,
+            activity_anchored: None,
             activities: vec![],
+            activities_filtered: vec![],
             store,
 
             activity_type: None,
@@ -175,7 +199,9 @@ impl App<'_> {
             }
 
             while self.event_queue.len() > 1 {
-                self.event_sender.send(self.event_queue.pop().unwrap()).await?;
+                self.event_sender
+                    .send(self.event_queue.pop().unwrap())
+                    .await?;
             }
 
             if let Some(event) = self.event_receiver.recv().await {
@@ -191,7 +217,7 @@ impl App<'_> {
                         self.error_message = Some(Notification::new(message));
                     }
                     InputEvent::Tick => (),
-                    InputEvent::Reload => self.activities = self.store.activities().await,
+                    InputEvent::Reload => self.reload().await,
                     InputEvent::Sync => self.sync_sender.send(true).await?,
                 }
             }
@@ -199,10 +225,10 @@ impl App<'_> {
         Ok(())
     }
 
-    // TODO: Add a collection object
-    pub fn unsorted_filtered_activities(&self) -> Vec<Activity> {
+    pub async fn reload(&mut self) {
+        self.activities = self.store.activities().await;
         let activities = self.activities.clone();
-        activities
+        self.activities_filtered = activities
             .into_iter()
             .filter(|a| {
                 if !a.title.contains(self.filters.filter.as_str()) {
@@ -216,7 +242,22 @@ impl App<'_> {
 
                 true
             })
+            .filter(|a| {
+                if self.activity_anchored.is_none() {
+                    return true;
+                }
+                let anchored = self.activity_anchored.as_ref().unwrap();
+                if !anchored.polyline().is_ok() || !a.polyline().is_ok() {
+                    return false;
+                }
+                return compare(&anchored.polyline().unwrap(), &a.polyline().unwrap(), 100) < self.filters.anchor_tolerance;
+            })
             .collect()
+    }
+
+    // TODO: Add a collection object
+    pub fn unsorted_filtered_activities(&self) -> Vec<Activity> {
+        return self.activities_filtered.clone();
     }
 
     pub fn filtered_activities(&self) -> Vec<Activity> {
@@ -257,5 +298,22 @@ impl App<'_> {
 
     pub fn send(&mut self, event: InputEvent) {
         self.event_queue.push(event);
+    }
+
+    pub(crate) fn anchor_selected(&mut self) -> () {
+        let activities = self.filtered_activities();
+        if let Some(selected) = self.activity_list.table_state().selected() {
+            if let Some(a) = activities.get(selected) {
+                if self.activity_anchored.is_some() {
+                    self.activity_anchored = None;
+                    self.activity_list.mode = ActivityListMode::Normal;
+                    return;
+                }
+
+                self.activity_anchored = Some(a.clone());
+                self.activity_list.mode = ActivityListMode::Anchored;
+                self.activity_list.table_state().select(Some(0));
+            }
+        }
     }
 }
