@@ -218,6 +218,20 @@ impl App<'_> {
 
                 true
             })
+            .filter(|a| {
+                if self.activity_anchored.is_none() {
+                    return true;
+                }
+                let anchored = self.activity_anchored.as_ref().unwrap();
+                if !anchored.polyline().is_ok() || !a.polyline().is_ok() {
+                    return false;
+                }
+                return compare(
+                    &anchored.polyline().unwrap(),
+                    &a.polyline().unwrap(),
+                    100
+                ) < 0.01;
+            })
             .collect()
     }
 
@@ -244,24 +258,6 @@ impl App<'_> {
             }
         });
         activities
-    }
-
-    pub fn similar_activities(&self, activity: Activity) -> Vec<Activity>
-    {
-        let activities = self.activities.clone();
-        activities
-            .into_iter()
-            .filter(|a| {
-                if !activity.polyline().is_ok() || !a.polyline().is_ok() {
-                    return false;
-                }
-                return compare(
-                    &activity.polyline().unwrap(),
-                    &a.polyline().unwrap(),
-                    100
-                ) < 0.01;
-            })
-            .collect()
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {

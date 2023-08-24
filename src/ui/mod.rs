@@ -63,6 +63,8 @@ fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
         Span::raw("rder "),
         Span::styled("[r]", Style::default().fg(strava)),
         Span::raw("efresh "),
+        Span::styled("[a]", Style::default().fg(strava)),
+        Span::raw("nchor "),
         Span::styled("[q]", Style::default().fg(strava)),
         Span::raw("uit"),
     ])];

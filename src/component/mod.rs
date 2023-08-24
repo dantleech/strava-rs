@@ -17,3 +17,22 @@ fn table_status_select_current(app: &mut App) {
         }
     }
 }
+fn table_status_anchor_current(app: &mut App) {
+    let activities = app.filtered_activities();
+    if let Some(selected) = app.activity_list.table_state.selected() {
+
+        if let Some(a) = activities.get(selected) {
+
+            if let Some(existing) = &app.activity_anchored {
+
+                if existing.id == a.id {
+                    app.activity_anchored = None;
+                    return;
+                }
+
+            }
+
+            app.activity_anchored = Some(a.clone());
+        }
+    }
+}

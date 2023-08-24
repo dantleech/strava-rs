@@ -16,7 +16,7 @@ use crate::{
         util::{table_state_next, table_state_prev}, input::InputEvent,
     },
     store::activity::Activity,
-    ui::{centered_rect_absolute, color::ColorTheme}, component::table_status_select_current,
+    ui::{centered_rect_absolute, color::ColorTheme}, component::{table_status_select_current, table_status_anchor_current},
 };
 
 use super::sort_dialog;
@@ -64,6 +64,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),
         StravaEvent::Refresh => app.send(InputEvent::Sync),
+        StravaEvent::Anchor => table_status_anchor_current(app),
         _ => (),
     }
 }
