@@ -65,6 +65,14 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),
         StravaEvent::Refresh => app.send(InputEvent::Sync),
+        StravaEvent::IncreaseTolerance => {
+            app.filters.anchor_tolerance_add(0.001);
+            app.send(InputEvent::Reload)
+        }
+        StravaEvent::DecreaseTolerance => {
+            app.filters.anchor_tolerance_add(-0.001);
+            app.send(InputEvent::Reload);
+        },
         StravaEvent::Anchor => {
             app.anchor_selected();
             app.send(InputEvent::Reload);

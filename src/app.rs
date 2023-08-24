@@ -34,7 +34,18 @@ use crate::{
 pub struct ActivityFilters {
     pub sort_by: SortBy,
     pub sort_order: SortOrder,
+    pub anchor_tolerance: f64,
     pub filter: String,
+}
+
+impl ActivityFilters {
+    pub fn anchor_tolerance_add(&mut self, delta: f64) -> () {
+        self.anchor_tolerance += delta;
+        if self.anchor_tolerance < 0.0 {
+            self.anchor_tolerance = 0.0;
+        }
+    }
+
 }
 
 pub struct Notification {
@@ -145,6 +156,7 @@ impl App<'_> {
                 sort_by: SortBy::Date,
                 sort_order: SortOrder::Desc,
                 filter: "".to_string(),
+                anchor_tolerance: 0.005,
             },
             activity: None,
             activity_anchored: None,
@@ -238,7 +250,7 @@ impl App<'_> {
                 if !anchored.polyline().is_ok() || !a.polyline().is_ok() {
                     return false;
                 }
-                return compare(&anchored.polyline().unwrap(), &a.polyline().unwrap(), 100) < 0.001;
+                return compare(&anchored.polyline().unwrap(), &a.polyline().unwrap(), 100) < self.filters.anchor_tolerance;
             })
             .collect()
     }
