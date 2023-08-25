@@ -4,10 +4,10 @@ use std::f64::MAX;
 
 use tui::{
     backend::Backend,
-    layout::{Constraint, Layout},
-    style::{Color, Style, Styled, Modifier},
-    widgets::{Gauge, Paragraph, Row, Cell, Table},
-    Frame, symbols::line::HORIZONTAL_DOWN,
+    layout::{Constraint},
+    style::{Style, Styled, Modifier},
+    widgets::{Row, Cell, Table},
+    Frame,
 };
 
 use crate::{app::App, ui::color::{gradient, Rgb}, store::activity::ActivitySplit};
