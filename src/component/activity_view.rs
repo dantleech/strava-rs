@@ -32,20 +32,24 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Quit => app.active_page = ActivePage::ActivityList,
         StravaEvent::Enter => app.active_page = ActivePage::ActivityList,
         StravaEvent::Down => {
-            table_state_next(&mut app.activity_list.table_state(), activities.len());
+            table_state_next(&mut app.activity_list.table_state(), activities.len(), false);
             table_status_select_current(app);
         },
         StravaEvent::Up => {
-            table_state_prev(&mut app.activity_list.table_state(), activities.len());
+            table_state_prev(&mut app.activity_list.table_state(), activities.len(), false);
             table_status_select_current(app);
         },
         StravaEvent::Next => {
-            table_state_next(&mut app.activity_view.pace_table_state, split_len);
-            table_status_select_current(app);
+            table_state_next(&mut app.activity_view.pace_table_state, split_len, true);
+            if let Some(selected) = app.activity_view.pace_table_state.selected() {
+                app.activity_view.selected_split = selected as i64;
+            }
         },
         StravaEvent::Previous => {
-            table_state_prev(&mut app.activity_view.pace_table_state, split_len);
-            table_status_select_current(app);
+            table_state_prev(&mut app.activity_view.pace_table_state, split_len, true);
+            if let Some(selected) = app.activity_view.pace_table_state.selected() {
+                app.activity_view.selected_split = selected as i64;
+            }
         },
         StravaEvent::Anchor => {
             app.anchor_selected();

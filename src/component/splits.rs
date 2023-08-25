@@ -68,13 +68,13 @@ pub fn draw<B: Backend>(
             .header(
                 Row::new(header)
                     .height(1)
-                    .bottom_margin(1)
+                    .bottom_margin(0)
                     .style(Style::default()),
 
             ).widths(&[
                 Constraint::Min(3),
-                Constraint::Min(10),
-                Constraint::Min(10),
+                Constraint::Percentage(33),
+                Constraint::Percentage(33),
             ])
             .highlight_style(Style::default().add_modifier(Modifier::BOLD))
             .highlight_symbol("")

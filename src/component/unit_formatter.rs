@@ -3,6 +3,8 @@ use std::{fmt::Display, f64::INFINITY};
 pub struct UnitFormatter {
     pub system: UnitSystem,
 }
+pub const KILOMETER_TO_MILE: f64 = 0.621371;
+const METERS_TO_FOOT: f64 = 3.28084;
 
 pub enum UnitSystem {
     Metric,
@@ -39,7 +41,7 @@ impl UnitFormatter {
                 format!("{:.2}km", (quantity / 1000.0))
             }
             UnitSystem::Imperial => {
-                format!("{:.2}mi", ((quantity / 1000.0) * 0.621371))
+                format!("{:.2}mi", ((quantity / 1000.0) * KILOMETER_TO_MILE))
             }
         }
     }
@@ -50,13 +52,13 @@ impl UnitFormatter {
                 format!("{:.2}m", elevation)
             }
             UnitSystem::Imperial => {
-                format!("{:.2}ft", elevation * 3.28084)
+                format!("{:.2}ft", elevation * METERS_TO_FOOT)
             }
         }
     }
 
-    pub fn pace(&self, time: i64, distance: f64) -> String {
-        let spm = time as f64 / distance;
+    pub fn pace(&self, time: i64, meters: f64) -> String {
+        let spm = time as f64 / meters;
         if spm == INFINITY {
             return "N/A".to_string();
         }
@@ -67,7 +69,7 @@ impl UnitFormatter {
             UnitSystem::Imperial => {
                 format!(
                     "{} /mi",
-                    self.stopwatch_time(((spm * 1000.0) / 0.621371).round() as i64)
+                    self.stopwatch_time(((spm * 1000.0) / KILOMETER_TO_MILE).round() as i64)
                 )
             }
         }
@@ -88,8 +90,8 @@ impl UnitFormatter {
     }
 
     #[allow(unused)]
-    pub(crate) fn speed(&self, distance: f64, elapsed_time: i64) -> String {
-        let kmph = (distance / 1000.0) / (elapsed_time as f64 / 3600.0);
+    pub(crate) fn speed(&self, meters: f64, elapsed_time: i64) -> String {
+        let kmph = (meters / 1000.0) / (elapsed_time as f64 / 3600.0);
         match self.system {
             UnitSystem::Metric => {
                 format!("{:.2}km/h", kmph)

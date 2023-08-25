@@ -42,6 +42,7 @@ pub struct ActivityListState {
 
 pub struct ActivityViewState {
     pub pace_table_state: TableState,
+    pub selected_split: i64,
 }
 
 impl ActivityListState {

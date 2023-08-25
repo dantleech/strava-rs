@@ -59,8 +59,8 @@ pub fn handle(app: &mut App, key: MappedKey) {
                 SortOrder::Desc => SortOrder::Asc,
             }
         }
-        StravaEvent::Down => table_state_next(&mut app.activity_list.table_state(), activities.len()),
-        StravaEvent::Up => table_state_prev(&mut app.activity_list.table_state(), activities.len()),
+        StravaEvent::Down => table_state_next(&mut app.activity_list.table_state(), activities.len(), false),
+        StravaEvent::Up => table_state_prev(&mut app.activity_list.table_state(), activities.len(), false),
         StravaEvent::Filter => toggle_filter(app),
         StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),

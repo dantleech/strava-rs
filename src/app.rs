@@ -155,6 +155,7 @@ impl App<'_> {
             },
             activity_view: ActivityViewState {
                 pace_table_state: TableState::default(),
+                selected_split: 0,
             },
             filters: ActivityFilters {
                 sort_by: SortBy::Date,
