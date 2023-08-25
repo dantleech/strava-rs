@@ -89,11 +89,20 @@ pub fn draw<B: Backend>(
                             y1: from.1 + 1.0,
                             x2: to.0 + 1.0,
                             y2: to.1 + 1.0,
-                            color: Rgb {
-                                red: 255,
-                                green: 255,
-                                blue: 255,
-                            }
+                            color: gradiant(
+                                Rgb {
+                                    red: 50,
+                                    green: 255,
+                                    blue: 255,
+                                },
+                                Rgb {
+                                    red: 255,
+                                    green: 50,
+                                    blue: 255,
+                                },
+                                offset as f64,
+                                mapped_polyline.coords.len() as f64,
+                            )
                             .to_color(),
                         }),
                         false => route_lines.push(Line {
