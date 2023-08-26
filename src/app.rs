@@ -21,7 +21,7 @@ use crate::{
     input::InputEvent,
     store::{
         activity::ActivityStore,
-        polyline_compare::{self, compare},
+        polyline_compare::{compare},
     },
 };
 use crate::{
