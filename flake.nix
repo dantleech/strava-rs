@@ -37,7 +37,9 @@
             pkgs.sqlite
             pkgs.rlwrap
             pkgs.sqlx-cli
+            pkgs.musl
           ];
+
           
         };
       };
