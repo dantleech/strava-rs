@@ -15,8 +15,7 @@ jobs:
     strategy:
       matrix:
         name: [
-            linux,
-            macos
+            linux
         ]
 
         include:
