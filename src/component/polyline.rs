@@ -34,11 +34,7 @@ pub fn draw<B: Backend>(
     if let Ok(decoded) = activity.polyline() {
         let mapped_polyline = map_coords_to_area(decoded, area.width - 4, area.height - 4);
 
-        let x_distance_meters = mapped_polyline.x_distance();
-        let y_distance_meters = mapped_polyline.y_distance();
-
-        let l = length(&mapped_polyline.to_polyline());
-        let length_per_split = l / ((activity.distance / 1000.0) * KILOMETER_TO_MILE);
+        let length_per_split = mapped_polyline.length() / ((activity.distance / 1000.0) * KILOMETER_TO_MILE);
 
         let canvas = Canvas::default()
             .x_bounds([0.0, area.width as f64])
@@ -51,14 +47,14 @@ pub fn draw<B: Backend>(
                     0.0,
                     Span::from(format!(
                         "{} → ",
-                        app.unit_formatter.distance(x_distance_meters.meters())
+                        app.unit_formatter.distance(mapped_polyline.x_distance().meters())
                     )),
                 );
 
                 ctx.print(
                     0.0,
                     area.height as f64,
-                    Span::from(app.unit_formatter.distance(y_distance_meters.meters())),
+                    Span::from(app.unit_formatter.distance(mapped_polyline.y_distance().meters())),
                 );
                 ctx.print(0.0, area.height as f64 - 2.0, Span::from("↓"));
                 let mut running_length = 0.0;
@@ -179,6 +175,10 @@ impl MappedPolyline {
         Location::new(0.0, 0.0)
             .distance_to(&Location::new(0.0, self.y_distance))
             .unwrap()
+    }
+
+    fn length(&self) -> f64 {
+        return length(&self.to_polyline());
     }
 }
 
