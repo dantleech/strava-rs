@@ -1,8 +1,8 @@
 pub mod app;
 pub mod authenticator;
 pub mod client;
-pub mod config;
 pub mod component;
+pub mod config;
 pub mod event;
 pub mod store;
 pub mod sync;
@@ -11,28 +11,23 @@ pub mod util;
 
 use std::{io, panic, process};
 
-
-use config::ConfigResult;
 use app::App;
+use config::ConfigResult;
 
-
-
-
-use crossterm::{
-    terminal::{disable_raw_mode, enable_raw_mode},
-};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
 use event::input;
 
-use tokio::{
-    sync::mpsc::{self},
-};
+use tokio::sync::mpsc::{self};
 use tui::{backend::CrosstermBackend, Terminal};
 use xdg::BaseDirectories;
 
-use crate::{sync::{spawn_sync}, store::{db::get_pool, migration::run_migrations}, event::logger::Logger, config::{load_config, Config}};
+use crate::store::activity::ActivityStore;
 use crate::{
-    store::activity::ActivityStore,
+    config::{load_config, Config},
+    event::logger::Logger,
+    store::{db::get_pool, migration::run_migrations},
+    sync::spawn_sync,
 };
 
 #[tokio::main]
@@ -45,7 +40,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let access_token_path = dirs
         .place_state_file("access_token.json")
         .expect("Could not create state directory");
-    let storage_path = dirs.get_data_home();
+    let storage_path = dirs.create_data_directory("").expect("Could not create data directory");
     let pool = get_pool(format!("{}/strava.sqlite", storage_path.display())).await;
     let (event_sender, event_receiver) = mpsc::channel(32);
     let (sync_sender, sync_receiver) = mpsc::channel::<bool>(32);
@@ -92,11 +87,17 @@ async fn main() -> Result<(), anyhow::Error> {
         config.client_secret,
         access_token_path.to_str().unwrap().to_string(),
         logger,
-        sync_receiver
-    ).await;
+        sync_receiver,
+    )
+    .await;
 
     let mut activity_store = ActivityStore::new(&pool);
-    let mut app = App::new(&mut activity_store, event_receiver, event_sender.clone(), sync_sender);
+    let mut app = App::new(
+        &mut activity_store,
+        event_receiver,
+        event_sender.clone(),
+        sync_sender,
+    );
     app.send(input::InputEvent::Reload);
     app.activity_type = config.activity_type;
     app.send(input::InputEvent::Sync);
