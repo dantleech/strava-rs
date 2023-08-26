@@ -23,7 +23,13 @@ pub fn draw<B: Backend>(
             ),
         ),
         ("Kudos".to_string(), format!("{}", activity.kudos)),
-        ("Split".to_string(), format!("{}", app.activity_view.selected_split)),
+        (
+            "Split".to_string(),
+            match app.activity_view.selected_split {
+                Some(s) => format!("{}", s),
+                None => "N/A".to_string()
+            },
+        ),
         (
             "Country".to_string(),
             (match activity.location_country {

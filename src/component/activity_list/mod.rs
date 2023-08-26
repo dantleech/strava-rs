@@ -42,7 +42,12 @@ pub struct ActivityListState {
 
 pub struct ActivityViewState {
     pub pace_table_state: TableState,
-    pub selected_split: i64,
+    pub selected_split: Option<i64>,
+}
+impl ActivityViewState {
+    pub(crate) fn select_split(&mut self, selected: i64) -> () {
+        self.selected_split = Some(selected);
+    }
 }
 
 impl ActivityListState {

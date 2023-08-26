@@ -19,7 +19,6 @@ use super::{
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {
-    let activities = app.filtered_activities();
     let split_len = match &app.activity {
         Some(a) => a.splits.len(),
         None => 0,
@@ -32,23 +31,21 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Quit => app.active_page = ActivePage::ActivityList,
         StravaEvent::Enter => app.active_page = ActivePage::ActivityList,
         StravaEvent::Next => {
-            table_state_next(&mut app.activity_list.table_state(), activities.len(), false);
-            table_status_select_current(app);
+            app.next_activity();
         },
         StravaEvent::Previous => {
-            table_state_prev(&mut app.activity_list.table_state(), activities.len(), false);
-            table_status_select_current(app);
+            app.previous_activity();
         },
         StravaEvent::Down => {
             table_state_next(&mut app.activity_view.pace_table_state, split_len, true);
             if let Some(selected) = app.activity_view.pace_table_state.selected() {
-                app.activity_view.selected_split = selected as i64;
+                app.activity_view.select_split(selected as i64);
             }
         },
         StravaEvent::Up => {
             table_state_prev(&mut app.activity_view.pace_table_state, split_len, true);
             if let Some(selected) = app.activity_view.pace_table_state.selected() {
-                app.activity_view.selected_split = selected as i64;
+                app.activity_view.select_split(selected as i64);
             }
         },
         StravaEvent::Anchor => {

@@ -59,7 +59,7 @@ pub fn draw<B: Backend>(
                 ctx.print(0.0, area.height as f64 - 2.0, Span::from("↓"));
                 let mut running_length = 0.0;
                 let mut next_break = length_per_split;
-                let mut split = 0;
+                let mut split:i64 = 0;
                 let mut route_lines = vec![];
                 let mut split_lines = vec![];
 
@@ -79,7 +79,7 @@ pub fn draw<B: Backend>(
                         Coord { x: to.0, y: to.1 },
                     ]));
 
-                    match app.activity_view.selected_split == split {
+                    match in_selected_split(app.activity_view.selected_split, split) {
                         true => split_lines.push(Line {
                             x1: from.0 + 1.0,
                             y1: from.1 + 1.0,
@@ -143,6 +143,13 @@ pub fn draw<B: Backend>(
         f.render_widget(canvas, area);
     }
     Ok(())
+}
+
+fn in_selected_split(selected_split: Option<i64>, split: i64) -> bool {
+    match selected_split {
+        Some(s) => s == split,
+        None => false,
+    }
 }
 
 struct MappedPolyline {
