@@ -14,8 +14,7 @@ use crate::{
 };
 
 use super::{
-    polyline, race_predictor, stats,
-    table_status_select_current, splits, activity_list::list::activity_list_table,
+    polyline, race_predictor, stats, splits, activity_list::list::activity_list_table,
 };
 
 pub fn handle(app: &mut App, key: MappedKey) {

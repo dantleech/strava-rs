@@ -12,8 +12,7 @@ use tui_input::backend::crossterm::EventHandler;
 use crate::{
     app::{App, SortOrder},
     event::{
-        keymap::{MappedKey, StravaEvent},
-        util::{table_state_next, table_state_prev}, input::InputEvent,
+        keymap::{MappedKey, StravaEvent}, input::InputEvent,
     },
     store::activity::Activity,
     ui::{centered_rect_absolute, color::ColorTheme}, component::{table_status_select_current},
@@ -47,7 +46,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
 
         return;
     }
-    let activities = app.filtered_activities();
+    let _activities = app.filtered_activities();
     match key.strava_event {
         StravaEvent::Quit => app.quit = true,
         StravaEvent::ToggleUnitSystem => {
