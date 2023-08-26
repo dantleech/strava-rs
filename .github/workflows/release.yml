@@ -30,6 +30,8 @@ jobs:
         toolchain: stable
         override: true
         target: ${{ matrix.target }}
+    - name: Install MUSL
+      run: sudo apt install musl-tools
 
     - name: Build
       uses: actions-rs/cargo@v1
