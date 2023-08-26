@@ -24,19 +24,23 @@ jobs:
             os: ubuntu-latest
             artifact_name: target/release/strava-rs
             asset_name: strava-rs-linux
-            extra: "--target x86_64-unknown-linux-musl"
-          - name: macos
-            os: macos-latest
-            artifact_name: target/release/strava-rs
-            asset_name: strava-rs-macos
-            extra: ""
+            target: "x86_64-unknown-linux-musl"
 
     steps:
     - uses: actions/checkout@v3
-    - name: Rustup
-      run: rustup target add x86_64-unknown-linux-musl
+    - name: Install stable toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+        target: ${{ matrix.target }}
+
     - name: Build
-      run: cargo build --release --locked ${{ matrix.extra }}
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release --target ${{ matrix.target }}
 
     - name: Rename
       run: mv ${{ matrix.artifact_name }} ${{ matrix.asset_name }}
