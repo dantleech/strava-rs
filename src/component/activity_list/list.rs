@@ -46,7 +46,6 @@ pub fn handle(app: &mut App, key: MappedKey) {
 
         return;
     }
-    let _activities = app.filtered_activities();
     match key.strava_event {
         StravaEvent::Quit => app.quit = true,
         StravaEvent::ToggleUnitSystem => {
@@ -58,8 +57,8 @@ pub fn handle(app: &mut App, key: MappedKey) {
                 SortOrder::Desc => SortOrder::Asc,
             }
         }
-        StravaEvent::Next => app.next_activity(),
-        StravaEvent::Previous => app.previous_activity(),
+        StravaEvent::Down => app.next_activity(),
+        StravaEvent::Up => app.previous_activity(),
         StravaEvent::Filter => toggle_filter(app),
         StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),

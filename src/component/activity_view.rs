@@ -29,19 +29,19 @@ pub fn handle(app: &mut App, key: MappedKey) {
         }
         StravaEvent::Quit => app.active_page = ActivePage::ActivityList,
         StravaEvent::Enter => app.active_page = ActivePage::ActivityList,
-        StravaEvent::Next => {
+        StravaEvent::Down => {
             app.next_activity();
         },
-        StravaEvent::Previous => {
+        StravaEvent::Up => {
             app.previous_activity();
         },
-        StravaEvent::Down => {
+        StravaEvent::Next => {
             table_state_next(&mut app.activity_view.pace_table_state, split_len, true);
             if let Some(selected) = app.activity_view.pace_table_state.selected() {
                 app.activity_view.select_split(selected as i64);
             }
         },
-        StravaEvent::Up => {
+        StravaEvent::Previous => {
             table_state_prev(&mut app.activity_view.pace_table_state, split_len, true);
             if let Some(selected) = app.activity_view.pace_table_state.selected() {
                 app.activity_view.select_split(selected as i64);
