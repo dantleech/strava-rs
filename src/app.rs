@@ -36,7 +36,7 @@ pub struct ActivityFilters {
 }
 
 impl ActivityFilters {
-    pub fn anchor_tolerance_add(&mut self, delta: f64) -> () {
+    pub fn anchor_tolerance_add(&mut self, delta: f64) {
         self.anchor_tolerance += delta;
         if self.anchor_tolerance < 0.0 {
             self.anchor_tolerance = 0.0;
@@ -248,18 +248,18 @@ impl App<'_> {
                     return true;
                 }
                 let anchored = self.activity_anchored.as_ref().unwrap();
-                if !anchored.polyline().is_ok() || !a.polyline().is_ok() {
+                if anchored.polyline().is_err() || a.polyline().is_err() {
                     return false;
                 }
-                return compare(&anchored.polyline().unwrap(), &a.polyline().unwrap(), 100)
-                    < self.filters.anchor_tolerance;
+                compare(&anchored.polyline().unwrap(), &a.polyline().unwrap(), 100)
+                    < self.filters.anchor_tolerance
             })
             .collect()
     }
 
     // TODO: Add a collection object
     pub fn unsorted_filtered_activities(&self) -> Vec<Activity> {
-        return self.activities_filtered.clone();
+        self.activities_filtered.clone()
     }
 
     pub fn filtered_activities(&self) -> Vec<Activity> {
@@ -302,7 +302,7 @@ impl App<'_> {
         self.event_queue.push(event);
     }
 
-    pub(crate) fn anchor_selected(&mut self) -> () {
+    pub(crate) fn anchor_selected(&mut self) {
         let activities = self.filtered_activities();
         if let Some(selected) = self.activity_list.table_state().selected() {
             if let Some(a) = activities.get(selected) {
@@ -319,9 +319,9 @@ impl App<'_> {
         }
     }
 
-    pub(crate) fn previous_activity(&mut self) -> () {
+    pub(crate) fn previous_activity(&mut self) {
         table_state_prev(
-            &mut self.activity_list.table_state(),
+            self.activity_list.table_state(),
             self.activities_filtered.len(),
             false,
         );
@@ -332,9 +332,9 @@ impl App<'_> {
         }
     }
 
-    pub(crate) fn next_activity(&mut self) -> () {
+    pub(crate) fn next_activity(&mut self) {
         table_state_next(
-            &mut self.activity_list.table_state(),
+            self.activity_list.table_state(),
             self.activities_filtered.len(),
             false,
         );

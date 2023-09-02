@@ -134,7 +134,7 @@ pub fn draw<B: Backend>(
                     }
 
                     if running_length >= next_break {
-                        next_break = next_break + length_per_split;
+                        next_break += length_per_split;
                         split += 1;
                     }
 
@@ -227,7 +227,7 @@ impl ActivityMap {
     }
 
     fn length(&self) -> f64 {
-        return length(&self.to_polyline());
+        length(&self.to_polyline())
     }
 }
 

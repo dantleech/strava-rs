@@ -101,7 +101,7 @@ pub fn draw<B: Backend>(
     f.render_stateful_widget(
         activity_list_table(app, activities),
         area,
-        &mut app.activity_list.table_state(),
+        app.activity_list.table_state(),
     );
 
     if app.activity_list.filter_dialog {

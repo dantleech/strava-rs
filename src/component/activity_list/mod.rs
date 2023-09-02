@@ -45,7 +45,7 @@ pub struct ActivityViewState {
     pub selected_split: Option<i64>,
 }
 impl ActivityViewState {
-    pub(crate) fn select_split(&mut self, selected: i64) -> () {
+    pub(crate) fn select_split(&mut self, selected: i64) {
         self.selected_split = Some(selected);
     }
 }

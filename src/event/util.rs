@@ -7,7 +7,11 @@ pub fn table_state_next(table_state: &mut TableState, max: usize, repeat: bool) 
                 return;
             }
             if i >= max - 1 {
-                if repeat { 0 } else { i }
+                if repeat {
+                    0
+                } else {
+                    i
+                }
             } else {
                 i + 1
             }
@@ -22,8 +26,10 @@ pub fn table_state_prev(table_state: &mut TableState, max: usize, repeat: bool) 
         Some(i) => {
             if i > 0 {
                 i - 1
+            } else if repeat {
+                max - 1
             } else {
-                if repeat { max - 1 } else { 0 }
+                0
             }
         }
         None => 0,
