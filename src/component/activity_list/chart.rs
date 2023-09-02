@@ -25,18 +25,8 @@ pub fn draw<B: Backend>(
     area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
     let activities = &app.unsorted_filtered_activities();
-    let times: Vec<i64> = activities
-        .iter()
-        .map(|a| {
-            a.start_date.unwrap().timestamp()
-        })
-        .collect();
-    let paces: Vec<i64> = activities
-        .iter()
-        .map(|a| {
-            a.meters_per_hour() as i64
-        })
-        .collect();
+    let times: Vec<i64> = activities.timestamps();
+    let paces: Vec<i64> = activities.meter_per_hours();
     let tmax = times.iter().max();
     let tmin = times.iter().min();
     let pmax = paces.iter().max();
@@ -51,7 +41,7 @@ pub fn draw<B: Backend>(
     }
     let pmin = pmin.unwrap();
     let pmax = pmax.unwrap();
-    let data: Vec<(f64, f64)> = activities
+    let data: Vec<(f64, f64)> = activities.to_vec()
         .iter()
         .map(|a| {
             let ts = a.start_date.unwrap().timestamp();
@@ -62,7 +52,7 @@ pub fn draw<B: Backend>(
     if let Some(selected) = app.activity_list.table_state().selected() {
         let activities = app.filtered_activities();
         if let Some(a) = activities.get(selected) {
-            if let Some(a) = app.activities.iter().find(|unsorted|unsorted.id == a.id) {
+            if let Some(a) = app.activities.find(a.id) {
                     current.push((a.start_date.unwrap().timestamp() as f64, *pmin as f64));
                     current.push((a.start_date.unwrap().timestamp() as f64, *pmax as f64));
             }

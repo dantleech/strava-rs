@@ -1,5 +1,4 @@
 use std::{
-    cmp::Ordering,
     fmt::Display,
     io,
     time::{Duration, SystemTime},
@@ -19,7 +18,7 @@ use crate::{
     component::activity_list::{ActivityListMode, ActivityListState, ActivityViewState},
     event::{input::EventSender, util::{table_state_prev, table_state_next}},
     input::InputEvent,
-    store::{activity::ActivityStore, polyline_compare::compare},
+    store::{activity::{ActivityStore, Activities}},
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
@@ -78,8 +77,8 @@ pub struct App<'a> {
     pub activity_type: Option<String>,
     pub activity: Option<Activity>,
     pub activity_anchored: Option<Activity>,
-    pub activities: Vec<Activity>,
-    pub activities_filtered: Vec<Activity>,
+    pub activities: Activities,
+    pub activities_filtered: Activities,
 
     pub info_message: Option<Notification>,
     pub error_message: Option<Notification>,
@@ -161,8 +160,8 @@ impl App<'_> {
             },
             activity: None,
             activity_anchored: None,
-            activities: vec![],
-            activities_filtered: vec![],
+            activities: Activities::new(),
+            activities_filtered: Activities::new(),
             store,
 
             activity_type: None,
@@ -228,63 +227,22 @@ impl App<'_> {
 
     pub async fn reload(&mut self) {
         self.activities = self.store.activities().await;
-        let activities = self.activities.clone();
-        self.activities_filtered = activities
-            .into_iter()
-            .filter(|a| {
-                if !a.title.contains(self.filters.filter.as_str()) {
-                    return false;
-                }
-                if let Some(activity_type) = self.activity_type.clone() {
-                    if a.activity_type != activity_type {
-                        return false;
-                    }
-                }
-
-                true
-            })
-            .filter(|a| {
-                if self.activity_anchored.is_none() {
-                    return true;
-                }
-                let anchored = self.activity_anchored.as_ref().unwrap();
-                if anchored.polyline().is_err() || a.polyline().is_err() {
-                    return false;
-                }
-                compare(&anchored.polyline().unwrap(), &a.polyline().unwrap(), 100)
-                    < self.filters.anchor_tolerance
-            })
-            .collect()
+        self.activities_filtered = self.activities.where_title_contains(self.filters.filter.as_str());
+        if let Some(activity_type) = self.activity_type.clone() {
+            self.activities_filtered = self.activities_filtered.having_activity_type(activity_type);
+        }
+        if let Some(anchored) = &self.activity_anchored {
+            self.activities_filtered = self.activities_filtered.withing_distance_of(anchored, self.filters.anchor_tolerance);
+        }
     }
 
-    // TODO: Add a collection object
-    pub fn unsorted_filtered_activities(&self) -> Vec<Activity> {
+    pub fn unsorted_filtered_activities(&self) -> Activities {
         self.activities_filtered.clone()
     }
 
-    pub fn filtered_activities(&self) -> Vec<Activity> {
-        let mut activities = self.unsorted_filtered_activities();
-        activities.sort_by(|a, b| {
-            let ordering = match self.filters.sort_by {
-                SortBy::Date => a.id.cmp(&b.id),
-                SortBy::Distance => a
-                    .distance
-                    .partial_cmp(&b.distance)
-                    .unwrap_or(Ordering::Less),
-                SortBy::Pace => a.kmph().partial_cmp(&b.kmph()).unwrap_or(Ordering::Less),
-                SortBy::HeartRate => a
-                    .average_heartrate
-                    .or(Some(0.0))
-                    .partial_cmp(&b.average_heartrate.or(Some(0.0)))
-                    .unwrap(),
-                SortBy::Time => a.moving_time.partial_cmp(&b.moving_time).unwrap(),
-            };
-            match self.filters.sort_order {
-                SortOrder::Asc => ordering,
-                SortOrder::Desc => ordering.reverse(),
-            }
-        });
-        activities
+    pub fn filtered_activities(&self) -> Activities {
+        let activities = self.unsorted_filtered_activities();
+        activities.sort(&self.filters.sort_by, &self.filters.sort_order)
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {

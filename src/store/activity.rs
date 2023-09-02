@@ -1,7 +1,155 @@
+use std::cmp::Ordering;
+
 use chrono::NaiveDateTime;
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, SqlitePool};
+
+use crate::app::{SortBy, SortOrder};
+
+use super::polyline_compare::compare;
+
+#[derive(Clone, Debug)]
+pub struct Activities {
+    activities: Vec<Activity>,
+    offset: usize,
+}
+
+impl Iterator for Activities {
+    type Item = Activity;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.activities.get(self.offset + 1) {
+            Some(a) => {
+                self.offset += 1;
+                Some(a.clone())
+            }
+            None => None,
+        }
+    }
+}
+
+impl Activities {
+    pub(crate) fn new() -> Activities {
+        Self {
+            activities: vec![],
+            offset: 0,
+        }
+    }
+    pub fn len(&self) -> usize {
+        self.activities.len()
+    }
+    pub fn get(&self, offset: usize) -> Option<&Activity> {
+        self.activities.get(offset)
+    }
+
+    pub fn find(&self, id: i64) -> Option<&Activity> {
+        self.activities.iter().find(|a|a.id == id)
+    }
+
+    pub(crate) fn where_title_contains(&self, pattern: &str) -> Activities {
+        self.activities.clone()
+            .into_iter()
+            .filter(|a| a.title.contains(pattern))
+            .collect()
+    }
+
+    pub(crate) fn having_activity_type(&self, activity_type: String) -> Activities {
+        self.activities.clone()
+            .into_iter()
+            .filter(|a| a.activity_type == activity_type)
+            .collect()
+    }
+
+    pub(crate) fn withing_distance_of(&self, anchored: &Activity, tolerant: f64) -> Activities {
+        self.activities.clone()
+            .into_iter()
+            .filter(|a| {
+                if anchored.polyline().is_err() || a.polyline().is_err() {
+                    return false;
+                }
+                compare(&anchored.polyline().unwrap(), &a.polyline().unwrap(), 100) < tolerant
+            })
+            .collect()
+    }
+
+    pub(crate) fn sort(
+        &self,
+        sort_by: &SortBy,
+        sort_order: &SortOrder,
+    ) -> Activities {
+        let mut activities = self.activities.clone();
+        activities.sort_by(|a, b| {
+            let ordering = match sort_by {
+                SortBy::Date => a.id.cmp(&b.id),
+                SortBy::Distance => a
+                    .distance
+                    .partial_cmp(&b.distance)
+                    .unwrap_or(Ordering::Less),
+                SortBy::Pace => a.kmph().partial_cmp(&b.kmph()).unwrap_or(Ordering::Less),
+                SortBy::HeartRate => a
+                    .average_heartrate
+                    .or(Some(0.0))
+                    .partial_cmp(&b.average_heartrate.or(Some(0.0)))
+                    .unwrap(),
+                SortBy::Time => a.moving_time.partial_cmp(&b.moving_time).unwrap(),
+            };
+            match sort_order {
+                SortOrder::Asc => ordering,
+                SortOrder::Desc => ordering.reverse(),
+            }
+        });
+        Activities::from(activities)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.activities.is_empty()
+    }
+
+    pub fn timestamps(&self) -> Vec<i64> {
+        self.activities
+            .iter()
+            .map(|a| a.start_date.unwrap().timestamp())
+            .collect()
+    }
+
+    pub fn meter_per_hours(&self) -> Vec<i64> {
+        self.activities
+            .iter()
+            .map(|a| a.meters_per_hour() as i64)
+            .collect()
+    }
+
+    pub fn to_vec(&self) -> Vec<Activity> {
+        self.activities.clone()
+    }
+}
+
+impl From<Vec<Activity>> for Activities {
+    fn from(activities: Vec<Activity>) -> Self {
+        Activities {
+            activities,
+            offset: 0,
+        }
+    }
+}
+impl From<Activity> for Activities {
+    fn from(activity: Activity) -> Self {
+        Activities {
+            activities: vec![activity],
+            offset: 0,
+        }
+    }
+}
+
+impl FromIterator<Activity> for Activities {
+    fn from_iter<T: IntoIterator<Item = Activity>>(iter: T) -> Self {
+        Activities {
+            activities: Vec::from_iter(iter),
+            offset: 0,
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
 pub struct Activity {
@@ -53,43 +201,49 @@ impl ActivityStore<'_> {
         ActivityStore { pool }
     }
 
-    pub(crate) async fn activities(&mut self) -> Vec<Activity> {
+    pub(crate) async fn activities(&mut self) -> Activities {
         let activities = sqlx::query!(
             r#"
             SELECT * FROM activity ORDER BY start_date DESC
             "#
-        ).fetch_all(self.pool).await.unwrap();
+        )
+        .fetch_all(self.pool)
+        .await
+        .unwrap();
 
-        return activities.iter().map(|rec| {
-            let splits: Vec<ActivitySplit> = if let Some(splits) = &rec.activity_splits {
-                serde_json::from_str(splits).unwrap()
-            } else {
-                vec![]
-            };
-            Activity{
-                id: rec.id,
-                title: rec.title.clone(),
-                activity_type: rec.activity_type.clone(),
-                description: rec.description.clone(),
-                distance: rec.distance,
-                average_speed: rec.average_speed,
-                moving_time: rec.moving_time,
-                elapsed_time: rec.elapsed_time,
-                total_elevation_gain: rec.total_elevation_gain,
-                sport_type: rec.sport_type.clone(),
-                average_heartrate: rec.average_heartrate,
-                max_heartrate: rec.max_heartrate,
-                start_date: rec.start_date,
-                summary_polyline: rec.summary_polyline.clone(),
-                average_cadence: rec.average_cadence,
-                kudos: rec.kudos,
-                location_country: rec.location_country.clone(),
-                location_state: rec.location_state.clone(),
-                location_city: rec.location_city.clone(),
-                athletes: rec.athletes,
-                splits,
-            }
-        }).collect()
+        return activities
+            .iter()
+            .map(|rec| {
+                let splits: Vec<ActivitySplit> = if let Some(splits) = &rec.activity_splits {
+                    serde_json::from_str(splits).unwrap()
+                } else {
+                    vec![]
+                };
+                Activity {
+                    id: rec.id,
+                    title: rec.title.clone(),
+                    activity_type: rec.activity_type.clone(),
+                    description: rec.description.clone(),
+                    distance: rec.distance,
+                    average_speed: rec.average_speed,
+                    moving_time: rec.moving_time,
+                    elapsed_time: rec.elapsed_time,
+                    total_elevation_gain: rec.total_elevation_gain,
+                    sport_type: rec.sport_type.clone(),
+                    average_heartrate: rec.average_heartrate,
+                    max_heartrate: rec.max_heartrate,
+                    start_date: rec.start_date,
+                    summary_polyline: rec.summary_polyline.clone(),
+                    average_cadence: rec.average_cadence,
+                    kudos: rec.kudos,
+                    location_country: rec.location_country.clone(),
+                    location_state: rec.location_state.clone(),
+                    location_city: rec.location_city.clone(),
+                    athletes: rec.athletes,
+                    splits,
+                }
+            })
+            .collect();
     }
 }
 

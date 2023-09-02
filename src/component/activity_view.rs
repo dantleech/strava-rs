@@ -10,7 +10,7 @@ use crate::{
     event::{
         keymap::{MappedKey, StravaEvent},
         util::{table_state_next, table_state_prev}, input::InputEvent,
-    },
+    }, store::activity::Activities,
 };
 
 use super::{
@@ -66,7 +66,10 @@ pub fn draw<B: Backend>(
         .split(area);
 
     if let Some(activity) = &app.activity {
-        f.render_widget(activity_list_table(app, &vec![activity.clone()]), rows[0]);
+        {
+            let a = Activities::from(activity.clone());
+            f.render_widget(activity_list_table(app, &a), rows[0]);
+        }
     }
 
     let cols = Layout::default()

@@ -14,7 +14,7 @@ use crate::{
     event::{
         keymap::{MappedKey, StravaEvent}, input::InputEvent,
     },
-    store::activity::Activity,
+    store::activity::{Activities},
     ui::{centered_rect_absolute, color::ColorTheme}, component::{table_status_select_current},
 };
 
@@ -133,7 +133,7 @@ pub fn draw<B: Backend>(
     Ok(())
 }
 
-pub fn activity_list_table<'a>(app: &App, activities: &'a Vec<Activity>) -> Table<'a> {
+pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'a> {
     let mut rows = vec![];
     let header_names = [
         "Date",
@@ -149,7 +149,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Vec<Activity>) -> Tabl
         .iter()
         .map(|header| Cell::from(Span::styled(*header, Style::default().fg(Color::DarkGray))));
 
-    for activity in activities {
+    for activity in activities.to_vec() {
         rows.push(Row::new([
             Cell::from(match activity.start_date {
                 Some(x) => x.format("%Y-%m-%d").to_string(),
