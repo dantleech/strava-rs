@@ -4,18 +4,18 @@ use super::activity::Polyline;
 
 pub fn compare(p1: &Polyline, p2: &Polyline, segments: i64) -> f64 {
     let n1 = normalize(p1, segments);
-    let n2 = normalize(p2, segments);
+    let mut n2 = normalize(p2, segments);
 
     if n1.0.len() != n2.0.len() {
         return f64::MAX;
     }
     
     let mut distance = 0.0; 
-    for (c1, c2) in n1.0.iter().zip(n2.clone().0.iter_mut()) {
+    for (c1, c2) in n1.0.iter().zip(n2.0.iter_mut()) {
         distance += length(&LineString::new(vec![*c1, *c2]));
     }
 
-    return distance / (segments as f64);
+    distance / (segments as f64)
 }
 
 pub fn length(p: &Polyline) -> f64 {
@@ -35,9 +35,8 @@ pub fn length(p: &Polyline) -> f64 {
     distance
 }
 
-// create a new polyline based on teh given polyline divided in the given number of segments
 pub fn normalize(p: &Polyline, segments: i64) -> Polyline {
-    let d = length(&p) / (segments as f64);
+    let d = length(p) / (segments as f64);
     let mut segd = d;
     let mut c1 = None;
     let mut new = vec![];
@@ -45,7 +44,7 @@ pub fn normalize(p: &Polyline, segments: i64) -> Polyline {
     for c2 in p.coords() {
         if c1.is_none() {
             c1 = Some(c2);
-            new.push(c2.clone());
+            new.push(*c2);
             continue;
         }
 
@@ -75,18 +74,20 @@ pub fn normalize(p: &Polyline, segments: i64) -> Polyline {
                 y: c1.unwrap().y + dy
             };
 
-            new.push(p.clone());
+            new.push(p);
 
-            segd = d + segd;
+            segd += d;
             c1 = Some(&p);
         }
         c1 = Some(c2);
     }
-    return LineString::new(new);
+    LineString::new(new)
 }
 
 #[cfg(test)]
 mod test {
+    use std::f64::consts::SQRT_2;
+
     use geo_types::{Coord, LineString};
     use polyline::decode_polyline;
 
@@ -95,7 +96,7 @@ mod test {
         let polyline: LineString =
             LineString::new(vec![Coord { x: 0.0, y: 0.0 }, Coord { x: 1.0, y: 1.0 }]);
         let length = super::length(&polyline);
-        assert_eq!(1.4142135623730951, length);
+        assert_eq!(SQRT_2, length);
 
         let polyline: LineString = LineString::new(vec![
             Coord { x: 0.0, y: 0.0 },

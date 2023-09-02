@@ -49,10 +49,10 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
 fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
     let strava = ColorTheme::Orange.to_color();
     let text: Vec<Line> = vec![Line::from(vec![
-        Span::styled("[k]", Style::default().fg(strava)),
-        Span::raw("up "),
-        Span::styled("[j]", Style::default().fg(strava)),
-        Span::raw("down "),
+        Span::styled("[n]", Style::default().fg(strava)),
+        Span::raw("ext "),
+        Span::styled("[p]", Style::default().fg(strava)),
+        Span::raw("evious "),
         Span::styled("[u]", Style::default().fg(strava)),
         Span::raw("nit toggle "),
         Span::styled("[f]", Style::default().fg(strava)),
@@ -66,6 +66,12 @@ fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
         Span::styled("[a]", Style::default().fg(strava)),
         Span::raw("nchor"),
         Span::styled("[+/-] ", Style::default().fg(strava)),
+        Span::styled("[j]", Style::default().fg(strava)),
+        Span::raw("down "),
+        Span::styled("[k]", Style::default().fg(strava)),
+        Span::raw("up "),
+        Span::styled("[p]", Style::default().fg(strava)),
+        Span::raw("evious "),
         Span::styled("[q]", Style::default().fg(strava)),
         Span::raw("uit"),
     ])];

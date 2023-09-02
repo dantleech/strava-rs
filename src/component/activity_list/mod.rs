@@ -40,6 +40,16 @@ pub struct ActivityListState {
     pub sort_dialog: bool,
 }
 
+pub struct ActivityViewState {
+    pub pace_table_state: TableState,
+    pub selected_split: Option<i64>,
+}
+impl ActivityViewState {
+    pub(crate) fn select_split(&mut self, selected: i64) {
+        self.selected_split = Some(selected);
+    }
+}
+
 impl ActivityListState {
     pub fn table_state(&mut self) -> &mut TableState
     {

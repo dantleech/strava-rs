@@ -13,6 +13,8 @@ pub fn map_key(ke: KeyEvent) -> MappedKey {
         KeyCode::Char('a') => new_strava_key(ke, StravaEvent::Anchor),
         KeyCode::Char('+') => new_strava_key(ke, StravaEvent::IncreaseTolerance),
         KeyCode::Char('-') => new_strava_key(ke, StravaEvent::DecreaseTolerance),
+        KeyCode::Char('n') => new_strava_key(ke, StravaEvent::Next),
+        KeyCode::Char('p') => new_strava_key(ke, StravaEvent::Previous),
         KeyCode::Enter => new_strava_key(ke, StravaEvent::Enter),
         KeyCode::Esc => new_strava_key(ke, StravaEvent::Escape),
         _ => new_strava_key(ke, StravaEvent::None),
@@ -46,4 +48,6 @@ pub enum StravaEvent {
     IncreaseTolerance,
     DecreaseTolerance,
     Quit,
+    Next,
+    Previous,
 }

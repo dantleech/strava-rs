@@ -16,13 +16,10 @@ use tui::{
 use tui_input::Input;
 
 use crate::{
-    component::activity_list::{ActivityListState, ActivityListMode},
-    event::input::EventSender,
+    component::activity_list::{ActivityListMode, ActivityListState, ActivityViewState},
+    event::{input::EventSender, util::{table_state_prev, table_state_next}},
     input::InputEvent,
-    store::{
-        activity::ActivityStore,
-        polyline_compare::{compare},
-    },
+    store::{activity::ActivityStore, polyline_compare::compare},
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
@@ -39,13 +36,12 @@ pub struct ActivityFilters {
 }
 
 impl ActivityFilters {
-    pub fn anchor_tolerance_add(&mut self, delta: f64) -> () {
+    pub fn anchor_tolerance_add(&mut self, delta: f64) {
         self.anchor_tolerance += delta;
         if self.anchor_tolerance < 0.0 {
             self.anchor_tolerance = 0.0;
         }
     }
-
 }
 
 pub struct Notification {
@@ -76,6 +72,7 @@ pub struct App<'a> {
     pub active_page: ActivePage,
     pub unit_formatter: UnitFormatter,
     pub activity_list: ActivityListState,
+    pub activity_view: ActivityViewState,
     pub filters: ActivityFilters,
 
     pub activity_type: Option<String>,
@@ -151,6 +148,10 @@ impl App<'_> {
                 filter_text_area: Input::default(),
                 filter_dialog: false,
                 sort_dialog: false,
+            },
+            activity_view: ActivityViewState {
+                pace_table_state: TableState::default(),
+                selected_split: None,
             },
             filters: ActivityFilters {
                 sort_by: SortBy::Date,
@@ -247,17 +248,18 @@ impl App<'_> {
                     return true;
                 }
                 let anchored = self.activity_anchored.as_ref().unwrap();
-                if !anchored.polyline().is_ok() || !a.polyline().is_ok() {
+                if anchored.polyline().is_err() || a.polyline().is_err() {
                     return false;
                 }
-                return compare(&anchored.polyline().unwrap(), &a.polyline().unwrap(), 100) < self.filters.anchor_tolerance;
+                compare(&anchored.polyline().unwrap(), &a.polyline().unwrap(), 100)
+                    < self.filters.anchor_tolerance
             })
             .collect()
     }
 
     // TODO: Add a collection object
     pub fn unsorted_filtered_activities(&self) -> Vec<Activity> {
-        return self.activities_filtered.clone();
+        self.activities_filtered.clone()
     }
 
     pub fn filtered_activities(&self) -> Vec<Activity> {
@@ -300,7 +302,7 @@ impl App<'_> {
         self.event_queue.push(event);
     }
 
-    pub(crate) fn anchor_selected(&mut self) -> () {
+    pub(crate) fn anchor_selected(&mut self) {
         let activities = self.filtered_activities();
         if let Some(selected) = self.activity_list.table_state().selected() {
             if let Some(a) = activities.get(selected) {
@@ -313,6 +315,32 @@ impl App<'_> {
                 self.activity_anchored = Some(a.clone());
                 self.activity_list.mode = ActivityListMode::Anchored;
                 self.activity_list.table_state().select(Some(0));
+            }
+        }
+    }
+
+    pub(crate) fn previous_activity(&mut self) {
+        table_state_prev(
+            self.activity_list.table_state(),
+            self.activities_filtered.len(),
+            false,
+        );
+        if let Some(selected) = self.activity_list.table_state().selected() {
+            if let Some(a) = self.activities_filtered.get(selected) {
+                self.activity = Some(a.clone());
+            }
+        }
+    }
+
+    pub(crate) fn next_activity(&mut self) {
+        table_state_next(
+            self.activity_list.table_state(),
+            self.activities_filtered.len(),
+            false,
+        );
+        if let Some(selected) = self.activity_list.table_state().selected() {
+            if let Some(a) = self.activities_filtered.get(selected) {
+                self.activity = Some(a.clone());
             }
         }
     }

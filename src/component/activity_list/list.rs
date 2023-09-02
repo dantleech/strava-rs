@@ -12,8 +12,7 @@ use tui_input::backend::crossterm::EventHandler;
 use crate::{
     app::{App, SortOrder},
     event::{
-        keymap::{MappedKey, StravaEvent},
-        util::{table_state_next, table_state_prev}, input::InputEvent,
+        keymap::{MappedKey, StravaEvent}, input::InputEvent,
     },
     store::activity::Activity,
     ui::{centered_rect_absolute, color::ColorTheme}, component::{table_status_select_current},
@@ -47,7 +46,6 @@ pub fn handle(app: &mut App, key: MappedKey) {
 
         return;
     }
-    let activities = app.filtered_activities();
     match key.strava_event {
         StravaEvent::Quit => app.quit = true,
         StravaEvent::ToggleUnitSystem => {
@@ -59,18 +57,18 @@ pub fn handle(app: &mut App, key: MappedKey) {
                 SortOrder::Desc => SortOrder::Asc,
             }
         }
-        StravaEvent::Down => table_state_next(&mut app.activity_list.table_state(), activities.len()),
-        StravaEvent::Up => table_state_prev(&mut app.activity_list.table_state(), activities.len()),
+        StravaEvent::Down => app.next_activity(),
+        StravaEvent::Up => app.previous_activity(),
         StravaEvent::Filter => toggle_filter(app),
         StravaEvent::Sort => toggle_sort(app),
         StravaEvent::Enter => table_status_select_current(app),
         StravaEvent::Refresh => app.send(InputEvent::Sync),
         StravaEvent::IncreaseTolerance => {
-            app.filters.anchor_tolerance_add(0.001);
+            app.filters.anchor_tolerance_add(0.01);
             app.send(InputEvent::Reload)
         }
         StravaEvent::DecreaseTolerance => {
-            app.filters.anchor_tolerance_add(-0.001);
+            app.filters.anchor_tolerance_add(-0.01);
             app.send(InputEvent::Reload);
         },
         StravaEvent::Anchor => {
@@ -103,7 +101,7 @@ pub fn draw<B: Backend>(
     f.render_stateful_widget(
         activity_list_table(app, activities),
         area,
-        &mut app.activity_list.table_state(),
+        app.activity_list.table_state(),
     );
 
     if app.activity_list.filter_dialog {
