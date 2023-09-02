@@ -18,7 +18,7 @@ pub type EventSender = Sender<InputEvent>;
 pub fn start(event_sender: EventSender) {
     thread::spawn(move || {
         loop {
-            if poll(Duration::from_millis(100)).unwrap() {
+            if poll(Duration::from_millis(20)).unwrap() {
                 if let Event::Key(key) = event::read().unwrap() {
                     event_sender.blocking_send(InputEvent::Input(key)).unwrap();
                 }

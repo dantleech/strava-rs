@@ -157,7 +157,7 @@ impl App<'_> {
                 sort_by: SortBy::Date,
                 sort_order: SortOrder::Desc,
                 filter: "".to_string(),
-                anchor_tolerance: 0.5,
+                anchor_tolerance: 0.005,
             },
             activity: None,
             activity_anchored: None,

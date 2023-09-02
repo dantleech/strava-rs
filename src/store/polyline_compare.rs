@@ -15,7 +15,7 @@ pub fn compare(p1: &Polyline, p2: &Polyline, segments: i64) -> f64 {
         distance += length(&LineString::new(vec![*c1, *c2]));
     }
 
-    return distance;
+    return distance / (segments as f64);
 }
 
 pub fn length(p: &Polyline) -> f64 {
@@ -113,7 +113,6 @@ mod test {
         let portland = super::length(&polyline);
 
         let polyline2 = decode_polyline(POLYLINE_PARKRUN, 5).unwrap();
-        panic("{:?}", polyline2.coords());
         let parkrun = super::length(&polyline2);
 
         assert_eq!(0.1045498079107501, portland);
