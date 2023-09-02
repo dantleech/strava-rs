@@ -87,7 +87,7 @@ pub fn draw<B: Backend>(
                             y1: from.1 + 1.0,
                             x2: to.0 + 1.0,
                             y2: to.1 + 1.0,
-                            color: gradiant(
+                            color: gradient(
                                 Rgb {
                                     red: 50,
                                     green: 255,
