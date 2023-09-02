@@ -27,7 +27,7 @@ impl Rgb {
     }
 }
 
-pub fn gradiant(start: Rgb, end: Rgb, offset: f64, size: f64) -> Rgb {
+pub fn gradient(start: Rgb, end: Rgb, offset: f64, size: f64) -> Rgb {
     let rdiff = (end.red as f64 - start.red as f64) / size;
     let gdiff = (end.green as f64 - start.green as f64) / size;
     let bdiff = (end.blue as f64 - start.blue as f64) / size;
@@ -41,11 +41,11 @@ pub fn gradiant(start: Rgb, end: Rgb, offset: f64, size: f64) -> Rgb {
 
 #[cfg(test)]
 mod tests {
-    use super::{gradiant, Rgb};
+    use super::{gradient, Rgb};
 
     #[test]
-    fn test_gradiant() {
-        let rgb = gradiant(
+    fn test_gradient() {
+        let rgb = gradient(
             Rgb {
                 red: 0,
                 green: 255,

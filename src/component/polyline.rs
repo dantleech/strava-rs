@@ -12,7 +12,7 @@ use tui::{
 
 use crate::{
     app::App,
-    ui::color::{gradiant, Rgb},
+    ui::color::{gradient, Rgb},
 };
 
 pub fn draw<B: Backend>(
@@ -78,7 +78,7 @@ pub fn draw<B: Backend>(
                         y1: from.1 + 1.0,
                         x2: to.0 + 1.0,
                         y2: to.1 + 1.0,
-                        color: gradiant(
+                        color: gradient(
                             Rgb {
                                 red: 0,
                                 green: 255,
