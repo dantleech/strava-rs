@@ -81,7 +81,6 @@ pub struct App<'a> {
     pub activity_type: Option<String>,
     pub activity: Option<Activity>,
     pub activity_anchored: Option<Activity>,
-    pub activities: Activities,
     pub activities_filtered: Activities,
 
     pub info_message: Option<Notification>,
@@ -135,7 +134,6 @@ impl App<'_> {
             },
             activity: None,
             activity_anchored: None,
-            activities: Activities::new(),
             activities_filtered: Activities::new(),
             store,
 
@@ -152,8 +150,6 @@ impl App<'_> {
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     ) -> Result<(), anyhow::Error> {
-        self.activities = self.store.activities().await;
-
         loop {
             if self.quit {
                 break;
@@ -201,8 +197,8 @@ impl App<'_> {
     }
 
     pub async fn reload(&mut self) {
-        self.activities = self.store.activities().await;
-        self.activities_filtered = self.activities.where_title_contains(self.filters.filter.as_str());
+        let activities = self.store.activities().await;
+        self.activities_filtered = activities.where_title_contains(self.filters.filter.as_str());
         if let Some(activity_type) = self.activity_type.clone() {
             self.activities_filtered = self.activities_filtered.having_activity_type(activity_type);
         }
@@ -212,10 +208,6 @@ impl App<'_> {
         self.activities_filtered = self.activities_filtered
             .rank(&self.ranking.rank_by, &self.ranking.rank_order)
             .sort(&self.filters.sort_by, &self.filters.sort_order)
-    }
-
-    pub fn unsorted_filtered_activities(&self) -> Activities {
-        self.activities_filtered.clone()
     }
 
     pub fn filtered_activities(&self) -> Activities {
