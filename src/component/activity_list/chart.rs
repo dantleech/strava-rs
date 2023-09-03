@@ -22,7 +22,7 @@ pub fn draw<B: Backend>(
     area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
     let activities = &app
-        .filtered_activities()
+        .activities()
         .sort(&SortBy::Date, &SortOrder::Asc);
     let times: Vec<i64> = activities.timestamps();
     let paces: Vec<i64> = activities.meter_per_hours();
@@ -50,7 +50,7 @@ pub fn draw<B: Backend>(
         .collect();
     let mut current = vec![];
     if let Some(selected) = app.activity_list.table_state().selected() {
-        let activities = app.filtered_activities();
+        let activities = app.activities();
         if let Some(a) = activities.get(selected) {
             if let Some(a) = activities.find(a.id) {
                 current.push((a.start_date.unwrap().timestamp() as f64, *pmin as f64));

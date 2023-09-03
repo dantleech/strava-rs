@@ -91,7 +91,7 @@ fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
         if app.filters.filter != *"" {
             status.push(format!("filtered by \"{}\"", app.filters.filter))
         }
-        status.push(format!("{} activities", app.filtered_activities().len()));
+        status.push(format!("{} activities", app.activities().len()));
         status.push(format!(
             "sorted by {} {}",
             app.filters.sort_by, app.filters.sort_order

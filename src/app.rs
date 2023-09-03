@@ -81,7 +81,7 @@ pub struct App<'a> {
     pub activity_type: Option<String>,
     pub activity: Option<Activity>,
     pub activity_anchored: Option<Activity>,
-    pub activities_filtered: Activities,
+    pub activities: Activities,
 
     pub info_message: Option<Notification>,
     pub error_message: Option<Notification>,
@@ -134,7 +134,7 @@ impl App<'_> {
             },
             activity: None,
             activity_anchored: None,
-            activities_filtered: Activities::new(),
+            activities: Activities::new(),
             store,
 
             activity_type: None,
@@ -197,21 +197,21 @@ impl App<'_> {
     }
 
     pub async fn reload(&mut self) {
-        let activities = self.store.activities().await;
-        self.activities_filtered = activities.where_title_contains(self.filters.filter.as_str());
+        let mut activities = self.store.activities().await;
+        activities = activities.where_title_contains(self.filters.filter.as_str());
         if let Some(activity_type) = self.activity_type.clone() {
-            self.activities_filtered = self.activities_filtered.having_activity_type(activity_type);
+            activities = activities.having_activity_type(activity_type);
         }
         if let Some(anchored) = &self.activity_anchored {
-            self.activities_filtered = self.activities_filtered.withing_distance_of(anchored, self.filters.anchor_tolerance);
+            activities = activities.withing_distance_of(anchored, self.filters.anchor_tolerance);
         }
-        self.activities_filtered = self.activities_filtered
+        self.activities = activities
             .rank(&self.ranking.rank_by, &self.ranking.rank_order)
             .sort(&self.filters.sort_by, &self.filters.sort_order)
     }
 
-    pub fn filtered_activities(&self) -> Activities {
-        self.activities_filtered.clone()
+    pub fn activities(&self) -> Activities {
+        self.activities.clone()
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
@@ -230,7 +230,7 @@ impl App<'_> {
     }
 
     pub(crate) fn anchor_selected(&mut self) {
-        let activities = self.filtered_activities();
+        let activities = self.activities();
         if let Some(selected) = self.activity_list.table_state().selected() {
             if let Some(a) = activities.get(selected) {
                 if self.activity_anchored.is_some() {
@@ -249,11 +249,11 @@ impl App<'_> {
     pub(crate) fn previous_activity(&mut self) {
         table_state_prev(
             self.activity_list.table_state(),
-            self.activities_filtered.len(),
+            self.activities.len(),
             false,
         );
         if let Some(selected) = self.activity_list.table_state().selected() {
-            if let Some(a) = self.activities_filtered.get(selected) {
+            if let Some(a) = self.activities.get(selected) {
                 self.activity = Some(a.clone());
             }
         }
@@ -262,11 +262,11 @@ impl App<'_> {
     pub(crate) fn next_activity(&mut self) {
         table_state_next(
             self.activity_list.table_state(),
-            self.activities_filtered.len(),
+            self.activities.len(),
             false,
         );
         if let Some(selected) = self.activity_list.table_state().selected() {
-            if let Some(a) = self.activities_filtered.get(selected) {
+            if let Some(a) = self.activities.get(selected) {
                 self.activity = Some(a.clone());
             }
         }

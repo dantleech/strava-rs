@@ -9,7 +9,7 @@ pub mod stats;
 pub mod unit_formatter;
 
 fn table_status_select_current(app: &mut App) {
-    let activities = app.filtered_activities();
+    let activities = app.activities();
     if let Some(selected) = app.activity_list.table_state().selected() {
         if let Some(a) = activities.get(selected) {
             app.activity = Some(a.clone());

@@ -93,7 +93,7 @@ pub fn draw<B: Backend>(
     f: &mut Frame<B>,
     area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
-    let activities = &app.filtered_activities();
+    let activities = &app.activities();
 
     if app.activity_list.table_state().selected().is_none() && !activities.is_empty() {
         app.activity_list.table_state().select(Some(0));
