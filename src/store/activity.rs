@@ -1,13 +1,79 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, fmt::Display};
 
 use chrono::NaiveDateTime;
+use crossterm::event::KeyCode;
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, SqlitePool};
-
-use crate::app::{SortBy, SortOrder};
+use strum::EnumIter;
 
 use super::polyline_compare::compare;
+
+#[derive(EnumIter)]
+pub enum SortBy {
+    Date,
+    Distance,
+    Pace,
+    HeartRate,
+    Time,
+}
+
+impl Display for SortBy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_label())
+    }
+}
+
+impl SortBy {
+    pub fn to_key(&self) -> char {
+        match *self {
+            SortBy::Date => 'd',
+            SortBy::Pace => 'p',
+            SortBy::HeartRate => 'h',
+            SortBy::Distance => 'D',
+            SortBy::Time => 't',
+        }
+    }
+
+    pub fn to_label(&self) -> &str {
+        match *self {
+            SortBy::Date => "date",
+            SortBy::Pace => "pace",
+            SortBy::HeartRate => "heartrate",
+            SortBy::Distance => "distance",
+            SortBy::Time => "time",
+        }
+    }
+
+    pub fn from_key(key: KeyCode) -> Option<SortBy> {
+        match key {
+            KeyCode::Char('d') => Some(SortBy::Date),
+            KeyCode::Char('p') => Some(SortBy::Pace),
+            KeyCode::Char('h') => Some(SortBy::HeartRate),
+            KeyCode::Char('D') => Some(SortBy::Distance),
+            KeyCode::Char('t') => Some(SortBy::Time),
+            _ => None,
+        }
+    }
+}
+
+pub enum SortOrder {
+    Asc,
+    Desc,
+}
+
+impl Display for SortOrder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                SortOrder::Asc => "ascending",
+                SortOrder::Desc => "descending",
+            }
+        )
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Activities {
@@ -101,6 +167,7 @@ impl Activities {
         });
         Activities::from(activities)
     }
+
 
     pub fn is_empty(&self) -> bool {
         self.activities.is_empty()

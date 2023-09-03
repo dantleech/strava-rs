@@ -10,11 +10,11 @@ use tui::{
 use tui_input::backend::crossterm::EventHandler;
 
 use crate::{
-    app::{App, SortOrder},
+    app::App,
     event::{
         keymap::{MappedKey, StravaEvent}, input::InputEvent,
     },
-    store::activity::{Activities},
+    store::activity::{Activities, SortOrder},
     ui::{centered_rect_absolute, color::ColorTheme}, component::{table_status_select_current},
 };
 

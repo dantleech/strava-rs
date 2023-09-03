@@ -9,43 +9,10 @@ use tui::{
 };
 
 use crate::{
-    app::{App, SortBy},
+    app::App,
     event::keymap::{MappedKey, StravaEvent},
-    ui::{centered_rect_absolute, color::ColorTheme},
+    ui::{centered_rect_absolute, color::ColorTheme}, store::activity::SortBy,
 };
-
-impl SortBy {
-    pub fn to_key(&self) -> char {
-        match *self {
-            SortBy::Date => 'd',
-            SortBy::Pace => 'p',
-            SortBy::HeartRate => 'h',
-            SortBy::Distance => 'D',
-            SortBy::Time => 't',
-        }
-    }
-
-    pub fn to_label(&self) -> &str {
-        match *self {
-            SortBy::Date => "date",
-            SortBy::Pace => "pace",
-            SortBy::HeartRate => "heartrate",
-            SortBy::Distance => "distance",
-            SortBy::Time => "time",
-        }
-    }
-
-    pub fn from_key(key: KeyCode) -> Option<SortBy> {
-        match key {
-            KeyCode::Char('d') => Some(SortBy::Date),
-            KeyCode::Char('p') => Some(SortBy::Pace),
-            KeyCode::Char('h') => Some(SortBy::HeartRate),
-            KeyCode::Char('D') => Some(SortBy::Distance),
-            KeyCode::Char('t') => Some(SortBy::Time),
-            _ => None,
-        }
-    }
-}
 
 pub fn handle(app: &mut App, key: MappedKey) {
     let matched = match key.strava_event {

@@ -4,8 +4,6 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use strum::EnumIter;
-
 use tokio::sync::mpsc::{Receiver, Sender};
 use tui::{
     backend::{Backend, CrosstermBackend},
@@ -18,7 +16,7 @@ use crate::{
     component::activity_list::{ActivityListMode, ActivityListState, ActivityViewState},
     event::{input::EventSender, util::{table_state_prev, table_state_next}},
     input::InputEvent,
-    store::{activity::{ActivityStore, Activities}},
+    store::{activity::{ActivityStore, Activities, SortBy, SortOrder}},
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
@@ -94,39 +92,6 @@ pub struct App<'a> {
 pub enum ActivePage {
     ActivityList,
     Activity,
-}
-
-#[derive(EnumIter)]
-pub enum SortBy {
-    Date,
-    Distance,
-    Pace,
-    HeartRate,
-    Time,
-}
-
-impl Display for SortBy {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_label())
-    }
-}
-
-pub enum SortOrder {
-    Asc,
-    Desc,
-}
-
-impl Display for SortOrder {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                SortOrder::Asc => "ascending",
-                SortOrder::Desc => "descending",
-            }
-        )
-    }
 }
 
 impl App<'_> {
