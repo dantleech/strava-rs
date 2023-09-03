@@ -32,6 +32,11 @@ pub struct ActivityFilters {
     pub filter: String,
 }
 
+pub struct RankOptions {
+    pub rank_by: SortBy,
+    pub rank_order: SortOrder,
+}
+
 impl ActivityFilters {
     pub fn anchor_tolerance_add(&mut self, delta: f64) {
         self.anchor_tolerance += delta;
@@ -71,6 +76,7 @@ pub struct App<'a> {
     pub activity_list: ActivityListState,
     pub activity_view: ActivityViewState,
     pub filters: ActivityFilters,
+    pub ranking: RankOptions,
 
     pub activity_type: Option<String>,
     pub activity: Option<Activity>,
@@ -122,6 +128,10 @@ impl App<'_> {
                 sort_order: SortOrder::Desc,
                 filter: "".to_string(),
                 anchor_tolerance: 0.005,
+            },
+            ranking: RankOptions {
+                rank_by: SortBy::Pace,
+                rank_order: SortOrder::Desc,
             },
             activity: None,
             activity_anchored: None,
@@ -207,7 +217,9 @@ impl App<'_> {
 
     pub fn filtered_activities(&self) -> Activities {
         let activities = self.unsorted_filtered_activities();
-        activities.sort(&self.filters.sort_by, &self.filters.sort_order)
+        activities
+            .rank(&self.ranking.rank_by, &self.ranking.rank_order)
+            .sort(&self.filters.sort_by, &self.filters.sort_order)
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {

@@ -96,7 +96,7 @@ impl Iterator for Activities {
 }
 
 impl Activities {
-    pub(crate) fn new() -> Activities {
+    pub fn new() -> Activities {
         Self {
             activities: vec![],
             offset: 0,
@@ -113,21 +113,21 @@ impl Activities {
         self.activities.iter().find(|a|a.id == id)
     }
 
-    pub(crate) fn where_title_contains(&self, pattern: &str) -> Activities {
+    pub fn where_title_contains(&self, pattern: &str) -> Activities {
         self.activities.clone()
             .into_iter()
             .filter(|a| a.title.contains(pattern))
             .collect()
     }
 
-    pub(crate) fn having_activity_type(&self, activity_type: String) -> Activities {
+    pub fn having_activity_type(&self, activity_type: String) -> Activities {
         self.activities.clone()
             .into_iter()
             .filter(|a| a.activity_type == activity_type)
             .collect()
     }
 
-    pub(crate) fn withing_distance_of(&self, anchored: &Activity, tolerant: f64) -> Activities {
+    pub fn withing_distance_of(&self, anchored: &Activity, tolerant: f64) -> Activities {
         self.activities.clone()
             .into_iter()
             .filter(|a| {
@@ -139,7 +139,7 @@ impl Activities {
             .collect()
     }
 
-    pub(crate) fn sort(
+    pub fn sort(
         &self,
         sort_by: &SortBy,
         sort_order: &SortOrder,
@@ -168,6 +168,19 @@ impl Activities {
         Activities::from(activities)
     }
 
+    pub fn rank(&self, rank_by: &SortBy, rank_order: &SortOrder) -> Activities {
+        let sorted = self.sort(&rank_by, &rank_order);
+        let s = sorted.to_vec();
+        let mut rank = 0;
+
+        let s = s.iter().cloned().map(|a| {
+            let mut aa= a.clone();
+            rank+=1;
+            aa.rank = rank;
+            aa
+        });
+        Activities::from(s.collect::<Vec<Activity>>())
+    }
 
     pub fn is_empty(&self) -> bool {
         self.activities.is_empty()
@@ -241,6 +254,7 @@ pub struct Activity {
     pub location_city: Option<String>,
     pub athletes: i64,
     pub splits: Vec<ActivitySplit>,
+    pub rank: i64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
@@ -264,11 +278,11 @@ pub struct ActivityStore<'a> {
 }
 
 impl ActivityStore<'_> {
-    pub(crate) fn new(pool: &SqlitePool) -> ActivityStore<'_> {
+    pub fn new(pool: &SqlitePool) -> ActivityStore<'_> {
         ActivityStore { pool }
     }
 
-    pub(crate) async fn activities(&mut self) -> Activities {
+    pub async fn activities(&mut self) -> Activities {
         let activities = sqlx::query!(
             r#"
             SELECT * FROM activity ORDER BY start_date DESC
@@ -308,6 +322,7 @@ impl ActivityStore<'_> {
                     location_city: rec.location_city.clone(),
                     athletes: rec.athletes,
                     splits,
+                    rank: 0,
                 }
             })
             .collect();
@@ -329,7 +344,7 @@ impl Activity {
         self.distance / (self.moving_time as f64 / 3600.0)
     }
 
-    pub(crate) fn activity_type_icon(&self) -> String {
+    pub fn activity_type_icon(&self) -> String {
         match self.activity_type.as_str() {
             "Ride" => "🚴".to_string(),
             "Run" => "🏃".to_string(),
@@ -339,7 +354,7 @@ impl Activity {
         }
     }
 
-    pub(crate) fn polyline(&self) -> Result<Polyline, String> {
+    pub fn polyline(&self) -> Result<Polyline, String> {
         if let Some(p) = &self.summary_polyline {
             return polyline::decode_polyline(p.as_str(), 5);
         }

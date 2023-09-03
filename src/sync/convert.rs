@@ -63,7 +63,8 @@ impl ActivityConverter<'_> {
                 location_state: listed.location_state.clone(),
                 location_city: listed.location_city.clone(),
                 athletes: listed.athlete_count,
-                splits: vec![]
+                splits: vec![],
+                rank: 0,
             };
 
             sqlx::query!(

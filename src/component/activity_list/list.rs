@@ -144,6 +144,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
         "👣 Pace",
         "💓 Heart",
         "🌄 Elevation",
+        "🪜 Rank",
     ];
     let headers = header_names
         .iter()
@@ -169,6 +170,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
                     .map_or_else(|| "n/a".to_string(), |v| format!("{:.2}", v)),
             ),
             Cell::from(app.unit_formatter.elevation(activity.total_elevation_gain)),
+            Cell::from(format!("{}", activity.rank)),
         ]));
     }
 
@@ -185,6 +187,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
             Constraint::Min(10),
             Constraint::Min(2),
             Constraint::Percentage(20),
+            Constraint::Percentage(10),
             Constraint::Percentage(10),
             Constraint::Percentage(10),
             Constraint::Percentage(10),
