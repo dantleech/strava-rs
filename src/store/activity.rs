@@ -169,12 +169,12 @@ impl Activities {
     }
 
     pub fn rank(&self, rank_by: &SortBy, rank_order: &SortOrder) -> Activities {
-        let sorted = self.sort(&rank_by, &rank_order);
+        let sorted = self.sort(rank_by, rank_order);
         let s = sorted.to_vec();
         let mut rank = 0;
 
         let s = s.iter().cloned().map(|a| {
-            let mut aa= a.clone();
+            let mut aa= a;
             rank+=1;
             aa.rank = rank;
             aa

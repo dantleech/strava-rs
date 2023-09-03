@@ -1,4 +1,4 @@
-use crossterm::event::KeyCode;
+
 use strum::IntoEnumIterator;
 use tui::{
     backend::Backend,

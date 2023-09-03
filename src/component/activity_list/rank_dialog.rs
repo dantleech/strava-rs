@@ -1,17 +1,15 @@
-use crossterm::event::KeyCode;
-use strum::IntoEnumIterator;
+
+
 use tui::{
     backend::Backend,
-    style::{Color, Style},
-    text::{Span, Line},
-    widgets::{Block, Borders, Clear, Paragraph},
+    widgets::{Clear},
     Frame,
 };
 
 use crate::{
     app::App,
     event::{keymap::{MappedKey, StravaEvent}, input::InputEvent},
-    ui::{centered_rect_absolute, color::ColorTheme}, store::activity::{SortBy, SortOrder},
+    ui::{centered_rect_absolute}, store::activity::{SortBy, SortOrder},
 };
 
 use super::sort_dialog::sort_option_paragraph;
