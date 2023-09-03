@@ -10,15 +10,15 @@ use tui::{
 use tui_input::backend::crossterm::EventHandler;
 
 use crate::{
-    app::{App, SortOrder},
+    app::App,
     event::{
         keymap::{MappedKey, StravaEvent}, input::InputEvent,
     },
-    store::activity::{Activities},
+    store::activity::{Activities, SortOrder},
     ui::{centered_rect_absolute, color::ColorTheme}, component::{table_status_select_current},
 };
 
-use super::sort_dialog;
+use super::{sort_dialog, rank_dialog};
 
 pub fn handle(app: &mut App, key: MappedKey) {
     if app.activity_list.filter_dialog {
@@ -46,6 +46,11 @@ pub fn handle(app: &mut App, key: MappedKey) {
 
         return;
     }
+    if app.activity_list.rank_dialog {
+        rank_dialog::handle(app, key);
+
+        return;
+    }
     match key.strava_event {
         StravaEvent::Quit => app.quit = true,
         StravaEvent::ToggleUnitSystem => {
@@ -55,12 +60,14 @@ pub fn handle(app: &mut App, key: MappedKey) {
             app.filters.sort_order = match app.filters.sort_order {
                 SortOrder::Asc => SortOrder::Desc,
                 SortOrder::Desc => SortOrder::Asc,
-            }
+            };
+            app.send(InputEvent::Reload);
         }
         StravaEvent::Down => app.next_activity(),
         StravaEvent::Up => app.previous_activity(),
         StravaEvent::Filter => toggle_filter(app),
         StravaEvent::Sort => toggle_sort(app),
+        StravaEvent::Rank => toggle_rank(app),
         StravaEvent::Enter => table_status_select_current(app),
         StravaEvent::Refresh => app.send(InputEvent::Sync),
         StravaEvent::IncreaseTolerance => {
@@ -86,13 +93,16 @@ fn toggle_filter(app: &mut App) {
 fn toggle_sort(app: &mut App) {
     app.activity_list.sort_dialog = !app.activity_list.sort_dialog;
 }
+fn toggle_rank(app: &mut App) {
+    app.activity_list.rank_dialog = !app.activity_list.rank_dialog;
+}
 
 pub fn draw<B: Backend>(
     app: &mut App,
     f: &mut Frame<B>,
     area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
-    let activities = &app.filtered_activities();
+    let activities = &app.activities();
 
     if app.activity_list.table_state().selected().is_none() && !activities.is_empty() {
         app.activity_list.table_state().select(Some(0));
@@ -129,6 +139,11 @@ pub fn draw<B: Backend>(
 
         return Ok(());
     }
+    if app.activity_list.rank_dialog {
+        rank_dialog::draw(app, f, f.size())?;
+
+        return Ok(());
+    }
 
     Ok(())
 }
@@ -142,8 +157,9 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
         "Dst",
         "🕑 Time",
         "👣 Pace",
-        "💓 Heart",
+        "💓 Avg. Heart",
         "🌄 Elevation",
+        "🪜 Rank",
     ];
     let headers = header_names
         .iter()
@@ -169,6 +185,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
                     .map_or_else(|| "n/a".to_string(), |v| format!("{:.2}", v)),
             ),
             Cell::from(app.unit_formatter.elevation(activity.total_elevation_gain)),
+            Cell::from(format!("{}", activity.rank)),
         ]));
     }
 
@@ -185,6 +202,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
             Constraint::Min(10),
             Constraint::Min(2),
             Constraint::Percentage(20),
+            Constraint::Percentage(10),
             Constraint::Percentage(10),
             Constraint::Percentage(10),
             Constraint::Percentage(10),

@@ -1,4 +1,4 @@
-use crossterm::event::KeyCode;
+
 use strum::IntoEnumIterator;
 use tui::{
     backend::Backend,
@@ -9,47 +9,18 @@ use tui::{
 };
 
 use crate::{
-    app::{App, SortBy},
-    event::keymap::{MappedKey, StravaEvent},
-    ui::{centered_rect_absolute, color::ColorTheme},
+    app::App,
+    event::{keymap::{MappedKey, StravaEvent}, input::InputEvent},
+    ui::{centered_rect_absolute, color::ColorTheme}, store::activity::SortBy,
 };
-
-impl SortBy {
-    pub fn to_key(&self) -> char {
-        match *self {
-            SortBy::Date => 'd',
-            SortBy::Pace => 'p',
-            SortBy::HeartRate => 'h',
-            SortBy::Distance => 'D',
-            SortBy::Time => 't',
-        }
-    }
-
-    pub fn to_label(&self) -> &str {
-        match *self {
-            SortBy::Date => "date",
-            SortBy::Pace => "pace",
-            SortBy::HeartRate => "heartrate",
-            SortBy::Distance => "distance",
-            SortBy::Time => "time",
-        }
-    }
-
-    pub fn from_key(key: KeyCode) -> Option<SortBy> {
-        match key {
-            KeyCode::Char('d') => Some(SortBy::Date),
-            KeyCode::Char('p') => Some(SortBy::Pace),
-            KeyCode::Char('h') => Some(SortBy::HeartRate),
-            KeyCode::Char('D') => Some(SortBy::Distance),
-            KeyCode::Char('t') => Some(SortBy::Time),
-            _ => None,
-        }
-    }
-}
 
 pub fn handle(app: &mut App, key: MappedKey) {
     let matched = match key.strava_event {
         StravaEvent::Enter => {
+            app.activity_list.sort_dialog = false;
+            true
+        }
+        StravaEvent::Escape => {
             app.activity_list.sort_dialog = false;
             true
         }
@@ -63,6 +34,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
     if let Some(sort) = SortBy::from_key(key.key_event.code) {
         app.filters.sort_by = sort;
         app.activity_list.sort_dialog = false;
+        app.send(InputEvent::Reload);
     }
 }
 
@@ -73,17 +45,11 @@ pub fn draw<B: Backend>(
 ) -> Result<(), anyhow::Error> {
     let rect = centered_rect_absolute(64, 3, area);
     f.render_widget(Clear, rect);
-    let block = Block::default()
-        .title("Sort".to_string())
-        .borders(Borders::ALL)
-        .style(Style::default().fg(ColorTheme::Dialog.to_color()));
-
-    f.render_widget(block, rect);
-    f.render_widget(sort_option_paragraph(app), rect);
+    f.render_widget(sort_option_paragraph(app, "Sort".to_string()), rect);
 
     Ok(())
 }
-fn sort_option_paragraph<'a>(_app: &'a mut App) -> Paragraph<'a> {
+pub fn sort_option_paragraph<'a>(_app: &'a mut App, title: String) -> Paragraph<'a> {
     let strava = ColorTheme::Orange.to_color();
     let mut sorts = vec![];
 
@@ -111,7 +77,9 @@ fn sort_option_paragraph<'a>(_app: &'a mut App) -> Paragraph<'a> {
 
     Paragraph::new(text).block(
         Block::default()
+            .title(title)
             .borders(Borders::ALL)
+            .border_style(Style::default().fg(ColorTheme::Dialog.to_color()))
             .style(Style::default()),
     )
 }

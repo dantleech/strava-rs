@@ -4,8 +4,6 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use strum::EnumIter;
-
 use tokio::sync::mpsc::{Receiver, Sender};
 use tui::{
     backend::{Backend, CrosstermBackend},
@@ -18,7 +16,7 @@ use crate::{
     component::activity_list::{ActivityListMode, ActivityListState, ActivityViewState},
     event::{input::EventSender, util::{table_state_prev, table_state_next}},
     input::InputEvent,
-    store::{activity::{ActivityStore, Activities}},
+    store::{activity::{ActivityStore, Activities, SortBy, SortOrder}},
 };
 use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
@@ -32,6 +30,11 @@ pub struct ActivityFilters {
     pub sort_order: SortOrder,
     pub anchor_tolerance: f64,
     pub filter: String,
+}
+
+pub struct RankOptions {
+    pub rank_by: SortBy,
+    pub rank_order: SortOrder,
 }
 
 impl ActivityFilters {
@@ -73,12 +76,12 @@ pub struct App<'a> {
     pub activity_list: ActivityListState,
     pub activity_view: ActivityViewState,
     pub filters: ActivityFilters,
+    pub ranking: RankOptions,
 
     pub activity_type: Option<String>,
     pub activity: Option<Activity>,
     pub activity_anchored: Option<Activity>,
     pub activities: Activities,
-    pub activities_filtered: Activities,
 
     pub info_message: Option<Notification>,
     pub error_message: Option<Notification>,
@@ -94,39 +97,6 @@ pub struct App<'a> {
 pub enum ActivePage {
     ActivityList,
     Activity,
-}
-
-#[derive(EnumIter)]
-pub enum SortBy {
-    Date,
-    Distance,
-    Pace,
-    HeartRate,
-    Time,
-}
-
-impl Display for SortBy {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_label())
-    }
-}
-
-pub enum SortOrder {
-    Asc,
-    Desc,
-}
-
-impl Display for SortOrder {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                SortOrder::Asc => "ascending",
-                SortOrder::Desc => "descending",
-            }
-        )
-    }
 }
 
 impl App<'_> {
@@ -147,6 +117,7 @@ impl App<'_> {
                 filter_text_area: Input::default(),
                 filter_dialog: false,
                 sort_dialog: false,
+                rank_dialog: false,
             },
             activity_view: ActivityViewState {
                 pace_table_state: TableState::default(),
@@ -158,10 +129,13 @@ impl App<'_> {
                 filter: "".to_string(),
                 anchor_tolerance: 0.005,
             },
+            ranking: RankOptions {
+                rank_by: SortBy::Pace,
+                rank_order: SortOrder::Desc,
+            },
             activity: None,
             activity_anchored: None,
             activities: Activities::new(),
-            activities_filtered: Activities::new(),
             store,
 
             activity_type: None,
@@ -177,8 +151,6 @@ impl App<'_> {
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     ) -> Result<(), anyhow::Error> {
-        self.activities = self.store.activities().await;
-
         loop {
             if self.quit {
                 break;
@@ -226,23 +198,21 @@ impl App<'_> {
     }
 
     pub async fn reload(&mut self) {
-        self.activities = self.store.activities().await;
-        self.activities_filtered = self.activities.where_title_contains(self.filters.filter.as_str());
+        let mut activities = self.store.activities().await;
+        activities = activities.where_title_contains(self.filters.filter.as_str());
         if let Some(activity_type) = self.activity_type.clone() {
-            self.activities_filtered = self.activities_filtered.having_activity_type(activity_type);
+            activities = activities.having_activity_type(activity_type);
         }
         if let Some(anchored) = &self.activity_anchored {
-            self.activities_filtered = self.activities_filtered.withing_distance_of(anchored, self.filters.anchor_tolerance);
+            activities = activities.withing_distance_of(anchored, self.filters.anchor_tolerance);
         }
+        self.activities = activities
+            .rank(&self.ranking.rank_by, &self.ranking.rank_order)
+            .sort(&self.filters.sort_by, &self.filters.sort_order)
     }
 
-    pub fn unsorted_filtered_activities(&self) -> Activities {
-        self.activities_filtered.clone()
-    }
-
-    pub fn filtered_activities(&self) -> Activities {
-        let activities = self.unsorted_filtered_activities();
-        activities.sort(&self.filters.sort_by, &self.filters.sort_order)
+    pub fn activities(&self) -> Activities {
+        self.activities.clone()
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
@@ -261,7 +231,7 @@ impl App<'_> {
     }
 
     pub(crate) fn anchor_selected(&mut self) {
-        let activities = self.filtered_activities();
+        let activities = self.activities();
         if let Some(selected) = self.activity_list.table_state().selected() {
             if let Some(a) = activities.get(selected) {
                 if self.activity_anchored.is_some() {
@@ -280,11 +250,11 @@ impl App<'_> {
     pub(crate) fn previous_activity(&mut self) {
         table_state_prev(
             self.activity_list.table_state(),
-            self.activities_filtered.len(),
+            self.activities.len(),
             false,
         );
         if let Some(selected) = self.activity_list.table_state().selected() {
-            if let Some(a) = self.activities_filtered.get(selected) {
+            if let Some(a) = self.activities.get(selected) {
                 self.activity = Some(a.clone());
             }
         }
@@ -293,11 +263,11 @@ impl App<'_> {
     pub(crate) fn next_activity(&mut self) {
         table_state_next(
             self.activity_list.table_state(),
-            self.activities_filtered.len(),
+            self.activities.len(),
             false,
         );
         if let Some(selected) = self.activity_list.table_state().selected() {
-            if let Some(a) = self.activities_filtered.get(selected) {
+            if let Some(a) = self.activities.get(selected) {
                 self.activity = Some(a.clone());
             }
         }

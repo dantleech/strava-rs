@@ -59,6 +59,8 @@ fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
         Span::raw("ilter "),
         Span::styled("[s]", Style::default().fg(strava)),
         Span::raw("ort "),
+        Span::styled("[S]", Style::default().fg(strava)),
+        Span::raw("rank "),
         Span::styled("[o]", Style::default().fg(strava)),
         Span::raw("rder "),
         Span::styled("[r]", Style::default().fg(strava)),
@@ -91,10 +93,14 @@ fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
         if app.filters.filter != *"" {
             status.push(format!("filtered by \"{}\"", app.filters.filter))
         }
-        status.push(format!("{} activities", app.filtered_activities().len()));
+        status.push(format!("{} activities", app.activities().len()));
         status.push(format!(
             "sorted by {} {}",
             app.filters.sort_by, app.filters.sort_order
+        ));
+        status.push(format!(
+            "ranked by {} {}",
+            app.ranking.rank_by, app.ranking.rank_order
         ));
         status.push(format!("{} units", app.unit_formatter.system));
         if let Some(anchored) = &app.activity_anchored {

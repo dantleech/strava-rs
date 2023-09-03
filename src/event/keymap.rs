@@ -8,6 +8,7 @@ pub fn map_key(ke: KeyEvent) -> MappedKey {
         KeyCode::Char('o') => new_strava_key(ke, StravaEvent::ToggleSortOrder),
         KeyCode::Char('u') => new_strava_key(ke, StravaEvent::ToggleUnitSystem),
         KeyCode::Char('s') => new_strava_key(ke, StravaEvent::Sort),
+        KeyCode::Char('S') => new_strava_key(ke, StravaEvent::Rank),
         KeyCode::Char('f') => new_strava_key(ke, StravaEvent::Filter),
         KeyCode::Char('r') => new_strava_key(ke, StravaEvent::Refresh),
         KeyCode::Char('a') => new_strava_key(ke, StravaEvent::Anchor),
@@ -34,6 +35,7 @@ pub struct MappedKey {
 }
 
 pub enum StravaEvent {
+    Rank,
     ToggleUnitSystem,
     ToggleSortOrder,
     Refresh,
