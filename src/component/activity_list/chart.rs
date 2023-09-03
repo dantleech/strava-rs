@@ -13,7 +13,7 @@ use crate::{
     app::{App},
     event::{
         keymap::{MappedKey},
-    },
+    }, store::activity::{SortBy, SortOrder},
 };
 
 
@@ -24,7 +24,7 @@ pub fn draw<B: Backend>(
     f: &mut Frame<B>,
     area: tui::layout::Rect,
 ) -> Result<(), anyhow::Error> {
-    let activities = &app.unsorted_filtered_activities();
+    let activities = &app.filtered_activities().sort(&SortBy::Date, &SortOrder::Asc);
     let times: Vec<i64> = activities.timestamps();
     let paces: Vec<i64> = activities.meter_per_hours();
     let tmax = times.iter().max();

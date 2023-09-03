@@ -10,7 +10,7 @@ use tui::{
 
 use crate::{
     app::App,
-    event::keymap::{MappedKey, StravaEvent},
+    event::{keymap::{MappedKey, StravaEvent}, input::InputEvent},
     ui::{centered_rect_absolute, color::ColorTheme}, store::activity::SortBy,
 };
 
@@ -30,6 +30,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
     if let Some(sort) = SortBy::from_key(key.key_event.code) {
         app.filters.sort_by = sort;
         app.activity_list.sort_dialog = false;
+        app.send(InputEvent::Reload);
     }
 }
 

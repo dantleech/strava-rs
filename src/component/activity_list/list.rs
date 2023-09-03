@@ -55,7 +55,8 @@ pub fn handle(app: &mut App, key: MappedKey) {
             app.filters.sort_order = match app.filters.sort_order {
                 SortOrder::Asc => SortOrder::Desc,
                 SortOrder::Desc => SortOrder::Asc,
-            }
+            };
+            app.send(InputEvent::Reload);
         }
         StravaEvent::Down => app.next_activity(),
         StravaEvent::Up => app.previous_activity(),

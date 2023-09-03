@@ -209,6 +209,9 @@ impl App<'_> {
         if let Some(anchored) = &self.activity_anchored {
             self.activities_filtered = self.activities_filtered.withing_distance_of(anchored, self.filters.anchor_tolerance);
         }
+        self.activities_filtered = self.activities_filtered
+            .rank(&self.ranking.rank_by, &self.ranking.rank_order)
+            .sort(&self.filters.sort_by, &self.filters.sort_order)
     }
 
     pub fn unsorted_filtered_activities(&self) -> Activities {
@@ -216,10 +219,7 @@ impl App<'_> {
     }
 
     pub fn filtered_activities(&self) -> Activities {
-        let activities = self.unsorted_filtered_activities();
-        activities
-            .rank(&self.ranking.rank_by, &self.ranking.rank_order)
-            .sort(&self.filters.sort_by, &self.filters.sort_order)
+        self.activities_filtered.clone()
     }
 
     fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
