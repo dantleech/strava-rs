@@ -20,6 +20,10 @@ pub fn handle(app: &mut App, key: MappedKey) {
             app.activity_list.sort_dialog = false;
             true
         }
+        StravaEvent::Escape => {
+            app.activity_list.sort_dialog = false;
+            true
+        }
         _ => false,
     };
 
