@@ -117,6 +117,7 @@ impl App<'_> {
                 filter_text_area: Input::default(),
                 filter_dialog: false,
                 sort_dialog: false,
+                rank_dialog: false,
             },
             activity_view: ActivityViewState {
                 pace_table_state: TableState::default(),

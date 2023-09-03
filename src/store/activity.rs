@@ -68,8 +68,8 @@ impl Display for SortOrder {
             f,
             "{}",
             match self {
-                SortOrder::Asc => "ascending",
-                SortOrder::Desc => "descending",
+                SortOrder::Asc => "asc",
+                SortOrder::Desc => "desc",
             }
         )
     }

@@ -41,17 +41,11 @@ pub fn draw<B: Backend>(
 ) -> Result<(), anyhow::Error> {
     let rect = centered_rect_absolute(64, 3, area);
     f.render_widget(Clear, rect);
-    let block = Block::default()
-        .title("Sort".to_string())
-        .borders(Borders::ALL)
-        .style(Style::default().fg(ColorTheme::Dialog.to_color()));
-
-    f.render_widget(block, rect);
-    f.render_widget(sort_option_paragraph(app), rect);
+    f.render_widget(sort_option_paragraph(app, "Sort".to_string()), rect);
 
     Ok(())
 }
-fn sort_option_paragraph<'a>(_app: &'a mut App) -> Paragraph<'a> {
+pub fn sort_option_paragraph<'a>(_app: &'a mut App, title: String) -> Paragraph<'a> {
     let strava = ColorTheme::Orange.to_color();
     let mut sorts = vec![];
 
@@ -79,7 +73,9 @@ fn sort_option_paragraph<'a>(_app: &'a mut App) -> Paragraph<'a> {
 
     Paragraph::new(text).block(
         Block::default()
+            .title(title)
             .borders(Borders::ALL)
+            .border_style(Style::default().fg(ColorTheme::Dialog.to_color()))
             .style(Style::default()),
     )
 }

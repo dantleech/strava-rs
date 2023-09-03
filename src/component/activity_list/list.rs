@@ -18,7 +18,7 @@ use crate::{
     ui::{centered_rect_absolute, color::ColorTheme}, component::{table_status_select_current},
 };
 
-use super::sort_dialog;
+use super::{sort_dialog, rank_dialog};
 
 pub fn handle(app: &mut App, key: MappedKey) {
     if app.activity_list.filter_dialog {
@@ -46,6 +46,11 @@ pub fn handle(app: &mut App, key: MappedKey) {
 
         return;
     }
+    if app.activity_list.rank_dialog {
+        rank_dialog::handle(app, key);
+
+        return;
+    }
     match key.strava_event {
         StravaEvent::Quit => app.quit = true,
         StravaEvent::ToggleUnitSystem => {
@@ -62,6 +67,7 @@ pub fn handle(app: &mut App, key: MappedKey) {
         StravaEvent::Up => app.previous_activity(),
         StravaEvent::Filter => toggle_filter(app),
         StravaEvent::Sort => toggle_sort(app),
+        StravaEvent::Rank => toggle_rank(app),
         StravaEvent::Enter => table_status_select_current(app),
         StravaEvent::Refresh => app.send(InputEvent::Sync),
         StravaEvent::IncreaseTolerance => {
@@ -86,6 +92,9 @@ fn toggle_filter(app: &mut App) {
 
 fn toggle_sort(app: &mut App) {
     app.activity_list.sort_dialog = !app.activity_list.sort_dialog;
+}
+fn toggle_rank(app: &mut App) {
+    app.activity_list.rank_dialog = !app.activity_list.rank_dialog;
 }
 
 pub fn draw<B: Backend>(
@@ -130,6 +139,11 @@ pub fn draw<B: Backend>(
 
         return Ok(());
     }
+    if app.activity_list.rank_dialog {
+        rank_dialog::draw(app, f, f.size())?;
+
+        return Ok(());
+    }
 
     Ok(())
 }
@@ -143,7 +157,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
         "Dst",
         "🕑 Time",
         "👣 Pace",
-        "💓 Heart",
+        "💓 Avg. Heart",
         "🌄 Elevation",
         "🪜 Rank",
     ];

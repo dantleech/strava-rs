@@ -1,6 +1,7 @@
 pub mod list;
 pub mod chart;
 pub mod sort_dialog;
+pub mod rank_dialog;
 
 use tui::{
     backend::Backend,
@@ -38,6 +39,7 @@ pub struct ActivityListState {
     pub filter_text_area: Input,
     pub filter_dialog: bool,
     pub sort_dialog: bool,
+    pub rank_dialog: bool,
 }
 
 pub struct ActivityViewState {
