@@ -6,19 +6,19 @@ use tui::{
     backend::Backend,
     layout::{Constraint},
     style::{Style, Styled, Modifier},
-    widgets::{Row, Cell, Table},
-    Frame,
+    widgets::{Row, Cell, Table, StatefulWidget},
+    Frame, prelude::Buffer,
 };
 
 use crate::{app::App, ui::color::{gradient, Rgb}, store::activity::ActivitySplit};
 
 pub fn draw<B: Backend>(
     app: &mut App,
-    f: &mut Frame<B>,
+    f: &mut Buffer,
     area: tui::layout::Rect,
-) -> Result<(), anyhow::Error> {
+) {
     if app.activity.is_none() {
-        return Ok(());
+        return;
     }
     let activity = app.activity.as_ref().unwrap();
     // TODO: cant use async DB access here
@@ -63,22 +63,19 @@ pub fn draw<B: Backend>(
             ]),
         );
     }
-    f.render_stateful_widget(
-        Table::new(rows)
-            .header(
-                Row::new(header)
-                    .height(1)
-                    .bottom_margin(0)
-                    .style(Style::default()),
+    Table::new(rows)
+        .header(
+            Row::new(header)
+                .height(1)
+                .bottom_margin(0)
+                .style(Style::default()),
 
-            ).widths(&[
-                Constraint::Min(3),
-                Constraint::Percentage(33),
-                Constraint::Percentage(33),
-            ])
-            .highlight_style(Style::default().add_modifier(Modifier::BOLD))
-            .highlight_symbol("")
-            , area, &mut app.activity_view.pace_table_state
-    );
-    Ok(())
+        ).widths(&[
+            Constraint::Min(3),
+            Constraint::Percentage(33),
+            Constraint::Percentage(33),
+        ])
+        .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+        .highlight_symbol("")
+        .render(area, f, &mut app.activity_view.pace_table_state);
 }

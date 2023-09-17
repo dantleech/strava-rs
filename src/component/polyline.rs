@@ -5,7 +5,8 @@ use tui::{
     backend::Backend,
     text::Span,
     widgets::canvas::{Canvas, Line},
-    Frame,
+    widgets::Widget,
+    Frame, prelude::Buffer,
 };
 
 use crate::{
@@ -18,14 +19,14 @@ use super::unit_formatter::KILOMETER_TO_MILE;
 
 pub fn draw<B: Backend>(
     app: &mut App,
-    f: &mut Frame<B>,
+    f: &mut Buffer,
     area: tui::layout::Rect,
-) -> Result<(), anyhow::Error> {
+) {
     if app.activity.is_none() {}
     let activity = app.activity.clone().unwrap();
 
     if activity.summary_polyline.is_none() {
-        return Ok(());
+        return;
     }
 
     if let Ok(decoded) = activity.polyline() {
@@ -142,9 +143,8 @@ pub fn draw<B: Backend>(
                     offset += 1;
                 }
             });
-        f.render_widget(canvas, area);
+        canvas.render(area, f);
     }
-    Ok(())
 }
 
 fn in_selected_split(selected_split: Option<i64>, split: i64) -> bool {

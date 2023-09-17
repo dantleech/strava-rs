@@ -1,4 +1,6 @@
-use crate::app::{ActivePage, App};
+use tui::{prelude::{Backend, Buffer}, Frame};
+
+use crate::{app::{ActivePage, App}, event::keymap::MappedKey};
 
 pub mod splits;
 pub mod activity_list;
@@ -16,4 +18,9 @@ fn table_status_select_current(app: &mut App) {
             app.active_page = ActivePage::Activity;
         }
     }
+}
+
+pub trait View {
+    fn handle(&self, app: &mut App, key: MappedKey);
+    fn draw(&self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) -> Result<(), anyhow::Error>;
 }
