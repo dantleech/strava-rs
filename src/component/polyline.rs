@@ -17,7 +17,7 @@ use crate::{
 
 use super::unit_formatter::KILOMETER_TO_MILE;
 
-pub fn draw<B: Backend>(
+pub fn draw(
     app: &mut App,
     f: &mut Buffer,
     area: tui::layout::Rect,

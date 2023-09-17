@@ -13,7 +13,7 @@ use tui::{
 use tui_input::Input;
 
 use crate::{
-    component::{activity_list::{ActivityListMode, ActivityListState, ActivityViewState}, View, activity_view::ActivityView},
+    component::{activity_list::{ActivityListMode, ActivityListState, ActivityViewState, ActivityList}, View, activity_view::ActivityView},
     event::{input::EventSender, util::{table_state_prev, table_state_next}},
     input::InputEvent,
     store::{activity::{ActivityStore, Activities, SortBy, SortOrder}},
@@ -72,7 +72,6 @@ impl Display for Notification {
 pub struct App<'a> {
     pub quit: bool,
     pub active_page: ActivePage,
-    pub view: Box<dyn View>,
     pub unit_formatter: UnitFormatter,
     pub activity_list: ActivityListState,
     pub activity_view: ActivityViewState,
@@ -111,7 +110,6 @@ impl App<'_> {
             quit: false,
             active_page: ActivePage::ActivityList,
             unit_formatter: UnitFormatter::imperial(),
-            view: Box::new(ActivityView{}),
             activity_list: ActivityListState {
                 mode: activity_list::ActivityListMode::Normal,
                 table_state: TableState::default(),
@@ -222,9 +220,11 @@ impl App<'_> {
     }
 
     fn handle(&mut self, key: MappedKey) {
+        let list = ActivityList{};
+        let view = ActivityView{};
         match self.active_page {
-            ActivePage::ActivityList => activity_list::handle(self, key),
-            ActivePage::Activity => activity_view::handle(self, key),
+            ActivePage::ActivityList => list.handle(self, key),
+            ActivePage::Activity => view.handle(self, key),
         }
     }
 

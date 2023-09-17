@@ -9,7 +9,7 @@ use tui::{
 
 use crate::app::App;
 
-pub fn draw<B: Backend>(
+pub fn draw(
     app: &mut App,
     f: &mut Buffer,
     area: tui::layout::Rect,

@@ -2,7 +2,7 @@ use tui::{backend::Backend, text::Text, widgets::Paragraph, widgets::Widget, pre
 
 use crate::app::App;
 
-pub fn draw<B: Backend>(
+pub fn draw(
     app: &mut App,
     f: &mut Buffer,
     area: tui::layout::Rect,

@@ -12,7 +12,7 @@ use tui::{
 
 use crate::{app::App, ui::color::{gradient, Rgb}, store::activity::ActivitySplit};
 
-pub fn draw<B: Backend>(
+pub fn draw(
     app: &mut App,
     f: &mut Buffer,
     area: tui::layout::Rect,

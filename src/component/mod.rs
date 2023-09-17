@@ -22,5 +22,5 @@ fn table_status_select_current(app: &mut App) {
 
 pub trait View {
     fn handle(&self, app: &mut App, key: MappedKey);
-    fn draw(&self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) -> Result<(), anyhow::Error>;
+    fn draw(&self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect);
 }

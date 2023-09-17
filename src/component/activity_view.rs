@@ -70,7 +70,7 @@ impl View for ActivityView {
         if let Some(activity) = &app.activity {
             {
                 let a = Activities::from(activity.clone());
-                f.render_widget(activity_list_table(app, &a), rows[0]);
+                activity_list_table(app, &a).render(rows[0], f);
             }
         }
 

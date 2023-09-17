@@ -8,11 +8,12 @@ use tui::{
     style::Style,
     text::{Span, Line, Text},
     widgets::{Block, Borders, Paragraph},
-    Frame,
+    Frame, buffer, prelude::Buffer,
 };
 use crate::{
     app::{ActivePage, App},
-    component::{activity_list, activity_view},
+    component::{activity_list::{self, ActivityList}, activity_view::{self, ActivityView}},
+    component::View,
 };
 
 use self::color::ColorTheme;
@@ -32,12 +33,16 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
 
     f.render_widget(header(app), rows[0]);
 
+    let mut buffer = Buffer::default();
+    let list = ActivityList{};
+    let view = ActivityView{};
+
     match app.active_page {
         ActivePage::ActivityList => {
-            activity_list::draw(app, f, rows[1])?;
+            list.draw(app, &mut buffer, rows[1]);
         }
         ActivePage::Activity => {
-            activity_view::draw(app, f, rows[1])?;
+            view.draw(app, &mut buffer, rows[1]);
         }
     }
 
