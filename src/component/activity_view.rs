@@ -59,6 +59,18 @@ impl View for ActivityView {
         }
     }
 
+    fn mapped_events(&self, _app: &App) -> Vec<StravaEvent> {
+        vec![
+            StravaEvent::Down,
+            StravaEvent::Up,
+            StravaEvent::ToggleUnitSystem,
+            StravaEvent::Next,
+            StravaEvent::Previous,
+            StravaEvent::Enter,
+            StravaEvent::Quit,
+        ]
+    }
+
     fn draw(&mut self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
         let rows = Layout::default()
             .direction(Direction::Vertical)

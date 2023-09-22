@@ -12,6 +12,8 @@ impl KeyMap {
         map.insert(KeyCode::Char('q'), StravaEvent::Quit);
         map.insert(KeyCode::Char('k'), StravaEvent::Up);
         map.insert(KeyCode::Char('j'), StravaEvent::Down);
+        map.insert(KeyCode::Char('n'), StravaEvent::Next);
+        map.insert(KeyCode::Char('p'), StravaEvent::Previous);
         map.insert(KeyCode::Char('o'), StravaEvent::ToggleSortOrder);
         map.insert(KeyCode::Char('u'), StravaEvent::ToggleUnitSystem);
         map.insert(KeyCode::Char('s'), StravaEvent::Sort);
@@ -32,6 +34,15 @@ impl KeyMap {
             None => new_strava_key(ke, StravaEvent::None),
         }
     }
+
+    pub(crate) fn key(&self, f: &StravaEvent) -> Option<KeyCode> {
+        for (key, event) in self.map.clone() {
+            if &event == f {
+                return Some(key)
+            }
+        }
+        None
+    }
 }
 
 fn new_strava_key(ke: KeyEvent, se: StravaEvent) -> MappedKey {
@@ -46,7 +57,7 @@ pub struct MappedKey {
     pub strava_event: StravaEvent,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum StravaEvent {
     Rank,
     ToggleUnitSystem,
@@ -65,4 +76,27 @@ pub enum StravaEvent {
     Quit,
     Next,
     Previous,
+}
+impl StravaEvent {
+    pub fn describe(se: &StravaEvent) -> &'static str {
+        match se {
+            StravaEvent::Rank => "rank",
+            StravaEvent::ToggleUnitSystem => "unit",
+            StravaEvent::ToggleSortOrder => "order",
+            StravaEvent::Refresh => "refresh",
+            StravaEvent::Filter => "filter",
+            StravaEvent::Anchor => "anchor",
+            StravaEvent::Sort => "sort",
+            StravaEvent::Down => "down",
+            StravaEvent::Up => "up",
+            StravaEvent::Enter => "enter",
+            StravaEvent::Escape => "back",
+            StravaEvent::None => "none",
+            StravaEvent::IncreaseTolerance => "tolerance++",
+            StravaEvent::DecreaseTolerance => "tolerance--",
+            StravaEvent::Quit => "quit",
+            StravaEvent::Next => "next",
+            StravaEvent::Previous => "prev",
+        }
+    }
 }

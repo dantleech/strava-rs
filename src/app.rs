@@ -91,6 +91,7 @@ pub struct App<'a> {
 
     pub info_message: Option<Notification>,
     pub error_message: Option<Notification>,
+    pub key_map: KeyMap,
 
     store: &'a mut ActivityStore<'a>,
     event_receiver: Receiver<InputEvent>,
@@ -98,7 +99,6 @@ pub struct App<'a> {
 
     event_queue: Vec<InputEvent>,
     sync_sender: Sender<bool>,
-    key_map: KeyMap,
 }
 
 pub enum ActivePage {

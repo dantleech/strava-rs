@@ -2,8 +2,9 @@ pub mod color;
 
 use crate::{
     app::App,
-    component::View,
+    component::View, event::keymap::StravaEvent,
 };
+use crossterm::event::KeyCode;
 use tui::{
     layout::{Constraint, Layout, Rect},
     prelude::Buffer,
@@ -27,44 +28,31 @@ pub fn draw(app: &mut App, f: &mut Buffer, area: Rect, view: &mut dyn View) {
         )
         .split(area);
 
-    header(app).render(rows[0], f);
+    header(app, view.mapped_events(app)).render(rows[0], f);
     view.draw(app, f, rows[1]);
 
     status_bar(app).render(rows[2], f);
 }
 
-fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
+fn header<'a>(app: &'a mut App, mapped_events: Vec<StravaEvent>) -> Paragraph<'a> {
     let strava = ColorTheme::Orange.to_color();
-    let text: Vec<Line> = vec![Line::from(vec![
-        Span::styled("[n]", Style::default().fg(strava)),
-        Span::raw("ext "),
-        Span::styled("[p]", Style::default().fg(strava)),
-        Span::raw("evious "),
-        Span::styled("[u]", Style::default().fg(strava)),
-        Span::raw("nit toggle "),
-        Span::styled("[f]", Style::default().fg(strava)),
-        Span::raw("ilter "),
-        Span::styled("[s]", Style::default().fg(strava)),
-        Span::raw("ort "),
-        Span::styled("[S]", Style::default().fg(strava)),
-        Span::raw("rank "),
-        Span::styled("[o]", Style::default().fg(strava)),
-        Span::raw("rder "),
-        Span::styled("[r]", Style::default().fg(strava)),
-        Span::raw("efresh "),
-        Span::styled("[a]", Style::default().fg(strava)),
-        Span::raw("nchor"),
-        Span::styled("[+/-] ", Style::default().fg(strava)),
-        Span::styled("[j]", Style::default().fg(strava)),
-        Span::raw("down "),
-        Span::styled("[k]", Style::default().fg(strava)),
-        Span::raw("up "),
-        Span::styled("[p]", Style::default().fg(strava)),
-        Span::raw("evious "),
-        Span::styled("[q]", Style::default().fg(strava)),
-        Span::raw("uit"),
-    ])];
+    let mut hints: Vec<Span> = vec![];
+    for event in mapped_events {
+        match app.key_map.key(&event) {
+            Some(k) => {
+                match k {
+                    KeyCode::Char(c) => {
+                        hints.push(Span::styled(format!("[{}]",c), Style::default().fg(strava)));
+                        hints.push(Span::raw(format!("{} ", StravaEvent::describe(&event))));
+                    },
+                    _ => ()
+                }
+            },
+            None => continue,
+        }
+    }
 
+    let text: Vec<Line> = vec![Line::from(hints)];
     Paragraph::new(text).block(
         Block::default()
             .borders(Borders::ALL)

@@ -109,6 +109,25 @@ impl View for ActivityList {
         }
     }
 
+    fn mapped_events(&self, app: &App) -> Vec<StravaEvent> {
+        let mut events = vec![
+            StravaEvent::Down,
+            StravaEvent::Up,
+            StravaEvent::ToggleUnitSystem,
+            StravaEvent::Filter,
+            StravaEvent::Sort,
+            StravaEvent::Rank,
+            StravaEvent::Refresh,
+        ];
+        events.push(StravaEvent::Anchor);
+        if app.activity_anchored.is_some() {
+            events.push(StravaEvent::IncreaseTolerance);
+            events.push(StravaEvent::DecreaseTolerance);
+        }
+        events.push(StravaEvent::Quit);
+        return events;
+    }
+
     fn draw(&mut self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
         let rows = Layout::default()
             .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])

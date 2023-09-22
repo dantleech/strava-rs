@@ -1,6 +1,6 @@
 use tui::{prelude::{Buffer}};
 
-use crate::{app::{ActivePage, App}, event::keymap::MappedKey};
+use crate::{app::{ActivePage, App}, event::keymap::{MappedKey, StravaEvent}};
 
 pub mod splits;
 pub mod activity_list;
@@ -25,5 +25,8 @@ pub trait View {
     fn draw(&mut self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect);
     fn cursor_position(&self) -> Option<(u16,u16)> {
         None
+    }
+    fn mapped_events(&self, _app: &App) -> Vec<StravaEvent> {
+        vec![]
     }
 }
