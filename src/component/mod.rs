@@ -1,4 +1,6 @@
-use crate::app::{ActivePage, App};
+use tui::{prelude::{Buffer}};
+
+use crate::{app::{ActivePage, App}, event::keymap::MappedKey};
 
 pub mod splits;
 pub mod activity_list;
@@ -15,5 +17,13 @@ fn table_status_select_current(app: &mut App) {
             app.activity = Some(a.clone());
             app.active_page = ActivePage::Activity;
         }
+    }
+}
+
+pub trait View {
+    fn handle(&mut self, app: &mut App, key: MappedKey);
+    fn draw(&mut self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect);
+    fn cursor_position(&self) -> Option<(u16,u16)> {
+        None
     }
 }

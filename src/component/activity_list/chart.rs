@@ -1,12 +1,11 @@
 use chrono::NaiveDateTime;
 use tui::{
-    backend::Backend,
     layout::Constraint,
     style::{Color, Style},
     symbols::Marker,
     text::Span,
-    widgets::{Axis, Block, Borders, Chart, Dataset, GraphType},
-    Frame,
+    widgets::{Axis, Block, Borders, Chart, Dataset, GraphType, Widget},
+    prelude::Buffer,
 };
 
 use crate::{
@@ -16,11 +15,11 @@ use crate::{
 };
 
 pub fn handle(_app: &mut App, _key: MappedKey) {}
-pub fn draw<B: Backend>(
+pub fn draw(
     app: &mut App,
-    f: &mut Frame<B>,
+    f: &mut Buffer,
     area: tui::layout::Rect,
-) -> Result<(), anyhow::Error> {
+) {
     let activities = &app
         .activities()
         .sort(&SortBy::Date, &SortOrder::Asc);
@@ -31,12 +30,12 @@ pub fn draw<B: Backend>(
     let pmax = paces.iter().max();
     let pmin = paces.iter().min();
     if tmax.is_none() || tmin.is_none() {
-        return Ok(());
+        return;
     }
     let pdiff = pmax.unwrap() - pmin.unwrap();
     let tdiff = tmax.unwrap() - tmin.unwrap();
     if pmin.is_none() || pmax.is_none() {
-        return Ok(());
+        return;
     }
     let pmin = pmin.unwrap();
     let pmax = pmax.unwrap();
@@ -115,7 +114,5 @@ pub fn draw<B: Backend>(
                         .collect(),
                 ),
         );
-    f.render_widget(chart, area);
-
-    Ok(())
+    chart.render(area, f);
 }

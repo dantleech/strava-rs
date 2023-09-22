@@ -1,11 +1,9 @@
 
 use strum::IntoEnumIterator;
 use tui::{
-    backend::Backend,
     style::{Color, Style},
     text::{Span, Line},
-    widgets::{Block, Borders, Clear, Paragraph},
-    Frame,
+    widgets::{Block, Borders, Clear, Paragraph, Widget}, prelude::Buffer,
 };
 
 use crate::{
@@ -38,16 +36,14 @@ pub fn handle(app: &mut App, key: MappedKey) {
     }
 }
 
-pub fn draw<B: Backend>(
+pub fn draw(
     app: &mut App,
-    f: &mut Frame<B>,
+    f: &mut Buffer,
     area: tui::layout::Rect,
-) -> Result<(), anyhow::Error> {
+) {
     let rect = centered_rect_absolute(64, 3, area);
-    f.render_widget(Clear, rect);
-    f.render_widget(sort_option_paragraph(app, "Sort".to_string()), rect);
-
-    Ok(())
+    Clear.render(rect, f);
+    sort_option_paragraph(app, "Sort".to_string()).render(rect, f);
 }
 pub fn sort_option_paragraph<'a>(_app: &'a mut App, title: String) -> Paragraph<'a> {
     let strava = ColorTheme::Orange.to_color();

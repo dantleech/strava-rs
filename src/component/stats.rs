@@ -1,14 +1,14 @@
-use tui::{backend::Backend, text::Text, widgets::Paragraph, Frame};
+use tui::{text::Text, widgets::Paragraph, widgets::Widget, prelude::Buffer};
 
 use crate::app::App;
 
-pub fn draw<B: Backend>(
+pub fn draw(
     app: &mut App,
-    f: &mut Frame<B>,
+    f: &mut Buffer,
     area: tui::layout::Rect,
-) -> Result<(), anyhow::Error> {
+) {
     if app.activity.is_none() {
-        return Ok(());
+        return;
     }
     let activity = app.activity.clone().unwrap();
     let stats: Vec<(String, String)> = vec![
@@ -46,6 +46,5 @@ pub fn draw<B: Backend>(
     for (name, value) in stats {
         text.push_str(format!("{}: {}\n", name, value).as_str());
     }
-    f.render_widget(Paragraph::new(Text::from(text)), area);
-    Ok(())
+    Paragraph::new(Text::from(text)).render(area, f);
 }

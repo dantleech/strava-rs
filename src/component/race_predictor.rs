@@ -1,19 +1,18 @@
 use tui::{
-    backend::Backend,
     layout::Constraint,
     style::{Color, Style},
     text::Span,
-    widgets::{Cell, Row, Table},
-    Frame,
+    widgets::{Cell, Row, Table, Widget},
+    prelude::Buffer,
 };
 
 use crate::app::App;
 
-pub fn draw<B: Backend>(
+pub fn draw(
     app: &mut App,
-    f: &mut Frame<B>,
+    f: &mut Buffer,
     area: tui::layout::Rect,
-) -> Result<(), anyhow::Error> {
+) {
     let mut rows = vec![];
     let header_names = ["Distance", "Time"];
     let headers = header_names
@@ -67,6 +66,5 @@ pub fn draw<B: Backend>(
         )
         .widths(&[Constraint::Length(9), Constraint::Length(10)]);
 
-    f.render_widget(table, area);
-    Ok(())
+    table.render(area, f);
 }

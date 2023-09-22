@@ -7,22 +7,28 @@ use std::{
 use tokio::sync::mpsc::{Receiver, Sender};
 use tui::{
     backend::{Backend, CrosstermBackend},
-    widgets::TableState,
-    Frame, Terminal,
+    widgets::TableState, Terminal,
 };
 use tui_input::Input;
 
 use crate::{
-    component::activity_list::{ActivityListMode, ActivityListState, ActivityViewState},
-    event::{input::EventSender, util::{table_state_prev, table_state_next}},
-    input::InputEvent,
-    store::{activity::{ActivityStore, Activities, SortBy, SortOrder}},
-};
-use crate::{
-    component::{activity_list, activity_view, unit_formatter::UnitFormatter},
-    event::keymap::{map_key, MappedKey},
+    component::{activity_list, unit_formatter::UnitFormatter},
+    event::keymap::{map_key},
     store::activity::Activity,
     ui,
+};
+use crate::{
+    component::{
+        activity_list::{ActivityList, ActivityListMode, ActivityListState, ActivityViewState},
+        activity_view::ActivityView,
+        View,
+    },
+    event::{
+        input::EventSender,
+        util::{table_state_next, table_state_prev},
+    },
+    input::InputEvent,
+    store::activity::{Activities, ActivityStore, SortBy, SortOrder},
 };
 
 pub struct ActivityFilters {
@@ -151,13 +157,18 @@ impl App<'_> {
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     ) -> Result<(), anyhow::Error> {
+        terminal.clear()?;
         loop {
             if self.quit {
                 break;
             }
-            terminal.draw(|f| {
-                self.draw(f).expect("Could not draw frame");
-            })?;
+
+            let mut view: Box<dyn View> = match self.active_page {
+                ActivePage::ActivityList => Box::new(ActivityList::new()),
+                ActivePage::Activity => Box::new(ActivityView{}),
+            };
+
+            self.render(terminal, view.as_mut())?;
 
             if let Some(message) = &self.info_message {
                 if message.has_expired() {
@@ -180,7 +191,7 @@ impl App<'_> {
                 match event {
                     InputEvent::Input(k) => {
                         let key = map_key(k);
-                        self.handle(key);
+                        view.handle(self, key);
                     }
                     InputEvent::InfoMessage(message) => {
                         self.info_message = Some(Notification::new(message));
@@ -213,17 +224,6 @@ impl App<'_> {
 
     pub fn activities(&self) -> Activities {
         self.activities.clone()
-    }
-
-    fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
-        ui::draw(self, f)
-    }
-
-    fn handle(&mut self, key: MappedKey) {
-        match self.active_page {
-            ActivePage::ActivityList => activity_list::handle(self, key),
-            ActivePage::Activity => activity_view::handle(self, key),
-        }
     }
 
     pub fn send(&mut self, event: InputEvent) {
@@ -271,5 +271,27 @@ impl App<'_> {
                 self.activity = Some(a.clone());
             }
         }
+    }
+
+    fn render(
+        &mut self,
+        terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
+        view: &mut dyn View
+    ) -> Result<(), anyhow::Error> {
+        let area = terminal.size().expect("Could not determine terminal size'");
+        let buffer = terminal.current_buffer_mut();
+        ui::draw(self, buffer, area, view);
+
+        match view.cursor_position() {
+            None => terminal.hide_cursor()?,
+            Some((x, y)) => {
+                terminal.show_cursor()?;
+                terminal.set_cursor(x, y)?;
+            }
+        }
+        terminal.flush()?;
+        terminal.swap_buffers();
+        terminal.backend_mut().flush()?;
+        Ok(())
     }
 }

@@ -1,9 +1,7 @@
 
 
 use tui::{
-    backend::Backend,
-    widgets::{Clear},
-    Frame,
+    widgets::{Clear, Widget}, prelude::Buffer,
 };
 
 use crate::{
@@ -42,14 +40,12 @@ pub fn handle(app: &mut App, key: MappedKey) {
     }
 }
 
-pub fn draw<B: Backend>(
+pub fn draw(
     app: &mut App,
-    f: &mut Frame<B>,
+    f: &mut Buffer,
     area: tui::layout::Rect,
-) -> Result<(), anyhow::Error> {
+) {
     let rect = centered_rect_absolute(64, 3, area);
-    f.render_widget(Clear, rect);
-    f.render_widget(sort_option_paragraph(app, "Rank".to_string()), rect);
-
-    Ok(())
+    Clear.render(area, f);
+    sort_option_paragraph(app, "Rank".to_string()).render(rect, f);
 }
