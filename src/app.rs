@@ -164,7 +164,12 @@ impl App<'_> {
                 break;
             }
 
-            self.render(terminal)?;
+            let view: Box<dyn View> = match self.active_page {
+                ActivePage::ActivityList => Box::new(ActivityList{}),
+                ActivePage::Activity => Box::new(ActivityView{}),
+            };
+
+            self.render(terminal, &view)?;
 
             if let Some(message) = &self.info_message {
                 if message.has_expired() {
@@ -187,7 +192,7 @@ impl App<'_> {
                 match event {
                     InputEvent::Input(k) => {
                         let key = map_key(k);
-                        self.handle(key);
+                        view.handle(self, key);
                     }
                     InputEvent::InfoMessage(message) => {
                         self.info_message = Some(Notification::new(message));
@@ -220,15 +225,6 @@ impl App<'_> {
 
     pub fn activities(&self) -> Activities {
         self.activities.clone()
-    }
-
-    fn handle(&mut self, key: MappedKey) {
-        let list = ActivityList {};
-        let view = ActivityView {};
-        match self.active_page {
-            ActivePage::ActivityList => list.handle(self, key),
-            ActivePage::Activity => view.handle(self, key),
-        }
     }
 
     pub fn send(&mut self, event: InputEvent) {
@@ -281,10 +277,11 @@ impl App<'_> {
     fn render(
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
+        view: &Box<dyn View>
     ) -> Result<(), anyhow::Error> {
         let area = terminal.size().expect("Could not determine terminal size'");
         let mut buffer = terminal.current_buffer_mut();
-        ui::draw(self, &mut buffer, area);
+        ui::draw(self, &mut buffer, area, view);
         terminal.flush()?;
         terminal.swap_buffers();
         terminal.backend_mut().flush()?;

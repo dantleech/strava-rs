@@ -1,24 +1,20 @@
 pub mod color;
 
-
-
-use tui::{
-    backend::Backend,
-    layout::{Constraint, Layout, Rect},
-    style::Style,
-    text::{Span, Line, Text},
-    widgets::{Block, Borders, Paragraph, Widget},
-    Frame, buffer, prelude::Buffer,
-};
 use crate::{
-    app::{ActivePage, App},
-    component::{activity_list::{self, ActivityList}, activity_view::{self, ActivityView}},
+    app::App,
     component::View,
+};
+use tui::{
+    layout::{Constraint, Layout, Rect},
+    prelude::Buffer,
+    style::Style,
+    text::{Line, Span, Text},
+    widgets::{Block, Borders, Paragraph, Widget},
 };
 
 use self::color::ColorTheme;
 
-pub fn draw(app: &mut App, f: &mut Buffer, area: Rect) {
+pub fn draw(app: &mut App, f: &mut Buffer, area: Rect, view: &Box<dyn View>) {
     let rows = Layout::default()
         .margin(0)
         .constraints(
@@ -32,17 +28,7 @@ pub fn draw(app: &mut App, f: &mut Buffer, area: Rect) {
         .split(area);
 
     header(app).render(rows[0], f);
-    let list = ActivityList{};
-    let view = ActivityView{};
-
-    match app.active_page {
-        ActivePage::ActivityList => {
-            list.draw(app, f, rows[1]);
-        }
-        ActivePage::Activity => {
-            view.draw(app, f, rows[1]);
-        }
-    }
+    view.draw(app, f, rows[1]);
 
     status_bar(app).render(rows[2], f);
 }
@@ -105,7 +91,10 @@ fn status_bar<'a>(app: &'a mut App) -> Paragraph<'a> {
         ));
         status.push(format!("{} units", app.unit_formatter.system));
         if let Some(anchored) = &app.activity_anchored {
-            status.push(format!("anchored to \"{}\" ± {:.3}", anchored.title, app.filters.anchor_tolerance));
+            status.push(format!(
+                "anchored to \"{}\" ± {:.3}",
+                anchored.title, app.filters.anchor_tolerance
+            ));
         }
     }
 
