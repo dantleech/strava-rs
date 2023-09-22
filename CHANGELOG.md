@@ -3,6 +3,13 @@ CHANGELOG
 
 ## master
 
+Improvements:
+
+- Refactored views to use traits.
+- Show only shortcuts relevant to current view.
+
+## 0.0.5
+
 Features:
 
 - Highlight and allow selection of current split in activity view.
