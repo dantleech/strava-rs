@@ -13,16 +13,23 @@ use tui::{
 use tui_input::Input;
 
 use crate::{
-    component::{activity_list::{ActivityListMode, ActivityListState, ActivityViewState, ActivityList}, View, activity_view::ActivityView},
-    event::{input::EventSender, util::{table_state_prev, table_state_next}},
-    input::InputEvent,
-    store::{activity::{ActivityStore, Activities, SortBy, SortOrder}},
-};
-use crate::{
     component::{activity_list, activity_view, unit_formatter::UnitFormatter},
     event::keymap::{map_key, MappedKey},
     store::activity::Activity,
     ui,
+};
+use crate::{
+    component::{
+        activity_list::{ActivityList, ActivityListMode, ActivityListState, ActivityViewState},
+        activity_view::ActivityView,
+        View,
+    },
+    event::{
+        input::EventSender,
+        util::{table_state_next, table_state_prev},
+    },
+    input::InputEvent,
+    store::activity::{Activities, ActivityStore, SortBy, SortOrder},
 };
 
 pub struct ActivityFilters {
@@ -151,13 +158,13 @@ impl App<'_> {
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     ) -> Result<(), anyhow::Error> {
+        terminal.clear()?;
         loop {
             if self.quit {
                 break;
             }
-            terminal.draw(|f| {
-                self.draw(f).expect("Could not draw frame");
-            })?;
+
+            self.render(terminal)?;
 
             if let Some(message) = &self.info_message {
                 if message.has_expired() {
@@ -215,13 +222,9 @@ impl App<'_> {
         self.activities.clone()
     }
 
-    fn draw<B: Backend>(&mut self, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
-        ui::draw(self, f)
-    }
-
     fn handle(&mut self, key: MappedKey) {
-        let list = ActivityList{};
-        let view = ActivityView{};
+        let list = ActivityList {};
+        let view = ActivityView {};
         match self.active_page {
             ActivePage::ActivityList => list.handle(self, key),
             ActivePage::Activity => view.handle(self, key),
@@ -273,5 +276,18 @@ impl App<'_> {
                 self.activity = Some(a.clone());
             }
         }
+    }
+
+    fn render(
+        &mut self,
+        terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
+    ) -> Result<(), anyhow::Error> {
+        let area = terminal.size().expect("Could not determine terminal size'");
+        let mut buffer = terminal.current_buffer_mut();
+        ui::draw(self, &mut buffer, area);
+        terminal.flush()?;
+        terminal.swap_buffers();
+        terminal.backend_mut().flush()?;
+        Ok(())
     }
 }

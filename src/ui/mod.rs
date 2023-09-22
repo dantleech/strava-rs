@@ -7,7 +7,7 @@ use tui::{
     layout::{Constraint, Layout, Rect},
     style::Style,
     text::{Span, Line, Text},
-    widgets::{Block, Borders, Paragraph},
+    widgets::{Block, Borders, Paragraph, Widget},
     Frame, buffer, prelude::Buffer,
 };
 use crate::{
@@ -18,7 +18,7 @@ use crate::{
 
 use self::color::ColorTheme;
 
-pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::Error> {
+pub fn draw(app: &mut App, f: &mut Buffer, area: Rect) {
     let rows = Layout::default()
         .margin(0)
         .constraints(
@@ -29,26 +29,22 @@ pub fn draw<B: Backend>(app: &mut App, f: &mut Frame<B>) -> Result<(), anyhow::E
             ]
             .as_ref(),
         )
-        .split(f.size());
+        .split(area);
 
-    f.render_widget(header(app), rows[0]);
-
-    let mut buffer = Buffer::default();
+    header(app).render(rows[0], f);
     let list = ActivityList{};
     let view = ActivityView{};
 
     match app.active_page {
         ActivePage::ActivityList => {
-            list.draw(app, &mut buffer, rows[1]);
+            list.draw(app, f, rows[1]);
         }
         ActivePage::Activity => {
-            view.draw(app, &mut buffer, rows[1]);
+            view.draw(app, f, rows[1]);
         }
     }
 
-    f.render_widget(status_bar(app), rows[2]);
-
-    Ok(())
+    status_bar(app).render(rows[2], f);
 }
 
 fn header<'a>(_app: &'a mut App) -> Paragraph<'a> {
