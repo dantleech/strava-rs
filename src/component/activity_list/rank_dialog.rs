@@ -1,9 +1,7 @@
 
 
 use tui::{
-    backend::Backend,
-    widgets::{Clear, Widget},
-    Frame, prelude::Buffer,
+    widgets::{Clear, Widget}, prelude::Buffer,
 };
 
 use crate::{

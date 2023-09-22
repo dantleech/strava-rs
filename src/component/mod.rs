@@ -1,4 +1,4 @@
-use tui::{prelude::{Backend, Buffer}, Frame};
+use tui::{prelude::{Buffer}};
 
 use crate::{app::{ActivePage, App}, event::keymap::MappedKey};
 

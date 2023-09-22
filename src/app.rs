@@ -7,14 +7,13 @@ use std::{
 use tokio::sync::mpsc::{Receiver, Sender};
 use tui::{
     backend::{Backend, CrosstermBackend},
-    widgets::TableState,
-    Frame, Terminal,
+    widgets::TableState, Terminal,
 };
 use tui_input::Input;
 
 use crate::{
-    component::{activity_list, activity_view, unit_formatter::UnitFormatter},
-    event::keymap::{map_key, MappedKey},
+    component::{activity_list, unit_formatter::UnitFormatter},
+    event::keymap::{map_key},
     store::activity::Activity,
     ui,
 };
@@ -280,8 +279,8 @@ impl App<'_> {
         view: &mut dyn View
     ) -> Result<(), anyhow::Error> {
         let area = terminal.size().expect("Could not determine terminal size'");
-        let mut buffer = terminal.current_buffer_mut();
-        ui::draw(self, &mut buffer, area, view);
+        let buffer = terminal.current_buffer_mut();
+        ui::draw(self, buffer, area, view);
 
         match view.cursor_position() {
             None => terminal.hide_cursor()?,

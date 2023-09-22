@@ -5,8 +5,7 @@ use tui::{
     backend::Backend,
     text::Span,
     widgets::canvas::{Canvas, Line},
-    widgets::Widget,
-    Frame, prelude::Buffer,
+    widgets::Widget, prelude::Buffer,
 };
 
 use crate::{

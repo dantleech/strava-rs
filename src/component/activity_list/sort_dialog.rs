@@ -1,11 +1,9 @@
 
 use strum::IntoEnumIterator;
 use tui::{
-    backend::Backend,
     style::{Color, Style},
     text::{Span, Line},
-    widgets::{Block, Borders, Clear, Paragraph, Widget},
-    Frame, prelude::Buffer,
+    widgets::{Block, Borders, Clear, Paragraph, Widget}, prelude::Buffer,
 };
 
 use crate::{

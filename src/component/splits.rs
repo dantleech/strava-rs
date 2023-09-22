@@ -3,11 +3,9 @@ use std::f64::MAX;
 
 
 use tui::{
-    backend::Backend,
     layout::{Constraint},
     style::{Style, Styled, Modifier},
-    widgets::{Row, Cell, Table, StatefulWidget},
-    Frame, prelude::Buffer,
+    widgets::{Row, Cell, Table, StatefulWidget}, prelude::Buffer,
 };
 
 use crate::{app::App, ui::color::{gradient, Rgb}, store::activity::ActivitySplit};

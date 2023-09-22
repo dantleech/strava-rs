@@ -1,9 +1,7 @@
 use tui::{
-    backend::Backend,
     layout::{Constraint, Direction, Layout, Margin},
     prelude::Buffer,
     widgets::{Block, Borders, Widget},
-    Frame,
 };
 
 use crate::{

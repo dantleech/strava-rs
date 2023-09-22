@@ -1,27 +1,18 @@
-use crossterm::event::Event;
+
 use tui::{
-    backend::Backend,
     layout::Constraint,
-    prelude::Buffer,
     style::{Color, Modifier, Style},
     text::Span,
-    widgets::{Block, Borders, Cell, Clear, Paragraph, Row, StatefulWidget, Table, Widget},
-    Frame,
+    widgets::{Cell, Row, Table},
 };
-use tui_input::backend::crossterm::EventHandler;
+
 
 use crate::{
     app::App,
-    component::{table_status_select_current, View},
-    event::{
-        input::InputEvent,
-        keymap::{MappedKey, StravaEvent},
-    },
-    store::activity::{Activities, SortOrder},
-    ui::{centered_rect_absolute, color::ColorTheme},
+    store::activity::{Activities},
 };
 
-use super::{rank_dialog, sort_dialog};
+
 
 pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'a> {
     let mut rows = vec![];

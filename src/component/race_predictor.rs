@@ -1,5 +1,4 @@
 use tui::{
-    backend::Backend,
     layout::Constraint,
     style::{Color, Style},
     text::Span,

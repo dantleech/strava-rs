@@ -151,8 +151,6 @@ impl View for ActivityList {
         }
         if app.activity_list.rank_dialog {
             rank_dialog::draw(app, f, area);
-
-            return;
         }
     }
 }

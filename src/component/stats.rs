@@ -1,4 +1,4 @@
-use tui::{backend::Backend, text::Text, widgets::Paragraph, widgets::Widget, prelude::Buffer};
+use tui::{text::Text, widgets::Paragraph, widgets::Widget, prelude::Buffer};
 
 use crate::app::App;
 
