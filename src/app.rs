@@ -164,12 +164,12 @@ impl App<'_> {
                 break;
             }
 
-            let view: Box<dyn View> = match self.active_page {
-                ActivePage::ActivityList => Box::new(ActivityList{}),
+            let mut view: Box<dyn View> = match self.active_page {
+                ActivePage::ActivityList => Box::new(ActivityList::new()),
                 ActivePage::Activity => Box::new(ActivityView{}),
             };
 
-            self.render(terminal, &view)?;
+            self.render(terminal, view.as_mut())?;
 
             if let Some(message) = &self.info_message {
                 if message.has_expired() {
@@ -277,11 +277,19 @@ impl App<'_> {
     fn render(
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
-        view: &Box<dyn View>
+        view: &mut dyn View
     ) -> Result<(), anyhow::Error> {
         let area = terminal.size().expect("Could not determine terminal size'");
         let mut buffer = terminal.current_buffer_mut();
         ui::draw(self, &mut buffer, area, view);
+
+        match view.cursor_position() {
+            None => terminal.hide_cursor()?,
+            Some((x, y)) => {
+                terminal.show_cursor()?;
+                terminal.set_cursor(x, y)?;
+            }
+        }
         terminal.flush()?;
         terminal.swap_buffers();
         terminal.backend_mut().flush()?;

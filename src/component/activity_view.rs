@@ -23,7 +23,7 @@ use super::{
 pub struct ActivityView {}
 
 impl View for ActivityView {
-    fn handle(&self, app: &mut App, key: MappedKey) {
+    fn handle(&mut self, app: &mut App, key: MappedKey) {
         let split_len = match &app.activity {
             Some(a) => a.splits.len(),
             None => 0,
@@ -61,7 +61,7 @@ impl View for ActivityView {
         }
     }
 
-    fn draw(&self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
+    fn draw(&mut self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
         let rows = Layout::default()
             .direction(Direction::Vertical)
             .constraints([Constraint::Length(4), Constraint::Length(2)].as_ref())

@@ -14,7 +14,7 @@ use tui::{
 
 use self::color::ColorTheme;
 
-pub fn draw(app: &mut App, f: &mut Buffer, area: Rect, view: &Box<dyn View>) {
+pub fn draw(app: &mut App, f: &mut Buffer, area: Rect, view: &mut dyn View) {
     let rows = Layout::default()
         .margin(0)
         .constraints(

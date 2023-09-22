@@ -27,10 +27,22 @@ use self::list::activity_list_table;
 
 use super::{table_status_select_current, View};
 
-pub struct ActivityList {}
+pub struct ActivityList {
+    cursor_pos: Option<(u16,u16)>
+}
+impl ActivityList {
+    pub(crate) fn new() -> ActivityList {
+        ActivityList{
+            cursor_pos: None,
+        }
+    }
+}
 
 impl View for ActivityList {
-    fn handle(&self, app: &mut App, key: MappedKey) {
+    fn cursor_position(&self) -> Option<(u16,u16)> {
+        self.cursor_pos
+    }
+    fn handle(&mut self, app: &mut App, key: MappedKey) {
         if app.activity_list.filter_dialog {
             let matched = match key.strava_event {
                 StravaEvent::Enter => {
@@ -97,7 +109,7 @@ impl View for ActivityList {
         }
     }
 
-    fn draw(&self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
+    fn draw(&mut self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
         let rows = Layout::default()
             .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
             .split(area);
@@ -121,14 +133,13 @@ impl View for ActivityList {
                     .border_style(Style::default().fg(ColorTheme::Dialog.to_color())),
             );
 
-            // TODO: support cursor pos
-            //f.set_cursor(
-            //    1 + rect.x + app.activity_list.filter_text_area.visual_cursor() as u16,
-            //    rect.y + 1,
-            //);
+            self.cursor_pos = Some((
+                1 + rect.x + app.activity_list.filter_text_area.visual_cursor() as u16,
+                rect.y + 1,
+            ));
 
-            Clear.render(area, f);
-            p.render(area, f);
+            Clear.render(rect, f);
+            p.render(rect, f);
 
             return;
         }
