@@ -281,6 +281,7 @@ impl App<'_> {
         view: &mut dyn View
     ) -> Result<(), anyhow::Error> {
         let area = terminal.size().expect("Could not determine terminal size'");
+        terminal.autoresize()?;
         let buffer = terminal.current_buffer_mut();
         ui::draw(self, buffer, area, view);
 
