@@ -125,7 +125,7 @@ impl View for ActivityList {
             events.push(StravaEvent::DecreaseTolerance);
         }
         events.push(StravaEvent::Quit);
-        return events;
+        events
     }
 
     fn draw(&mut self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
