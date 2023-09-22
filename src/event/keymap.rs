@@ -1,24 +1,36 @@
+use std::collections::HashMap;
+
 use crossterm::event::{KeyCode, KeyEvent};
 
-pub fn map_key(ke: KeyEvent) -> MappedKey {
-    match ke.code {
-        KeyCode::Char('q') => new_strava_key(ke, StravaEvent::Quit),
-        KeyCode::Char('k') => new_strava_key(ke, StravaEvent::Up),
-        KeyCode::Char('j') => new_strava_key(ke, StravaEvent::Down),
-        KeyCode::Char('o') => new_strava_key(ke, StravaEvent::ToggleSortOrder),
-        KeyCode::Char('u') => new_strava_key(ke, StravaEvent::ToggleUnitSystem),
-        KeyCode::Char('s') => new_strava_key(ke, StravaEvent::Sort),
-        KeyCode::Char('S') => new_strava_key(ke, StravaEvent::Rank),
-        KeyCode::Char('f') => new_strava_key(ke, StravaEvent::Filter),
-        KeyCode::Char('r') => new_strava_key(ke, StravaEvent::Refresh),
-        KeyCode::Char('a') => new_strava_key(ke, StravaEvent::Anchor),
-        KeyCode::Char('+') => new_strava_key(ke, StravaEvent::IncreaseTolerance),
-        KeyCode::Char('-') => new_strava_key(ke, StravaEvent::DecreaseTolerance),
-        KeyCode::Char('n') => new_strava_key(ke, StravaEvent::Next),
-        KeyCode::Char('p') => new_strava_key(ke, StravaEvent::Previous),
-        KeyCode::Enter => new_strava_key(ke, StravaEvent::Enter),
-        KeyCode::Esc => new_strava_key(ke, StravaEvent::Escape),
-        _ => new_strava_key(ke, StravaEvent::None),
+pub struct KeyMap {
+    map: HashMap<KeyCode, StravaEvent>
+}
+
+impl KeyMap {
+    pub fn default() -> KeyMap {
+        let mut map = HashMap::new();
+        map.insert(KeyCode::Char('q'), StravaEvent::Quit);
+        map.insert(KeyCode::Char('k'), StravaEvent::Up);
+        map.insert(KeyCode::Char('j'), StravaEvent::Down);
+        map.insert(KeyCode::Char('o'), StravaEvent::ToggleSortOrder);
+        map.insert(KeyCode::Char('u'), StravaEvent::ToggleUnitSystem);
+        map.insert(KeyCode::Char('s'), StravaEvent::Sort);
+        map.insert(KeyCode::Char('S'), StravaEvent::Rank);
+        map.insert(KeyCode::Char('f'), StravaEvent::Filter);
+        map.insert(KeyCode::Char('r'), StravaEvent::Refresh);
+        map.insert(KeyCode::Char('a'), StravaEvent::Anchor);
+        map.insert(KeyCode::Char('+'), StravaEvent::IncreaseTolerance);
+        map.insert(KeyCode::Char('-'), StravaEvent::DecreaseTolerance);
+        map.insert(KeyCode::Enter, StravaEvent::Enter);
+        map.insert(KeyCode::Esc, StravaEvent::Escape);
+        KeyMap{map}
+    }
+
+    pub fn map_key(&self, ke: KeyEvent) -> MappedKey {
+        match self.map.get(&ke.code) {
+            Some(event) => new_strava_key(ke, event.clone()),
+            None => new_strava_key(ke, StravaEvent::None),
+        }
     }
 }
 
@@ -34,6 +46,7 @@ pub struct MappedKey {
     pub strava_event: StravaEvent,
 }
 
+#[derive(Clone)]
 pub enum StravaEvent {
     Rank,
     ToggleUnitSystem,

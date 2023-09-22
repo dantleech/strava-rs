@@ -13,7 +13,7 @@ use tui_input::Input;
 
 use crate::{
     component::{activity_list, unit_formatter::UnitFormatter},
-    event::keymap::{map_key},
+    event::keymap::KeyMap,
     store::activity::Activity,
     ui,
 };
@@ -98,6 +98,7 @@ pub struct App<'a> {
 
     event_queue: Vec<InputEvent>,
     sync_sender: Sender<bool>,
+    key_map: KeyMap,
 }
 
 pub enum ActivePage {
@@ -151,6 +152,7 @@ impl App<'_> {
             event_sender,
             event_queue: vec![],
             sync_sender,
+            key_map: KeyMap::default(),
         }
     }
     pub async fn run(
@@ -190,7 +192,7 @@ impl App<'_> {
             if let Some(event) = self.event_receiver.recv().await {
                 match event {
                     InputEvent::Input(k) => {
-                        let key = map_key(k);
+                        let key = self.key_map.map_key(k);
                         view.handle(self, key);
                     }
                     InputEvent::InfoMessage(message) => {
