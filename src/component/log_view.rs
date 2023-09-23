@@ -1,19 +1,30 @@
 use tui::{widgets::{block::Block, Borders, Widget}, style::{Style, Color}};
 use tui_logger::{TuiLoggerWidget, TuiLoggerLevelOutput, TuiWidgetState};
 
-use crate::{event::keymap::StravaEvent, app::ActivePage};
+use crate::{event::keymap::StravaEvent, app::{ActivePage, App}};
 
 use super::View;
 
 pub struct LogView {
     state: TuiWidgetState
 }
+impl LogView {
+    pub(crate) fn new() -> LogView {
+        LogView{ state: TuiWidgetState::default() }
+    }
+}
 
 impl View for LogView {
+    fn mapped_events(&self, _app: &App) -> Vec<StravaEvent> {
+        vec![
+            StravaEvent::ToggleLogView,
+            StravaEvent::Quit,
+        ]
+    }
     fn handle(&mut self, app: &mut crate::app::App, key: crate::event::keymap::MappedKey) {
         match key.strava_event {
             StravaEvent::Quit => app.quit = true,
-            StravaEvent::ToggleLogView => app.active_page = ActivePage::ActivityList,
+            StravaEvent::ToggleLogView => app.switch_to_previous(),
             _ => (),
         }
     }
@@ -25,12 +36,6 @@ impl View for LogView {
         area: tui::layout::Rect,
     ) {
         let tui_w: TuiLoggerWidget = TuiLoggerWidget::default()
-            .block(
-                Block::default()
-                    .title("Independent Tui Logger View")
-                    .border_style(Style::default().fg(Color::White).bg(Color::Black))
-                    .borders(Borders::ALL),
-            )
             .output_separator('|')
             .output_timestamp(Some("%F %H:%M:%S%.3f".to_string()))
             .output_level(Some(TuiLoggerLevelOutput::Long))

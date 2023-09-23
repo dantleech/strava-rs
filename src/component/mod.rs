@@ -16,7 +16,7 @@ fn table_status_select_current(app: &mut App) {
     if let Some(selected) = app.activity_list.table_state().selected() {
         if let Some(a) = activities.get(selected) {
             app.activity = Some(a.clone());
-            app.active_page = ActivePage::Activity;
+            app.switch_to(ActivePage::Activity);
         }
     }
 }

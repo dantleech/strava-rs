@@ -77,7 +77,7 @@ impl Display for Notification {
 
 pub struct App<'a> {
     pub quit: bool,
-    pub active_page: ActivePage,
+    pub previous_page: Option<ActivePage>,
     pub unit_formatter: UnitFormatter,
     pub activity_list: ActivityListState,
     pub activity_view: ActivityViewState,
@@ -98,9 +98,11 @@ pub struct App<'a> {
     event_sender: EventSender,
 
     event_queue: Vec<InputEvent>,
+    active_page: ActivePage,
     sync_sender: Sender<bool>,
 }
 
+#[derive(Clone, Copy)]
 pub enum ActivePage {
     ActivityList,
     Activity,
@@ -117,6 +119,7 @@ impl App<'_> {
         App {
             quit: false,
             active_page: ActivePage::ActivityList,
+            previous_page: None,
             unit_formatter: UnitFormatter::imperial(),
             activity_list: ActivityListState {
                 mode: activity_list::ActivityListMode::Normal,
@@ -169,7 +172,7 @@ impl App<'_> {
             let mut view: Box<dyn View> = match self.active_page {
                 ActivePage::ActivityList => Box::new(ActivityList::new()),
                 ActivePage::Activity => Box::new(ActivityView{}),
-                ActivePage::LogView => Box::new(LogView{})
+                ActivePage::LogView => Box::new(LogView::new())
             };
 
             self.render(terminal, view.as_mut())?;
@@ -298,5 +301,16 @@ impl App<'_> {
         terminal.swap_buffers();
         terminal.backend_mut().flush()?;
         Ok(())
+    }
+
+    pub(crate) fn switch_to(&mut self, view: ActivePage) {
+        self.previous_page = Some(self.active_page);
+        self.active_page = view;
+    }
+
+    pub(crate) fn switch_to_previous(&mut self) {
+        let current_page = Some(self.active_page);
+        self.active_page = self.previous_page.unwrap_or(ActivePage::ActivityList);
+        self.previous_page = current_page;
     }
 }

@@ -106,7 +106,7 @@ impl View for ActivityList {
                 app.send(InputEvent::Reload);
             }
             StravaEvent::ToggleLogView => {
-                app.active_page = ActivePage::LogView;
+                app.switch_to(ActivePage::LogView);
             }
             _ => (),
         }

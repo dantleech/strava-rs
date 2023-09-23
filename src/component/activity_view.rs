@@ -31,8 +31,8 @@ impl View for ActivityView {
             StravaEvent::ToggleUnitSystem => {
                 app.unit_formatter = app.unit_formatter.toggle();
             }
-            StravaEvent::Quit => app.active_page = ActivePage::ActivityList,
-            StravaEvent::Enter => app.active_page = ActivePage::ActivityList,
+            StravaEvent::Quit => app.switch_to(ActivePage::ActivityList),
+            StravaEvent::Enter => app.switch_to(ActivePage::ActivityList),
             StravaEvent::Down => {
                 app.next_activity();
             }
@@ -55,6 +55,9 @@ impl View for ActivityView {
                 app.anchor_selected();
                 app.send(InputEvent::Reload);
             }
+            StravaEvent::ToggleLogView => {
+                app.switch_to(ActivePage::LogView);
+            }
             _ => (),
         }
     }
@@ -67,6 +70,7 @@ impl View for ActivityView {
             StravaEvent::Next,
             StravaEvent::Previous,
             StravaEvent::Enter,
+            StravaEvent::ToggleLogView,
             StravaEvent::Quit,
         ]
     }
