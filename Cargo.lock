@@ -1299,22 +1299,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ratatui"
-version = "0.23.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e2e4cd95294a85c3b4446e63ef054eea43e0205b1fd60120c16b74ff7ff96ad"
-dependencies = [
- "bitflags 2.3.3",
- "cassowary",
- "indoc",
- "itertools 0.11.0",
- "paste",
- "strum",
- "unicode-segmentation",
- "unicode-width",
-]
-
-[[package]]
 name = "redox_syscall"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1919,7 +1903,7 @@ dependencies = [
  "log",
  "open",
  "polyline",
- "ratatui 0.22.0",
+ "ratatui",
  "serde",
  "serde_json",
  "sqlx",
@@ -2234,7 +2218,7 @@ dependencies = [
  "lazy_static",
  "log",
  "parking_lot",
- "ratatui 0.23.0",
+ "ratatui",
  "termion",
  "tui",
 ]
