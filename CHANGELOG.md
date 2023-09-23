@@ -12,6 +12,10 @@ Improvements:
 - Refactored views to use traits.
 - Show only shortcuts relevant to current view.
 
+Features:
+
+- Log view
+
 ## 0.0.5
 
 Features:
