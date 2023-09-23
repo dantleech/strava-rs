@@ -81,7 +81,7 @@ pub fn draw(
                         Coord { x: to.0, y: to.1 },
                     ]));
 
-                    match in_selected_split(app.activity_view.selected_split, split) {
+                    match in_selected_split(app.activity_view_state.selected_split, split) {
                         true => split_lines.push(Line {
                             x1: from.0 + 1.0,
                             y1: from.1 + 1.0,

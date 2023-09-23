@@ -40,15 +40,15 @@ impl View for ActivityView {
                 app.previous_activity();
             }
             StravaEvent::Next => {
-                table_state_next(&mut app.activity_view.pace_table_state, split_len, true);
-                if let Some(selected) = app.activity_view.pace_table_state.selected() {
-                    app.activity_view.select_split(selected as i64);
+                table_state_next(&mut app.activity_view_state.pace_table_state, split_len, true);
+                if let Some(selected) = app.activity_view_state.pace_table_state.selected() {
+                    app.activity_view_state.select_split(selected as i64);
                 }
             }
             StravaEvent::Previous => {
-                table_state_prev(&mut app.activity_view.pace_table_state, split_len, true);
-                if let Some(selected) = app.activity_view.pace_table_state.selected() {
-                    app.activity_view.select_split(selected as i64);
+                table_state_prev(&mut app.activity_view_state.pace_table_state, split_len, true);
+                if let Some(selected) = app.activity_view_state.pace_table_state.selected() {
+                    app.activity_view_state.select_split(selected as i64);
                 }
             }
             StravaEvent::Anchor => {

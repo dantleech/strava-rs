@@ -4,6 +4,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
+use log::info;
 use tokio::sync::mpsc::{Receiver, Sender};
 use tui::{
     backend::{Backend, CrosstermBackend},
@@ -80,7 +81,7 @@ pub struct App<'a> {
     pub previous_page: Option<ActivePage>,
     pub unit_formatter: UnitFormatter,
     pub activity_list: ActivityListState,
-    pub activity_view: ActivityViewState,
+    pub activity_view_state: ActivityViewState,
     pub filters: ActivityFilters,
     pub ranking: RankOptions,
 
@@ -130,7 +131,7 @@ impl App<'_> {
                 sort_dialog: false,
                 rank_dialog: false,
             },
-            activity_view: ActivityViewState {
+            activity_view_state: ActivityViewState {
                 pace_table_state: TableState::default(),
                 selected_split: None,
             },
@@ -189,12 +190,18 @@ impl App<'_> {
             }
 
             while self.event_queue.len() > 1 {
+                let event = self.event_queue.pop().unwrap();
+                info!("Sending event: {:?}", event);
                 self.event_sender
-                    .send(self.event_queue.pop().unwrap())
+                    .send(event)
                     .await?;
             }
 
             if let Some(event) = self.event_receiver.recv().await {
+                match InputEvent::Tick {
+                    InputEvent::Tick => (),
+                    _ => info!("Recieving event: {:?}", event),
+                }
                 match event {
                     InputEvent::Input(k) => {
                         let key = self.key_map.map_key(k);
