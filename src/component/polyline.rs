@@ -1,8 +1,8 @@
 use geo_types::{Coord, LineString};
 use geoutils::{Distance, Location};
 
+use log::debug;
 use tui::{
-    backend::Backend,
     text::Span,
     widgets::canvas::{Canvas, Line},
     widgets::Widget, prelude::Buffer,
@@ -184,15 +184,31 @@ impl ActivityMap {
             .unwrap_or(0 as f64);
         let y_width = y_max - y_min;
 
-        let boundary_size = if width > height { height } else { width } as f64;
-        let size = boundary_size / if x_width < y_width { x_width } else { y_width };
+        let mut ratio = width as f64 / x_width;
         let x_diff = 0.0 - x_min;
         let y_diff = 0.0 - y_min;
+        let y_length = y_width * ratio;
+
+        if y_length > height as f64 {
+            ratio = height as f64 / y_width;
+        }
+
 
         let coords = decoded
             .coords()
-            .map(|c| ((c.x + x_diff) * size, (c.y + y_diff) * size));
+            .map(|c| ((c.x + x_diff) * ratio, (c.y + y_diff) * ratio));
 
+
+        debug!(
+            target: "polyline",
+            "container: {} x {}, map: {:.4} x {:.4}, norm: {:.2} x {:.2}",
+            width,
+            height,
+            x_width,
+            y_width,
+            x_width * ratio,
+            y_width * ratio,
+        );
         ActivityMap {
             coords: coords.collect::<Vec<(f64, f64)>>(),
             x_distance: x_width,

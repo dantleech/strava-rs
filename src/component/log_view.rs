@@ -1,12 +1,12 @@
-use log::{LevelFilter, info, warn};
+
 use tui::{
     style::{Color, Style},
-    widgets::{block::Block, Borders, Widget},
+    widgets::{Widget},
 };
-use tui_logger::{TuiLoggerLevelOutput, TuiLoggerWidget, TuiWidgetState, TuiLoggerSmartWidget};
+use tui_logger::{TuiLoggerLevelOutput, TuiLoggerWidget};
 
 use crate::{
-    app::{ActivePage, App},
+    app::{App},
     event::keymap::StravaEvent,
 };
 

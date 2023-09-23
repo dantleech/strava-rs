@@ -3,6 +3,10 @@ CHANGELOG
 
 ## master
 
+Bug fixes:
+
+- Fixed incorrect polyline scaling
+
 Improvements:
 
 - Refactored views to use traits.
