@@ -16,10 +16,12 @@ use config::ConfigResult;
 
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
+use env_logger::fmt::termcolor::Buffer;
 use event::input;
 
 use tokio::sync::mpsc::{self};
 use tui::{backend::CrosstermBackend, Terminal};
+use tui_logger::{init_logger, TuiLoggerLevelOutput, set_default_level};
 use xdg::BaseDirectories;
 
 use crate::store::activity::ActivityStore;
@@ -32,8 +34,13 @@ use crate::{
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
+    init_logger(log::LevelFilter::Trace)?;
+    set_default_level(log::LevelFilter::Trace);
+
+    let log_buffer = Buffer::ansi();
     env_logger::Builder::new()
         .filter(None, log::LevelFilter::Info)
+        .target(log_buffer)
         .init();
 
     let dirs: BaseDirectories = xdg::BaseDirectories::with_prefix("strava-rs").unwrap();
@@ -97,6 +104,7 @@ async fn main() -> Result<(), anyhow::Error> {
         event_receiver,
         event_sender.clone(),
         sync_sender,
+        log_buffer
     );
     app.send(input::InputEvent::Reload);
     app.activity_type = config.activity_type;

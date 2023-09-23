@@ -9,6 +9,7 @@ pub mod polyline;
 pub mod race_predictor;
 pub mod stats;
 pub mod unit_formatter;
+pub mod log_view;
 
 fn table_status_select_current(app: &mut App) {
     let activities = app.activities();

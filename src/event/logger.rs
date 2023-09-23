@@ -1,3 +1,4 @@
+use log::{log, Level};
 use tokio::sync::mpsc::Sender;
 
 use super::input::{EventSender, InputEvent};
@@ -8,9 +9,11 @@ pub struct Logger {
 
 impl Logger {
     pub async fn info(&self, message: String) {
+        log!(Level::Info, "{}", message);
         self.event_sender.send(InputEvent::InfoMessage(message)).await.unwrap();
     }
     pub async fn error(&self, message: String) {
+        log!(Level::Error, "{}", message);
         self.event_sender.send(InputEvent::ErrorMessage(message)).await.unwrap();
     }
 
