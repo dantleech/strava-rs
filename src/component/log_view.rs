@@ -1,5 +1,5 @@
-use tui::widgets::block::Block;
-use tui_logger::TuiLoggerWidget;
+use tui::{widgets::{block::Block, Borders, Widget}, style::{Style, Color}};
+use tui_logger::{TuiLoggerWidget, TuiLoggerLevelOutput};
 
 use super::View;
 
@@ -12,7 +12,7 @@ impl View for LogView {
 
     fn draw(
         &mut self,
-        app: &mut crate::app::App,
+        _app: &mut crate::app::App,
         f: &mut tui::prelude::Buffer,
         area: tui::layout::Rect,
     ) {
@@ -30,7 +30,6 @@ impl View for LogView {
             .output_file(false)
             .output_line(false)
             .style(Style::default().fg(Color::White).bg(Color::Black));
-        t.render_widget(tui_w, hchunks[1]);
-        todo!()
+        tui_w.render(area, f);
     }
 }

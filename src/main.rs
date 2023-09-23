@@ -16,12 +16,11 @@ use config::ConfigResult;
 
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
-use env_logger::fmt::termcolor::Buffer;
 use event::input;
 
 use tokio::sync::mpsc::{self};
 use tui::{backend::CrosstermBackend, Terminal};
-use tui_logger::{init_logger, TuiLoggerLevelOutput, set_default_level};
+use tui_logger::{init_logger, set_default_level};
 use xdg::BaseDirectories;
 
 use crate::store::activity::ActivityStore;
@@ -37,17 +36,17 @@ async fn main() -> Result<(), anyhow::Error> {
     init_logger(log::LevelFilter::Trace)?;
     set_default_level(log::LevelFilter::Trace);
 
-    let log_buffer = Buffer::ansi();
     env_logger::Builder::new()
         .filter(None, log::LevelFilter::Info)
-        .target(log_buffer)
         .init();
 
     let dirs: BaseDirectories = xdg::BaseDirectories::with_prefix("strava-rs").unwrap();
     let access_token_path = dirs
         .place_state_file("access_token.json")
         .expect("Could not create state directory");
-    let storage_path = dirs.create_data_directory("").expect("Could not create data directory");
+    let storage_path = dirs
+        .create_data_directory("")
+        .expect("Could not create data directory");
     let pool = get_pool(format!("{}/strava.sqlite", storage_path.display())).await;
     let (event_sender, event_receiver) = mpsc::channel(32);
     let (sync_sender, sync_receiver) = mpsc::channel::<bool>(32);
@@ -104,7 +103,6 @@ async fn main() -> Result<(), anyhow::Error> {
         event_receiver,
         event_sender.clone(),
         sync_sender,
-        log_buffer
     );
     app.send(input::InputEvent::Reload);
     app.activity_type = config.activity_type;
