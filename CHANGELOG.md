@@ -3,10 +3,18 @@ CHANGELOG
 
 ## master
 
+Bug fixes:
+
+- Fixed incorrect polyline scaling
+
 Improvements:
 
 - Refactored views to use traits.
 - Show only shortcuts relevant to current view.
+
+Features:
+
+- Log view
 
 ## 0.0.5
 

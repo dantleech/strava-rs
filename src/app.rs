@@ -4,15 +4,17 @@ use std::{
     time::{Duration, SystemTime},
 };
 
+use log::info;
 use tokio::sync::mpsc::{Receiver, Sender};
 use tui::{
     backend::{Backend, CrosstermBackend},
     widgets::TableState, Terminal,
 };
 use tui_input::Input;
+use tui_logger::TuiWidgetState;
 
 use crate::{
-    component::{activity_list, unit_formatter::UnitFormatter},
+    component::{activity_list, unit_formatter::UnitFormatter, log_view::LogView},
     event::keymap::KeyMap,
     store::activity::Activity,
     ui,
@@ -77,10 +79,10 @@ impl Display for Notification {
 
 pub struct App<'a> {
     pub quit: bool,
-    pub active_page: ActivePage,
+    pub previous_page: Option<ActivePage>,
     pub unit_formatter: UnitFormatter,
     pub activity_list: ActivityListState,
-    pub activity_view: ActivityViewState,
+    pub activity_view_state: ActivityViewState,
     pub filters: ActivityFilters,
     pub ranking: RankOptions,
 
@@ -88,6 +90,8 @@ pub struct App<'a> {
     pub activity: Option<Activity>,
     pub activity_anchored: Option<Activity>,
     pub activities: Activities,
+
+    pub log_view_state: TuiWidgetState,
 
     pub info_message: Option<Notification>,
     pub error_message: Option<Notification>,
@@ -98,12 +102,15 @@ pub struct App<'a> {
     event_sender: EventSender,
 
     event_queue: Vec<InputEvent>,
+    active_page: ActivePage,
     sync_sender: Sender<bool>,
 }
 
+#[derive(Clone, Copy)]
 pub enum ActivePage {
     ActivityList,
     Activity,
+    LogView,
 }
 
 impl App<'_> {
@@ -116,6 +123,7 @@ impl App<'_> {
         App {
             quit: false,
             active_page: ActivePage::ActivityList,
+            previous_page: None,
             unit_formatter: UnitFormatter::imperial(),
             activity_list: ActivityListState {
                 mode: activity_list::ActivityListMode::Normal,
@@ -126,10 +134,11 @@ impl App<'_> {
                 sort_dialog: false,
                 rank_dialog: false,
             },
-            activity_view: ActivityViewState {
+            activity_view_state: ActivityViewState {
                 pace_table_state: TableState::default(),
                 selected_split: None,
             },
+            log_view_state: TuiWidgetState::default().set_default_display_level(log::LevelFilter::Debug),
             filters: ActivityFilters {
                 sort_by: SortBy::Date,
                 sort_order: SortOrder::Desc,
@@ -168,9 +177,8 @@ impl App<'_> {
             let mut view: Box<dyn View> = match self.active_page {
                 ActivePage::ActivityList => Box::new(ActivityList::new()),
                 ActivePage::Activity => Box::new(ActivityView{}),
+                ActivePage::LogView => Box::new(LogView::new())
             };
-
-            self.render(terminal, view.as_mut())?;
 
             if let Some(message) = &self.info_message {
                 if message.has_expired() {
@@ -184,12 +192,18 @@ impl App<'_> {
             }
 
             while self.event_queue.len() > 1 {
+                let event = self.event_queue.pop().unwrap();
+                info!("Sending event: {:?}", event);
                 self.event_sender
-                    .send(self.event_queue.pop().unwrap())
+                    .send(event)
                     .await?;
             }
 
             if let Some(event) = self.event_receiver.recv().await {
+                match InputEvent::Tick {
+                    InputEvent::Tick => (),
+                    _ => info!("Recieving event: {:?}", event),
+                }
                 match event {
                     InputEvent::Input(k) => {
                         let key = self.key_map.map_key(k);
@@ -206,6 +220,7 @@ impl App<'_> {
                     InputEvent::Sync => self.sync_sender.send(true).await?,
                 }
             }
+            self.render(terminal, view.as_mut())?;
         }
         Ok(())
     }
@@ -296,5 +311,16 @@ impl App<'_> {
         terminal.swap_buffers();
         terminal.backend_mut().flush()?;
         Ok(())
+    }
+
+    pub(crate) fn switch_to(&mut self, view: ActivePage) {
+        self.previous_page = Some(self.active_page);
+        self.active_page = view;
+    }
+
+    pub(crate) fn switch_to_previous(&mut self) {
+        let current_page = Some(self.active_page);
+        self.active_page = self.previous_page.unwrap_or(ActivePage::ActivityList);
+        self.previous_page = current_page;
     }
 }

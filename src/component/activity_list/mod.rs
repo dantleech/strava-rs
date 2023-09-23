@@ -14,7 +14,7 @@ use tui_input::backend::crossterm::EventHandler;
 use tui_input::Input;
 
 use crate::{
-    app::App,
+    app::{App, ActivePage},
     event::{
         input::InputEvent,
         keymap::{MappedKey, StravaEvent},
@@ -104,6 +104,9 @@ impl View for ActivityList {
             StravaEvent::Anchor => {
                 app.anchor_selected();
                 app.send(InputEvent::Reload);
+            }
+            StravaEvent::ToggleLogView => {
+                app.switch_to(ActivePage::LogView);
             }
             _ => (),
         }

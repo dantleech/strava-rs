@@ -9,13 +9,14 @@ pub mod polyline;
 pub mod race_predictor;
 pub mod stats;
 pub mod unit_formatter;
+pub mod log_view;
 
 fn table_status_select_current(app: &mut App) {
     let activities = app.activities();
     if let Some(selected) = app.activity_list.table_state().selected() {
         if let Some(a) = activities.get(selected) {
             app.activity = Some(a.clone());
-            app.active_page = ActivePage::Activity;
+            app.switch_to(ActivePage::Activity);
         }
     }
 }

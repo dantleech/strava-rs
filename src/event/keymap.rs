@@ -23,6 +23,7 @@ impl KeyMap {
         map.insert(KeyCode::Char('a'), StravaEvent::Anchor);
         map.insert(KeyCode::Char('+'), StravaEvent::IncreaseTolerance);
         map.insert(KeyCode::Char('-'), StravaEvent::DecreaseTolerance);
+        map.insert(KeyCode::Char('0'), StravaEvent::ToggleLogView);
         map.insert(KeyCode::Enter, StravaEvent::Enter);
         map.insert(KeyCode::Esc, StravaEvent::Escape);
         KeyMap{map}
@@ -63,6 +64,7 @@ pub enum StravaEvent {
     ToggleUnitSystem,
     ToggleSortOrder,
     Refresh,
+    ToggleLogView,
     Filter,
     Anchor,
     Sort,
@@ -97,6 +99,7 @@ impl StravaEvent {
             StravaEvent::Quit => "quit",
             StravaEvent::Next => "next",
             StravaEvent::Previous => "prev",
+            StravaEvent::ToggleLogView => "logs",
         }
     }
 }

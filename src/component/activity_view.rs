@@ -31,8 +31,8 @@ impl View for ActivityView {
             StravaEvent::ToggleUnitSystem => {
                 app.unit_formatter = app.unit_formatter.toggle();
             }
-            StravaEvent::Quit => app.active_page = ActivePage::ActivityList,
-            StravaEvent::Enter => app.active_page = ActivePage::ActivityList,
+            StravaEvent::Quit => app.switch_to(ActivePage::ActivityList),
+            StravaEvent::Enter => app.switch_to(ActivePage::ActivityList),
             StravaEvent::Down => {
                 app.next_activity();
             }
@@ -40,20 +40,23 @@ impl View for ActivityView {
                 app.previous_activity();
             }
             StravaEvent::Next => {
-                table_state_next(&mut app.activity_view.pace_table_state, split_len, true);
-                if let Some(selected) = app.activity_view.pace_table_state.selected() {
-                    app.activity_view.select_split(selected as i64);
+                table_state_next(&mut app.activity_view_state.pace_table_state, split_len, true);
+                if let Some(selected) = app.activity_view_state.pace_table_state.selected() {
+                    app.activity_view_state.select_split(selected as i64);
                 }
             }
             StravaEvent::Previous => {
-                table_state_prev(&mut app.activity_view.pace_table_state, split_len, true);
-                if let Some(selected) = app.activity_view.pace_table_state.selected() {
-                    app.activity_view.select_split(selected as i64);
+                table_state_prev(&mut app.activity_view_state.pace_table_state, split_len, true);
+                if let Some(selected) = app.activity_view_state.pace_table_state.selected() {
+                    app.activity_view_state.select_split(selected as i64);
                 }
             }
             StravaEvent::Anchor => {
                 app.anchor_selected();
                 app.send(InputEvent::Reload);
+            }
+            StravaEvent::ToggleLogView => {
+                app.switch_to(ActivePage::LogView);
             }
             _ => (),
         }
@@ -67,6 +70,7 @@ impl View for ActivityView {
             StravaEvent::Next,
             StravaEvent::Previous,
             StravaEvent::Enter,
+            StravaEvent::ToggleLogView,
             StravaEvent::Quit,
         ]
     }

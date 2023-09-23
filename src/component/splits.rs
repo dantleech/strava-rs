@@ -75,5 +75,5 @@ pub fn draw(
         ])
         .highlight_style(Style::default().add_modifier(Modifier::BOLD))
         .highlight_symbol("")
-        .render(area, f, &mut app.activity_view.pace_table_state);
+        .render(area, f, &mut app.activity_view_state.pace_table_state);
 }

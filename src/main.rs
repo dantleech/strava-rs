@@ -20,6 +20,7 @@ use event::input;
 
 use tokio::sync::mpsc::{self};
 use tui::{backend::CrosstermBackend, Terminal};
+use tui_logger::{init_logger, set_default_level};
 use xdg::BaseDirectories;
 
 use crate::store::activity::ActivityStore;
@@ -32,15 +33,16 @@ use crate::{
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
-    env_logger::Builder::new()
-        .filter(None, log::LevelFilter::Info)
-        .init();
+    init_logger(log::LevelFilter::Trace)?;
+    set_default_level(log::LevelFilter::Trace);
 
     let dirs: BaseDirectories = xdg::BaseDirectories::with_prefix("strava-rs").unwrap();
     let access_token_path = dirs
         .place_state_file("access_token.json")
         .expect("Could not create state directory");
-    let storage_path = dirs.create_data_directory("").expect("Could not create data directory");
+    let storage_path = dirs
+        .create_data_directory("")
+        .expect("Could not create data directory");
     let pool = get_pool(format!("{}/strava.sqlite", storage_path.display())).await;
     let (event_sender, event_receiver) = mpsc::channel(32);
     let (sync_sender, sync_receiver) = mpsc::channel::<bool>(32);

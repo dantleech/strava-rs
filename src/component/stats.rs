@@ -25,7 +25,7 @@ pub fn draw(
         ("Kudos".to_string(), format!("{}", activity.kudos)),
         (
             "Split".to_string(),
-            match app.activity_view.selected_split {
+            match app.activity_view_state.selected_split {
                 Some(s) => format!("{}", s),
                 None => "N/A".to_string()
             },
