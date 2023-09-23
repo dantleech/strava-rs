@@ -1,13 +1,21 @@
 use tui::{widgets::{block::Block, Borders, Widget}, style::{Style, Color}};
-use tui_logger::{TuiLoggerWidget, TuiLoggerLevelOutput};
+use tui_logger::{TuiLoggerWidget, TuiLoggerLevelOutput, TuiWidgetState};
+
+use crate::{event::keymap::StravaEvent, app::ActivePage};
 
 use super::View;
 
-struct LogView {}
+pub struct LogView {
+    state: TuiWidgetState
+}
 
 impl View for LogView {
     fn handle(&mut self, app: &mut crate::app::App, key: crate::event::keymap::MappedKey) {
-        todo!()
+        match key.strava_event {
+            StravaEvent::Quit => app.quit = true,
+            StravaEvent::ToggleLogView => app.active_page = ActivePage::ActivityList,
+            _ => (),
+        }
     }
 
     fn draw(

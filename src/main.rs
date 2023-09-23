@@ -36,10 +36,6 @@ async fn main() -> Result<(), anyhow::Error> {
     init_logger(log::LevelFilter::Trace)?;
     set_default_level(log::LevelFilter::Trace);
 
-    env_logger::Builder::new()
-        .filter(None, log::LevelFilter::Info)
-        .init();
-
     let dirs: BaseDirectories = xdg::BaseDirectories::with_prefix("strava-rs").unwrap();
     let access_token_path = dirs
         .place_state_file("access_token.json")

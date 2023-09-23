@@ -12,7 +12,7 @@ use tui::{
 use tui_input::Input;
 
 use crate::{
-    component::{activity_list, unit_formatter::UnitFormatter},
+    component::{activity_list, unit_formatter::UnitFormatter, log_view::LogView},
     event::keymap::KeyMap,
     store::activity::Activity,
     ui,
@@ -104,6 +104,7 @@ pub struct App<'a> {
 pub enum ActivePage {
     ActivityList,
     Activity,
+    LogView,
 }
 
 impl App<'_> {
@@ -168,6 +169,7 @@ impl App<'_> {
             let mut view: Box<dyn View> = match self.active_page {
                 ActivePage::ActivityList => Box::new(ActivityList::new()),
                 ActivePage::Activity => Box::new(ActivityView{}),
+                ActivePage::LogView => Box::new(LogView{})
             };
 
             self.render(terminal, view.as_mut())?;
