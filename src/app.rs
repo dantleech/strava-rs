@@ -11,6 +11,7 @@ use tui::{
     widgets::TableState, Terminal,
 };
 use tui_input::Input;
+use tui_logger::TuiWidgetState;
 
 use crate::{
     component::{activity_list, unit_formatter::UnitFormatter, log_view::LogView},
@@ -90,6 +91,8 @@ pub struct App<'a> {
     pub activity_anchored: Option<Activity>,
     pub activities: Activities,
 
+    pub log_view_state: TuiWidgetState,
+
     pub info_message: Option<Notification>,
     pub error_message: Option<Notification>,
     pub key_map: KeyMap,
@@ -135,6 +138,7 @@ impl App<'_> {
                 pace_table_state: TableState::default(),
                 selected_split: None,
             },
+            log_view_state: TuiWidgetState::default().set_default_display_level(log::LevelFilter::Debug),
             filters: ActivityFilters {
                 sort_by: SortBy::Date,
                 sort_order: SortOrder::Desc,
@@ -176,8 +180,6 @@ impl App<'_> {
                 ActivePage::LogView => Box::new(LogView::new())
             };
 
-            self.render(terminal, view.as_mut())?;
-
             if let Some(message) = &self.info_message {
                 if message.has_expired() {
                     self.info_message = None
@@ -218,6 +220,7 @@ impl App<'_> {
                     InputEvent::Sync => self.sync_sender.send(true).await?,
                 }
             }
+            self.render(terminal, view.as_mut())?;
         }
         Ok(())
     }

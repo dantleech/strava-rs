@@ -13,41 +13,41 @@ use crate::{
 use super::View;
 
 pub struct LogView {
-    state: TuiWidgetState,
 }
 impl LogView {
     pub(crate) fn new() -> LogView {
         LogView {
-            state: TuiWidgetState::default(),
         }
     }
 }
 
 impl View for LogView {
     fn mapped_events(&self, _app: &App) -> Vec<StravaEvent> {
-        vec![StravaEvent::ToggleLogView, StravaEvent::Quit]
+        vec![
+            StravaEvent::ToggleLogView,
+            StravaEvent::Up,
+            StravaEvent::Down,
+            StravaEvent::Quit,
+        ]
     }
     fn handle(&mut self, app: &mut crate::app::App, key: crate::event::keymap::MappedKey) {
-        info!("Log view");
         match key.strava_event {
             StravaEvent::Quit => app.quit = true,
             StravaEvent::ToggleLogView => app.switch_to_previous(),
-            StravaEvent::Up => self.state.transition(&tui_logger::TuiWidgetEvent::UpKey),
-            StravaEvent::Down => self.state.transition(&tui_logger::TuiWidgetEvent::DownKey),
-            StravaEvent::Filter => self.state.transition(&tui_logger::TuiWidgetEvent::HideKey),
-            StravaEvent::Next => self.state.transition(&tui_logger::TuiWidgetEvent::NextPageKey),
-            StravaEvent::Previous => self.state.transition(&tui_logger::TuiWidgetEvent::PrevPageKey),
+            StravaEvent::Down => app.log_view_state.transition(&tui_logger::TuiWidgetEvent::NextPageKey),
+            StravaEvent::Up => app.log_view_state.transition(&tui_logger::TuiWidgetEvent::PrevPageKey),
+            StravaEvent::Enter => app.log_view_state.transition(&tui_logger::TuiWidgetEvent::EscapeKey),
             _ => (),
         }
     }
 
     fn draw(
         &mut self,
-        _app: &mut crate::app::App,
+        app: &mut crate::app::App,
         f: &mut tui::prelude::Buffer,
         area: tui::layout::Rect,
     ) {
-        let tui_w = TuiLoggerSmartWidget::default()
+        let tui_w = TuiLoggerWidget::default()
             .output_separator('|')
             .output_timestamp(Some("%F %H:%M:%S%.3f".to_string()))
             .output_level(Some(TuiLoggerLevelOutput::Long))
@@ -59,7 +59,7 @@ impl View for LogView {
             .style_info(Style::default().fg(Color::Cyan))
             .output_file(false)
             .output_line(false)
-            .state(&mut self.state)
+            .state(&mut app.log_view_state)
             .style(Style::default().fg(Color::White).bg(Color::Black));
         tui_w.render(area, f);
     }
