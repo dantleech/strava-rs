@@ -51,6 +51,12 @@ impl View for ActivityView {
                     app.activity_view_state.select_split(selected as i64);
                 }
             }
+            StravaEvent::ActivityListView => {
+                app.switch_to(ActivePage::ActivityList);
+            }
+            StravaEvent::CalendarView => {
+                app.switch_to(ActivePage::CalendarView);
+            }
             StravaEvent::Anchor => {
                 app.anchor_selected();
                 app.send(InputEvent::Reload);
@@ -71,6 +77,8 @@ impl View for ActivityView {
             StravaEvent::Previous,
             StravaEvent::Enter,
             StravaEvent::ToggleLogView,
+            StravaEvent::ActivityListView,
+            StravaEvent::CalendarView,
             StravaEvent::Quit,
         ]
     }

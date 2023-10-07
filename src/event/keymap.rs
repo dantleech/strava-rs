@@ -24,6 +24,8 @@ impl KeyMap {
         map.insert(KeyCode::Char('+'), StravaEvent::IncreaseTolerance);
         map.insert(KeyCode::Char('-'), StravaEvent::DecreaseTolerance);
         map.insert(KeyCode::Char('0'), StravaEvent::ToggleLogView);
+        map.insert(KeyCode::Char('1'), StravaEvent::ActivityListView);
+        map.insert(KeyCode::Char('2'), StravaEvent::CalendarView);
         map.insert(KeyCode::Enter, StravaEvent::Enter);
         map.insert(KeyCode::Esc, StravaEvent::Escape);
         KeyMap{map}
@@ -78,6 +80,8 @@ pub enum StravaEvent {
     Quit,
     Next,
     Previous,
+    CalendarView,
+    ActivityListView,
 }
 impl StravaEvent {
     pub fn describe(se: &StravaEvent) -> &'static str {
@@ -100,6 +104,8 @@ impl StravaEvent {
             StravaEvent::Next => "next",
             StravaEvent::Previous => "prev",
             StravaEvent::ToggleLogView => "logs",
+            StravaEvent::ActivityListView => "activites",
+            StravaEvent::CalendarView => "calendar",
         }
     }
 }

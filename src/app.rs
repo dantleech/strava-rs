@@ -14,7 +14,7 @@ use tui_input::Input;
 use tui_logger::TuiWidgetState;
 
 use crate::{
-    component::{activity_list, unit_formatter::UnitFormatter, log_view::LogView},
+    component::{activity_list, unit_formatter::UnitFormatter, log_view::LogView, calendar_view::{CalendarView, CalendarViewState}},
     event::keymap::KeyMap,
     store::activity::Activity,
     ui,
@@ -83,6 +83,7 @@ pub struct App<'a> {
     pub unit_formatter: UnitFormatter,
     pub activity_list: ActivityListState,
     pub activity_view_state: ActivityViewState,
+    pub calendar_view_state: CalendarViewState,
     pub filters: ActivityFilters,
     pub ranking: RankOptions,
 
@@ -111,6 +112,7 @@ pub enum ActivePage {
     ActivityList,
     Activity,
     LogView,
+    CalendarView,
 }
 
 impl App<'_> {
@@ -138,6 +140,7 @@ impl App<'_> {
                 pace_table_state: TableState::default(),
                 selected_split: None,
             },
+            calendar_view_state: CalendarViewState::new(),
             log_view_state: TuiWidgetState::default().set_default_display_level(log::LevelFilter::Debug),
             filters: ActivityFilters {
                 sort_by: SortBy::Date,
@@ -177,7 +180,8 @@ impl App<'_> {
             let mut view: Box<dyn View> = match self.active_page {
                 ActivePage::ActivityList => Box::new(ActivityList::new()),
                 ActivePage::Activity => Box::new(ActivityView{}),
-                ActivePage::LogView => Box::new(LogView::new())
+                ActivePage::LogView => Box::new(LogView::new()),
+                ActivePage::CalendarView => Box::new(CalendarView::new()),
             };
 
             if let Some(message) = &self.info_message {

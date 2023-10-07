@@ -30,3 +30,4 @@ confy = "0.5.1"
 hyper-rustls = "0.24.1"
 sqlx = { version = "0.7.1", features = ["sqlx-sqlite", "sqlite", "runtime-tokio", "chrono"] }
 tui-logger = { version = "0.9.6", features = ["ratatui", "ratatui-support"] }
+time = "0.3.29"

@@ -108,6 +108,9 @@ impl View for ActivityList {
             StravaEvent::ToggleLogView => {
                 app.switch_to(ActivePage::LogView);
             }
+            StravaEvent::CalendarView => {
+                app.switch_to(ActivePage::CalendarView);
+            }
             _ => (),
         }
     }
@@ -127,6 +130,7 @@ impl View for ActivityList {
             events.push(StravaEvent::IncreaseTolerance);
             events.push(StravaEvent::DecreaseTolerance);
         }
+        events.push(StravaEvent::CalendarView);
         events.push(StravaEvent::Quit);
         events
     }
