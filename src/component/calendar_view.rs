@@ -6,7 +6,7 @@ use tui::{
     text::{Span, Line},
     widgets::{
         calendar::{CalendarEventStore, Monthly},
-        Axis, BarChart, BarGroup, Chart, Dataset, GraphType, Widget, Bar,
+        Axis, BarChart, BarGroup, Chart, Dataset, GraphType, Widget, Bar, Block, Borders,
     },
 };
 
@@ -93,9 +93,19 @@ impl CalendarView {
                 }).collect::<Vec<Bar>>(),
         );
         BarChart::default()
+            .block(
+                Block::default().title(
+                    format!(
+                        "Distance: {}",
+                        unit_formatter.distance(data.iter().fold(0.0, |a,(_, d)| a + *d as f64 ))
+                    )
+                ).borders(Borders::all())
+            )
+            .direction(Direction::Vertical)
+            .bar_gap(0)
             .bar_style(Style::default().fg(Color::Green))
             .value_style(Style::default().fg(Color::White))
-            .bar_width(7)
+            .bar_width(3)
             .data(group)
     }
 

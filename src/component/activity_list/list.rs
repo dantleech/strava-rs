@@ -14,6 +14,7 @@ use crate::{
 
 
 
+
 pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'a> {
     let mut rows = vec![];
     let header_names = [
