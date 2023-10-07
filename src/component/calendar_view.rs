@@ -1,21 +1,125 @@
-use chrono::Datelike;
+use chrono::{Datelike, NaiveDate};
 use time::{Date, Month};
 use tui::{
+    prelude::{Constraint, Direction, Layout},
     style::{Color, Style},
+    text::{Span, Line},
     widgets::{
         calendar::{CalendarEventStore, Monthly},
-        Widget,
+        Axis, BarChart, BarGroup, Chart, Dataset, GraphType, Widget, Bar,
     },
 };
 
-use crate::{app::App, event::keymap::StravaEvent};
+use crate::{
+    app::App,
+    event::keymap::StravaEvent,
+    store::activity::{Activities, Activity},
+};
 
-use super::View;
+use super::{activity_list::list::activity_list_table, View, unit_formatter::UnitFormatter};
 
 pub struct CalendarView {}
 impl CalendarView {
     pub(crate) fn new() -> CalendarView {
         CalendarView {}
+    }
+
+    fn calendar_widget(&self, app: &mut App) -> Monthly<CalendarEventStore> {
+        let mut events = CalendarEventStore::default();
+        events.add(
+            Date::from_calendar_date(
+                app.calendar_view_state.year,
+                app.calendar_view_state.month,
+                app.calendar_view_state.day,
+            )
+            .unwrap(),
+            Style::default().fg(Color::Blue),
+        );
+
+        for activity in app.activities() {
+            let mut style = Style::default().bg(Color::Blue);
+            if app
+                .calendar_view_state
+                .is_selected_equal_to(activity.start_date)
+            {
+                style = style.fg(Color::Black);
+            }
+
+            events.add(
+                Date::from_calendar_date(
+                    activity.start_date.unwrap().year(),
+                    Month::try_from(activity.start_date.unwrap().month() as u8).unwrap(),
+                    activity.start_date.unwrap().day() as u8,
+                )
+                .unwrap(),
+                style,
+            );
+        }
+
+        Monthly::new(
+            Date::from_calendar_date(
+                app.calendar_view_state.year,
+                app.calendar_view_state.month,
+                app.calendar_view_state.day,
+            )
+            .unwrap(),
+            events,
+        )
+        .show_month_header(Style::default())
+        .show_weekdays_header(Style::default())
+        .show_surrounding(Style::default().fg(Color::DarkGray))
+    }
+
+    fn month_widget<'a>(
+        &self,
+        data: Vec<(u8, u64)>,
+        unit_formatter: &UnitFormatter,
+        selected_date: NaiveDate,
+    ) -> BarChart<'a> {
+        let group = BarGroup::default().bars(
+            &data
+                .iter()
+                .map(|(day, distance)| {
+                    Bar::default()
+                        .value(*distance as u64)
+                        .text_value(unit_formatter.distance(*distance as f64))
+                        .label(Line::from(day.to_string()))
+                        .style({
+                            match day == &(selected_date.day() as u8) {
+                                true => Style::default().fg(Color::Red),
+                                false => Style::default().fg(Color::Green),
+                            }
+                        })
+                }).collect::<Vec<Bar>>(),
+        );
+        BarChart::default()
+            .bar_style(Style::default().fg(Color::Green))
+            .value_style(Style::default().fg(Color::White))
+            .bar_width(7)
+            .data(group)
+    }
+
+    fn month_data(&self, app: &mut App) -> Vec<(u8, u64)> {
+        let dim = time::util::days_in_year_month(
+            app.calendar_view_state.year,
+            app.calendar_view_state.month,
+        );
+        let mut d = 1;
+        let mut data = vec![];
+        while d <= dim {
+            let activities = app.activities.for_date(
+                NaiveDate::from_ymd_opt(
+                    app.calendar_view_state.year,
+                    app.calendar_view_state.month as u32,
+                    d as u32,
+                )
+                .unwrap(),
+            );
+            data.push((d, activities.distance() as u64));
+            d += 1;
+        }
+
+        data
     }
 }
 
@@ -24,14 +128,16 @@ pub struct CalendarViewState {
     month: Month,
     year: i32,
 }
+
 impl CalendarViewState {
     fn next_month(&mut self) {
         self.month = self.month.next();
-        self.santize_day();
+        self.day = 1;
     }
 
     fn previous_month(&mut self) {
         self.month = self.month.previous();
+        self.day = 31;
         self.santize_day();
     }
 
@@ -76,6 +182,11 @@ impl CalendarViewState {
             && Month::try_from(start_date.unwrap().month() as u8).unwrap() == self.month
             && start_date.unwrap().day() as u8 == self.day
     }
+
+    fn selected_date(&self) -> chrono::NaiveDate {
+        return NaiveDate::from_ymd_opt(self.year, self.month as u32, self.day as u32)
+            .expect("Could not convert date");
+    }
 }
 
 impl View for CalendarView {
@@ -100,50 +211,28 @@ impl View for CalendarView {
         f: &mut tui::prelude::Buffer,
         area: tui::layout::Rect,
     ) {
-        let mut events = CalendarEventStore::default();
-        events.add(
-            Date::from_calendar_date(
-                app.calendar_view_state.year,
-                app.calendar_view_state.month,
-                app.calendar_view_state.day,
-            )
-            .unwrap(),
-            Style::default().fg(Color::Blue),
-        );
+        let rows = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Length(8), Constraint::Length(2)].as_ref())
+            .split(area);
+        let cal_row = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Length(30), Constraint::Length(10)].as_ref())
+            .split(rows[0]);
 
-        for activity in app.activities() {
-            let mut style = Style::default().bg(Color::Blue);
-            if app
-                .calendar_view_state
-                .is_selected_equal_to(activity.start_date)
-            {
-                style = style.fg(Color::Black);
-            }
+        let cal_w = self.calendar_widget(app);
+        cal_w.render(cal_row[0], f);
 
-            events.add(
-                Date::from_calendar_date(
-                    activity.start_date.unwrap().year(),
-                    Month::try_from(activity.start_date.unwrap().month() as u8).unwrap(),
-                    activity.start_date.unwrap().day() as u8,
-                )
-                .unwrap(),
-                style,
-            );
-        }
+        let a = app
+            .activities()
+            .for_date(app.calendar_view_state.selected_date());
+        activity_list_table(app, &a).render(cal_row[1], f);
 
-        let tui_w = Monthly::new(
-            Date::from_calendar_date(
-                app.calendar_view_state.year,
-                app.calendar_view_state.month,
-                app.calendar_view_state.day,
-            )
-            .unwrap(),
-            events,
-        )
-        .show_month_header(Style::default())
-        .show_weekdays_header(Style::default())
-        .show_surrounding(Style::default().fg(Color::DarkGray));
-
-        tui_w.render(area, f);
+        let data = self.month_data(app);
+        self.month_widget(
+            data,
+            &app.unit_formatter,
+            app.calendar_view_state.selected_date()
+        ).render(rows[1], f);
     }
 }

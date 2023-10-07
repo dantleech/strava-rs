@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, fmt::Display};
 
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, NaiveDate, Datelike};
 use crossterm::event::KeyCode;
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
@@ -202,6 +202,30 @@ impl Activities {
 
     pub fn to_vec(&self) -> Vec<Activity> {
         self.activities.clone()
+    }
+
+    pub(crate) fn for_date(&self, selected_date: NaiveDate) -> Activities {
+        self.activities.clone()
+            .into_iter()
+            .filter(|a| match a.start_date {
+                Some(date) => NaiveDate::from(date) == selected_date,
+                None => false,
+            })
+            .collect()
+    }
+
+    pub(crate) fn by_month(&self, year: i32, month: u8) -> Activities {
+        self.activities.clone()
+            .into_iter()
+            .filter(|a| match a.start_date {
+                Some(date) => date.year() == year && date.month() == month as u32,
+                None => false,
+            })
+            .collect()
+    }
+
+    pub(crate) fn distance(&self) -> f64 {
+        self.activities.clone().into_iter().fold(0.0, |acc, a| acc + a.distance)
     }
 }
 
