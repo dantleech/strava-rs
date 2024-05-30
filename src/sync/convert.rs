@@ -37,7 +37,10 @@ impl ActivityConverter<'_> {
 
         for raw_activity in raw_activities {
             let listed: client::Activity =
-                serde_json::from_str(raw_activity.listed.as_str()).expect("Could not decode JSON");
+                serde_json::from_str(match &raw_activity.activity {
+                    Some(a) => &a.as_str(),
+                    None => raw_activity.listed.as_str()
+                }).expect("Could not decode JSON");
             self.logger.info(format!("Converting activity {}", listed.name)).await;
             let activity = Activity {
                 id: listed.id,
