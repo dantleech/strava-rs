@@ -41,7 +41,7 @@ pub struct Token {
     pub length: usize,
 }
 
-struct Lexer<'a> {
+pub struct Lexer<'a> {
     pub pos: usize,
     pub expr: &'a str,
 }
