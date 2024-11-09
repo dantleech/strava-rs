@@ -3,7 +3,7 @@
 // pace > 06:00
 // average_speed > 10mph
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum TokenKind {
     Number,
     Contains,
@@ -53,7 +53,7 @@ impl Lexer<'_> {
     pub fn next(&mut self) -> Token {
         self.skip_whitespace();
         let c = self.current();
-        match c {
+        let t = match c {
             '\0' => self.spawn_token(TokenKind::Eol, self.pos),
             _ => {
                 if is_number(c) {
@@ -77,7 +77,8 @@ impl Lexer<'_> {
                     _ => self.spawn_advance(TokenKind::Unkown, 0),
                 }
             }
-        }
+        };
+        t
     }
 
     fn advance(&mut self) {
@@ -136,7 +137,7 @@ impl Lexer<'_> {
         }
     }
 
-    pub fn token_value(&self, token: Token) -> &str {
+    pub fn token_value(&self, token: &Token) -> &str {
         &self.expr[token.start..token.start + token.length]
     }
 
@@ -168,7 +169,7 @@ mod test {
         let mut l = Lexer::new("    10");
         let t = l.next();
         assert_eq!(TokenKind::Number, t.kind);
-        assert_eq!("10", l.token_value(t))
+        assert_eq!("10", l.token_value(&t))
     }
 
     #[test]
@@ -204,15 +205,15 @@ mod test {
         let mut l = Lexer::new("distance > 10m");
         let t = l.next();
         assert_eq!(TokenKind::Name, t.kind);
-        assert_eq!("distance", l.token_value(t));
+        assert_eq!("distance", l.token_value(&t));
         let t = l.next();
         assert_eq!(TokenKind::GreaterThan, t.kind);
-        assert_eq!(">", l.token_value(t));
+        assert_eq!(">", l.token_value(&t));
         let t = l.next();
         assert_eq!(TokenKind::Number, t.kind);
-        assert_eq!("10", l.token_value(t));
+        assert_eq!("10", l.token_value(&t));
         let t = l.next();
         assert_eq!(TokenKind::Name, t.kind);
-        assert_eq!("m", l.token_value(t));
+        assert_eq!("m", l.token_value(&t));
     }
 }
