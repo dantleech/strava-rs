@@ -29,7 +29,11 @@ pub fn draw(
     }
 
     if let Ok(decoded) = activity.polyline() {
-        let mapped_polyline = ActivityMap::from_polyline(decoded, area.width - 4, area.height - 4);
+        let mapped_polyline = ActivityMap::from_polyline(
+            decoded,
+            area.width.saturating_add(4),
+            area.height.saturating_sub(4)
+        );
 
         let length_per_split =
             mapped_polyline.length() / ((activity.distance / 1000.0) * KILOMETER_TO_MILE);
