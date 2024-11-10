@@ -60,6 +60,8 @@ impl Parser<'_> {
                 | TokenKind::Or
                 | TokenKind::FuzzyEqual
                 | TokenKind::Equal
+                | TokenKind::NotFuzzyEqual
+                | TokenKind::NotEqual
                 | TokenKind::LessThanEqual
                 | TokenKind::LessThan => Ok(Expr::Binary(
                     Box::new(left),

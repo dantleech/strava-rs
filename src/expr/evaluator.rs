@@ -70,6 +70,8 @@ impl Evaluator {
                     super::lexer::TokenKind::LessThan => Ok(lval < rval),
                     super::lexer::TokenKind::Equal => Ok(lval == rval),
                     super::lexer::TokenKind::FuzzyEqual => Ok(lval.to_string().contains(rval.to_string().as_str())),
+                    super::lexer::TokenKind::NotEqual => Ok(lval != rval),
+                    super::lexer::TokenKind::NotFuzzyEqual => Ok(!lval.to_string().contains(rval.to_string().as_str())),
                     super::lexer::TokenKind::Or => Ok(lval.to_bool() || rval.to_bool()),
                     super::lexer::TokenKind::And => Ok(lval.to_bool() && rval.to_bool()),
                     _ => Err(format!("unknown operator: {:?}", op)),
@@ -118,7 +120,9 @@ mod test {
         assert_eq!(true, result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("type ~ 'Ru'", &map);
         assert_eq!(true, result.unwrap());
-        let result = Evaluator::new().parse_and_evaluate("type ~ 'Rup'", &map);
+        let result = Evaluator::new().parse_and_evaluate("type !~ 'Rup'", &map);
+        assert_eq!(true, result.unwrap());
+        let result = Evaluator::new().parse_and_evaluate("type != 'Run'", &map);
         assert_eq!(false, result.unwrap());
     }
 }
