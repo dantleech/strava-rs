@@ -6,6 +6,7 @@
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum TokenKind {
     True,
+    String,
     False,
     Number,
     Contains,
@@ -67,6 +68,8 @@ impl Lexer<'_> {
                 }
 
                 match c {
+                    '"' => self.parse_string(),
+                    '\'' => self.parse_string(),
                     '=' => self.spawn_advance(TokenKind::Equal, 1),
                     ':' => self.spawn_advance(TokenKind::Colon, 1),
                     '>' => match self.peek(1) {
@@ -126,6 +129,20 @@ impl Lexer<'_> {
             "AND" => self.spawn_advance(TokenKind::And, length),
             _ => self.spawn_advance(TokenKind::Name, length),
         }
+    }
+
+    fn parse_string(&mut self) -> Token {
+        // move past opening quote
+        self.advance();
+
+        let mut length = 1;
+        while self.peek(length) != '\'' && self.peek(length) != '"' && self.peek(length) != '\0' {
+            length += 1;
+        }
+
+        let val = self.spawn_advance(TokenKind::String, length);
+        self.advance();
+        val
     }
 
     fn spawn_token(&self, number: TokenKind, start: usize) -> Token {
@@ -203,6 +220,15 @@ mod test {
         assert_eq!(TokenKind::And, Lexer::new("and").next().kind);
         assert_eq!(TokenKind::Or, Lexer::new("OR").next().kind);
         assert_eq!(TokenKind::And, Lexer::new("AND").next().kind);
+    }
+
+    #[test]
+    pub fn lex_string_literal() {
+        assert_eq!(TokenKind::String, Lexer::new("\"or\"").next().kind);
+        assert_eq!(TokenKind::String, Lexer::new("'or'").next().kind);
+        let mut l = Lexer::new("'or'");
+        let t = l.next();
+        assert_eq!("or", l.token_value(&t));
     }
 
     #[test]

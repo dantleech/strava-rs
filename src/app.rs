@@ -17,7 +17,7 @@ use crate::{
     component::{activity_list, unit_formatter::UnitFormatter, log_view::LogView},
     event::keymap::KeyMap,
     store::activity::Activity,
-    ui,
+    ui, expr::{self, evaluator::{Evaluator, Vars}},
 };
 use crate::{
     component::{
@@ -227,7 +227,13 @@ impl App<'_> {
 
     pub async fn reload(&mut self) {
         let mut activities = self.store.activities().await;
-        activities = activities.where_title_contains(self.filters.filter.as_str());
+
+        let mut evaluator = Evaluator::new();
+        activities = match evaluator.parse(self.filters.filter.as_str()) {
+            Ok(expr) => activities.by_expr(&evaluator, &expr),
+            Err(_) => activities.where_title_contains(self.filters.filter.as_str()),
+        };
+        
         if let Some(activity_type) = self.activity_type.clone() {
             activities = activities.having_activity_type(activity_type);
         }

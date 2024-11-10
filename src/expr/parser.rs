@@ -1,11 +1,14 @@
+use std::ascii::AsciiExt;
+
 use super::lexer::{Lexer, Token, TokenKind};
 
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Expr {
     Binary(Box<Expr>, TokenKind, Box<Expr>),
-    Number(u16),
+    Number(f64),
     Variable(String),
     Boolean(bool),
+    String(String),
 }
 
 pub struct Parser<'a> {
@@ -30,10 +33,11 @@ impl Parser<'_> {
         let mut left: Expr = match token.kind {
             TokenKind::True => Ok(Expr::Boolean(true)),
             TokenKind::False => Ok(Expr::Boolean(false)),
-            TokenKind::Number => match self.lexer.token_value(&token).parse::<u16>() {
+            TokenKind::Number => match self.lexer.token_value(&token).parse::<f64>() {
                 Ok(v) => Ok(Expr::Number(v)),
                 Err(_) => Err("Could not parse number".to_string()),
             },
+            TokenKind::String => Ok(Expr::String(self.lexer.token_value(&token).to_string())),
             TokenKind::Name => {
                 let value = self.lexer.token_value(&token);
                 Ok(Expr::Variable(value.to_string()))
@@ -48,7 +52,7 @@ impl Parser<'_> {
 
         // infix parsing
         while precedence < self.token_precedence(&next_t) {
-            let (right, new_t) = self.parse_expr(self.token_precedence(&next_t)).unwrap();
+            let (right, new_t) = self.parse_expr(self.token_precedence(&next_t))?;
             left = match &next_t.kind {
                 TokenKind::GreaterThan
                 | TokenKind::GreaterThanEqual
@@ -98,12 +102,12 @@ mod test {
             Expr::Variable("distance".to_string()),
             Parser::new("distance").parse().unwrap()
         );
-        assert_eq!(Expr::Number(10), Parser::new("10").parse().unwrap());
+        assert_eq!(Expr::Number(10.0), Parser::new("10").parse().unwrap());
         assert_eq!(
             Expr::Binary(
-                Box::new(Expr::Number(10)),
+                Box::new(Expr::Number(10.0)),
                 TokenKind::GreaterThan,
-                Box::new(Expr::Number(20))
+                Box::new(Expr::Number(20.0))
             ),
             Parser::new("10 > 20").parse().unwrap()
         );
@@ -112,13 +116,13 @@ mod test {
                 Box::new(Expr::Binary(
                     Box::new(Expr::Variable("variable".to_string())),
                     TokenKind::GreaterThan,
-                    Box::new(Expr::Number(20))
+                    Box::new(Expr::Number(20.0))
                 )),
                 TokenKind::And,
                 Box::new(Expr::Binary(
-                    Box::new(Expr::Number(10)),
+                    Box::new(Expr::Number(10.0)),
                     TokenKind::LessThan,
-                    Box::new(Expr::Number(30))
+                    Box::new(Expr::Number(30.0))
                 )),
             ),
             Parser::new("variable > 20 and 10 < 30").parse().unwrap()

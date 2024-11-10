@@ -1,8 +1,3 @@
-#[allow(dead_code)]
 mod lexer;
-
-#[allow(dead_code)]
-mod parser;
-
-#[allow(dead_code)]
-mod evaluator;
+pub mod parser;
+pub mod evaluator;

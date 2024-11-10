@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, SqlitePool};
 use strum::EnumIter;
 
+use crate::expr::{parser::Expr, evaluator::{Evaluator, Vars, Evalue}};
+
 use super::polyline_compare::compare;
 
 #[derive(EnumIter)]
@@ -202,6 +204,20 @@ impl Activities {
 
     pub fn to_vec(&self) -> Vec<Activity> {
         self.activities.clone()
+    }
+
+    pub(crate) fn by_expr(&self, evaluator: &Evaluator, expr: &Expr) -> Activities {
+        self.activities.clone()
+            .into_iter()
+            .filter(|a| match evaluator.evaluate(expr, &Vars::from([
+                ("distance".to_string(), Evalue::Number(a.distance)),
+                ("type".to_string(), Evalue::String(a.activity_type.to_string())),
+                ("heartrate".to_string(), Evalue::Number(a.average_heartrate.unwrap_or(0.0))),
+            ])) {
+                Ok(v) => v,
+                Err(_) => false,
+            })
+            .collect()
     }
 }
 
