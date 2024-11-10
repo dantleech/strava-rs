@@ -8,16 +8,18 @@ use log::info;
 use tokio::sync::mpsc::{Receiver, Sender};
 use tui::{
     backend::{Backend, CrosstermBackend},
-    widgets::TableState, Terminal,
+    widgets::TableState,
+    Terminal,
 };
 use tui_input::Input;
 use tui_logger::TuiWidgetState;
 
 use crate::{
-    component::{activity_list, unit_formatter::UnitFormatter, log_view::LogView},
+    component::{activity_list, log_view::LogView, unit_formatter::UnitFormatter},
     event::keymap::KeyMap,
+    expr::evaluator::Evaluator,
     store::activity::Activity,
-    ui, expr::{self, evaluator::{Evaluator, Vars}},
+    ui,
 };
 use crate::{
     component::{
@@ -138,7 +140,8 @@ impl App<'_> {
                 pace_table_state: TableState::default(),
                 selected_split: None,
             },
-            log_view_state: TuiWidgetState::default().set_default_display_level(log::LevelFilter::Debug),
+            log_view_state: TuiWidgetState::default()
+                .set_default_display_level(log::LevelFilter::Debug),
             filters: ActivityFilters {
                 sort_by: SortBy::Date,
                 sort_order: SortOrder::Desc,
@@ -176,8 +179,8 @@ impl App<'_> {
 
             let mut view: Box<dyn View> = match self.active_page {
                 ActivePage::ActivityList => Box::new(ActivityList::new()),
-                ActivePage::Activity => Box::new(ActivityView{}),
-                ActivePage::LogView => Box::new(LogView::new())
+                ActivePage::Activity => Box::new(ActivityView {}),
+                ActivePage::LogView => Box::new(LogView::new()),
             };
 
             if let Some(message) = &self.info_message {
@@ -194,9 +197,7 @@ impl App<'_> {
             while self.event_queue.len() > 1 {
                 let event = self.event_queue.pop().unwrap();
                 info!("Sending event: {:?}", event);
-                self.event_sender
-                    .send(event)
-                    .await?;
+                self.event_sender.send(event).await?;
             }
 
             if let Some(event) = self.event_receiver.recv().await {
@@ -233,7 +234,7 @@ impl App<'_> {
             Ok(expr) => activities.by_expr(&evaluator, &expr),
             Err(_) => activities.where_title_contains(self.filters.filter.as_str()),
         };
-        
+
         if let Some(activity_type) = self.activity_type.clone() {
             activities = activities.having_activity_type(activity_type);
         }
@@ -299,7 +300,7 @@ impl App<'_> {
     fn render(
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
-        view: &mut dyn View
+        view: &mut dyn View,
     ) -> Result<(), anyhow::Error> {
         let area = terminal.size().expect("Could not determine terminal size'");
         terminal.autoresize()?;

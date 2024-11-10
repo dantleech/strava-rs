@@ -1,5 +1,3 @@
-use std::ascii::AsciiExt;
-
 use super::lexer::{Lexer, Token, TokenKind};
 
 #[derive(PartialEq, Debug, Clone)]

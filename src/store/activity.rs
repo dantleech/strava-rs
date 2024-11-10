@@ -214,6 +214,8 @@ impl Activities {
                 ("type".to_string(), Evalue::String(a.activity_type.to_string())),
                 ("heartrate".to_string(), Evalue::Number(a.average_heartrate.unwrap_or(0.0))),
                 ("title".to_string(), Evalue::String(a.title.clone())),
+                ("elevation".to_string(), Evalue::Number(a.total_elevation_gain)),
+                ("time".to_string(), Evalue::Number(a.moving_time as f64)),
             ])) {
                 Ok(v) => v,
                 Err(_) => false,
