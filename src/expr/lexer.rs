@@ -149,6 +149,11 @@ impl Lexer<'_> {
             length += 1;
         }
 
+        if self.peek(length) == '\0' {
+            let val = self.spawn_advance(TokenKind::Unkown, length);
+            return val;
+        }
+
         let val = self.spawn_advance(TokenKind::String, length);
         self.advance();
         val
@@ -242,6 +247,9 @@ mod test {
         let mut l = Lexer::new("'or'");
         let t = l.next();
         assert_eq!("or", l.token_value(&t));
+
+        // unterminated string
+        assert_eq!(TokenKind::Unkown, Lexer::new("' ").next().kind);
     }
 
     #[test]

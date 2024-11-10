@@ -8,7 +8,7 @@ use tui::{
     layout::{Constraint, Layout},
     prelude::Buffer,
     style::Style,
-    widgets::{Block, Borders, Clear, Paragraph, StatefulWidget, Table, TableState, Widget},
+    widgets::{Block, Borders, Clear, Paragraph, StatefulWidget, Table, TableState, Widget, block::Title},
 };
 use tui_input::backend::crossterm::EventHandler;
 use tui_input::Input;
@@ -151,7 +151,8 @@ impl View for ActivityList {
             let p = Paragraph::new(app.activity_list.filter_text_area.value()).block(
                 Block::default()
                     .borders(Borders::ALL)
-                    .title("Filter")
+                    .title(Title::from("Filter"))
+                    .title(Title::from("e.g. type=\"Run\" and distance > 21000 and title ~ 'Marathon'").position(tui::widgets::block::Position::Bottom))
                     .border_style(Style::default().fg(ColorTheme::Dialog.to_color())),
             );
 
