@@ -213,6 +213,7 @@ impl Activities {
                 ("distance".to_string(), Evalue::Number(a.distance)),
                 ("type".to_string(), Evalue::String(a.activity_type.to_string())),
                 ("heartrate".to_string(), Evalue::Number(a.average_heartrate.unwrap_or(0.0))),
+                ("title".to_string(), Evalue::String(a.title.clone())),
             ])) {
                 Ok(v) => v,
                 Err(_) => false,

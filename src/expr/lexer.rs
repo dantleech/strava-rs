@@ -19,6 +19,7 @@ pub enum TokenKind {
     Or,
     And,
     Equal,
+    FuzzyEqual,
     Name,
     Eol,
 }
@@ -70,6 +71,7 @@ impl Lexer<'_> {
                 match c {
                     '"' => self.parse_string(),
                     '\'' => self.parse_string(),
+                    '~' => self.spawn_advance(TokenKind::FuzzyEqual, 1),
                     '=' => self.spawn_advance(TokenKind::Equal, 1),
                     ':' => self.spawn_advance(TokenKind::Colon, 1),
                     '>' => match self.peek(1) {
@@ -212,6 +214,8 @@ mod test {
         assert_eq!(TokenKind::GreaterThan, Lexer::new(">").next().kind);
         assert_eq!(TokenKind::LessThanEqual, Lexer::new("<=").next().kind);
         assert_eq!(TokenKind::LessThan, Lexer::new("<").next().kind);
+        assert_eq!(TokenKind::Equal, Lexer::new("=").next().kind);
+        assert_eq!(TokenKind::FuzzyEqual, Lexer::new("~").next().kind);
     }
 
     #[test]

@@ -58,6 +58,7 @@ impl Parser<'_> {
                 | TokenKind::GreaterThanEqual
                 | TokenKind::And
                 | TokenKind::Or
+                | TokenKind::FuzzyEqual
                 | TokenKind::Equal
                 | TokenKind::LessThanEqual
                 | TokenKind::LessThan => Ok(Expr::Binary(
