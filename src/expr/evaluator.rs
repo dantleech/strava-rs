@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use super::parser::Parser;
+use super::parser::{Parser, Expr};
 
-struct Evaluator<'a, 'b> {
-    parser: Parser<'a>,
-    vars: &'b HashMap<String, Evalue>,
+type Vars = HashMap<String,Evalue>;
+
+struct Evaluator {
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Debug, Clone)]
@@ -23,17 +23,18 @@ impl Evalue {
     }
 }
 
-impl Evaluator<'_, '_> {
-    pub fn new<'a, 'b>(expr: &'a str, vars: &'b HashMap<String, Evalue>) -> Evaluator<'a, 'b> {
-        Evaluator {
-            parser: Parser::new(expr),
-            vars,
-        }
+impl Evaluator {
+    pub fn new() -> Evaluator {
+        Evaluator {  }
     }
 
-    pub fn evaluate(&mut self) -> Result<bool, String> {
-        let expr = self.parser.parse()?;
-        match self.evaluate_expr(expr.clone())? {
+    pub fn parse(&mut self, expr: String) -> Result<Expr, String> {
+        Parser::new(&expr).parse()
+    }
+
+    pub fn parse_and_evaluate(&mut self, expr: &str, vars: &Vars) -> Result<bool, String> {
+        let expr = Parser::new(expr).parse()?;
+        match self.evaluate(expr.clone(), vars)? {
             Evalue::String(_) | Evalue::Number(_) => {
                 Err(format!("expression must evluate to a boolean, got: {:?}", expr).to_string())
             }
@@ -41,12 +42,12 @@ impl Evaluator<'_, '_> {
         }
     }
 
-    fn evaluate_expr(&self, expr: super::parser::Expr) -> Result<Evalue, String> {
+    pub fn evaluate(&self, expr: super::parser::Expr, vars: &Vars) -> Result<Evalue, String> {
         match expr {
             super::parser::Expr::Boolean(b) => Ok(Evalue::Bool(b)),
             super::parser::Expr::Binary(lexpr, op, rexpr) => {
-                let lval = self.evaluate_expr(*lexpr)?;
-                let rval = self.evaluate_expr(*rexpr)?;
+                let lval = self.evaluate(*lexpr, vars)?;
+                let rval = self.evaluate(*rexpr, vars)?;
                 let eval = match op {
                     super::lexer::TokenKind::GreaterThan => Ok(lval > rval),
                     super::lexer::TokenKind::GreaterThanEqual => Ok(lval >= rval),
@@ -60,7 +61,7 @@ impl Evaluator<'_, '_> {
                 Ok(Evalue::Bool(eval))
             }
             super::parser::Expr::Number(n) => Ok(Evalue::Number(n)),
-            super::parser::Expr::Variable(v) => match self.vars.get(&v) {
+            super::parser::Expr::Variable(v) => match vars.get(&v) {
                 Some(v) => Ok(v.clone()),
                 None => Err(format!("Unknown variable `{}`", v)),
             },
@@ -78,13 +79,13 @@ mod test {
 
     #[test]
     fn test_evaluate() {
-        let result = Evaluator::new("false", &HashMap::new()).evaluate();
+        let result = Evaluator::new().parse_and_evaluate("false", &HashMap::new());
         assert_eq!(false, result.unwrap());
-        let result = Evaluator::new("20 > 10", &HashMap::new()).evaluate();
+        let result = Evaluator::new().parse_and_evaluate("20 > 10", &HashMap::new());
 
         assert_eq!(true, result.unwrap());
 
-        let result = Evaluator::new("20 > 10 and false", &HashMap::new()).evaluate();
+        let result = Evaluator::new().parse_and_evaluate("20 > 10 and false", &HashMap::new());
 
         assert_eq!(false, result.unwrap());
     }
@@ -92,11 +93,11 @@ mod test {
     #[test]
     fn test_evaluate_params() {
         let map = HashMap::from([("distance".to_string(), Evalue::Number(10))]);
-        let result = Evaluator::new("distance > 5", &map).evaluate();
+        let result = Evaluator::new().parse_and_evaluate("distance > 5", &map);
         assert_eq!(true, result.unwrap());
-        let result = Evaluator::new("distance < 5", &map).evaluate();
+        let result = Evaluator::new().parse_and_evaluate("distance < 5", &map);
         assert_eq!(false, result.unwrap());
-        let result = Evaluator::new("distance = 10", &map).evaluate();
+        let result = Evaluator::new().parse_and_evaluate("distance = 10", &map);
         assert_eq!(true, result.unwrap());
     }
 }
