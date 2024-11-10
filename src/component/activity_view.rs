@@ -1,7 +1,7 @@
 use tui::{
     layout::{Constraint, Direction, Layout, Margin},
     prelude::Buffer,
-    widgets::{Block, Borders, Widget, Paragraph},
+    widgets::{Block, Borders, Widget},
 };
 
 use crate::{
@@ -78,15 +78,13 @@ impl View for ActivityView {
     fn draw(&mut self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
         let rows = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Length(3), Constraint::Min(1), Constraint::Length(2)].as_ref())
+            .constraints([Constraint::Length(4), Constraint::Length(2)].as_ref())
             .split(area);
 
         if let Some(activity) = &app.activity {
             {
                 let a = Activities::from(activity.clone());
                 activity_list_table(app, &a).render(rows[0], f);
-                let desc = Paragraph::new(activity.description.as_str());
-                desc.render(rows[1], f);
             }
         }
 
@@ -100,7 +98,7 @@ impl View for ActivityView {
                 ]
                 .as_ref(),
             )
-            .split(rows[2]);
+            .split(rows[1]);
         let col1 = Layout::default()
             .direction(Direction::Vertical)
             .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())

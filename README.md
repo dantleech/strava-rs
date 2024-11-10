@@ -6,24 +6,73 @@ Strava TUI written in Rust! This is an experimental TUI for Strava.
 Features:
 
 - List activities in a comparable way
-- Filter activites by name
+- Filter activites by with expressions
 - Sort listed activities
 - Display the route
 - Show laps
 - Race predictions
 - Filter by route similarity ("anchoring")
 
+## Screenshots
+
 ### List activities
 
-![image](https://github.com/dantleech/strava-rs/assets/530801/7187befb-65e2-4fbc-b5b4-8710510c5e1a)
-*Numbers*
+![image](https://github.com/user-attachments/assets/f13ed611-d764-4941-a3df-c95db8636ba7)
 
-### Filter activities
+### Acivity View
 
-![image](https://github.com/dantleech/strava-rs/assets/530801/42a5a2e2-0925-4d1f-a780-e1a5d11b0ab1)
-*Chronological*
+![image](https://github.com/user-attachments/assets/88c9b34a-7cee-409d-9d01-39bd22ef8259)
 
-### Details
+## Key Map
 
-![image](https://github.com/dantleech/strava-rs/assets/530801/633ea4ff-12c8-4ead-817b-80db8efcf61a)
-*Detailed Maps*
+- `q`: **Quit**: quit!
+- `k`: **Up** - select previous activity
+- `j`: **Down** - select next activity
+- `n`: **Next** - (in activity view) next split
+- `p`: **Previous** - (in activity view) previous split
+- `o`: **ToggleSortOrder** - switch between ascending and descending order
+- `u`: **ToggleUnitSystem** - switch between imperial and metric units
+- `s`: **Sort** - show sort dialog
+- `S`: **Rank** - choose ranking
+- `f`: **Filter** - filter (see filter section below)
+- `r`: **Refresh** - reload activities
+- `a`: **Anchor** - show activities with similar routes
+- `+`: **IncreaseTolerance** - incease the anchor tolerance
+- `-`: **DecreaseTolerance** - descrease the ancor tolerance
+- `0`: **ToggleLogView** - toggle log view
+
+## Filter
+
+Press `f` on the activity list view to open the filter input.
+
+### Examples
+
+Show all runs that are of a half marathon distance or more:
+
+```
+type = "Run" and distance > 21000
+```
+
+Show all runs with "Park" in the title:
+
+```
+type = "Run" and title ~ "Park"
+```
+
+### Fields
+
+- `distance`: Distance (in meters)
+- `type`: `Run`, `Ride` etc.
+- `heartrate`: Heart rate in BPM.
+- `title`: Activity title
+- `elevation`: Elevation (in meters)
+- `time`: Time (in seconds, 3600 = 1 hour)
+
+### Operators
+
+- `>`, `<`: Greater than, Less than (e.g. `distance > 21000`)
+- `and`, `or`: Logical operators (e.g. `type = "Run" and time > 0`)
+- `=`: Equal to
+- `~`: String contains
+- `!=`: Not equal to (e.g. `type != "Run"`)
+- `!~`: String does not contain (e.g. `title ~ "Parkrun"`)

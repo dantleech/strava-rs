@@ -1,5 +1,6 @@
 pub mod app;
 pub mod authenticator;
+pub mod expr;
 pub mod client;
 pub mod component;
 pub mod config;
