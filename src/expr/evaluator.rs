@@ -4,7 +4,7 @@ use super::parser::Parser;
 
 struct Evaluator<'a, 'b> {
     parser: Parser<'a>,
-    params: &'b HashMap<String, Evalue>,
+    vars: &'b HashMap<String, Evalue>,
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Debug, Clone)]
@@ -24,10 +24,10 @@ impl Evalue {
 }
 
 impl Evaluator<'_, '_> {
-    pub fn new<'a, 'b>(expr: &'a str, params: &'b HashMap<String, Evalue>) -> Evaluator<'a, 'b> {
+    pub fn new<'a, 'b>(expr: &'a str, vars: &'b HashMap<String, Evalue>) -> Evaluator<'a, 'b> {
         Evaluator {
             parser: Parser::new(expr),
-            params,
+            vars,
         }
     }
 
@@ -60,7 +60,7 @@ impl Evaluator<'_, '_> {
                 Ok(Evalue::Bool(eval))
             }
             super::parser::Expr::Number(n) => Ok(Evalue::Number(n)),
-            super::parser::Expr::Variable(v) => match self.params.get(&v) {
+            super::parser::Expr::Variable(v) => match self.vars.get(&v) {
                 Some(v) => Ok(v.clone()),
                 None => Err(format!("Unknown variable `{}`", v)),
             },
