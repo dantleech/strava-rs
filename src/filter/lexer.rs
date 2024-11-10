@@ -67,6 +67,7 @@ impl Lexer<'_> {
                 }
 
                 match c {
+                    '=' => self.spawn_advance(TokenKind::Equal, 1),
                     ':' => self.spawn_advance(TokenKind::Colon, 1),
                     '>' => match self.peek(1) {
                         '=' => self.spawn_advance(TokenKind::GreaterThanEqual, 2),
