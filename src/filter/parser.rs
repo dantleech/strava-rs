@@ -5,16 +5,10 @@ pub enum Expr {
     Binary(Box<Expr>, TokenKind, Box<Expr>),
     Number(u16),
     Variable(String),
-    Quantity(Box<Expr>, QuantityUnit)
+    Boolean(bool),
 }
 
-#[derive(PartialEq, Eq, Debug, Clone)]
-pub enum QuantityUnit {
-    Miles,
-    Kilometers,
-}
-
-struct Parser<'a> {
+pub struct Parser<'a> {
     lexer: Lexer<'a>,
 }
 
@@ -34,6 +28,8 @@ impl Parser<'_> {
     fn parse_expr(&mut self, precedence: usize) -> Result<(Expr, Token), String> {
         let token = self.lexer.next();
         let mut left: Expr = match token.kind {
+            TokenKind::True => Ok(Expr::Boolean(true)),
+            TokenKind::False => Ok(Expr::Boolean(false)),
             TokenKind::Number => match self.lexer.token_value(&token).parse::<u16>() {
                 Ok(v) => Ok(Expr::Number(v)),
                 Err(_) => Err("Could not parse number".to_string()),
@@ -49,22 +45,6 @@ impl Parser<'_> {
         if next_t.kind == TokenKind::Eol {
             return Ok((left, next_t));
         }
-
-        // suffix parsing
-        let suffix = match &next_t.kind {
-            TokenKind::Name => match self.lexer.token_value(&next_t) {
-                "m" => Some(Expr::Quantity(Box::new(left.clone()), QuantityUnit::Miles)),
-                "km" => Some(Expr::Quantity(Box::new(left.clone()), QuantityUnit::Kilometers)),
-                _ => None,
-            },
-            _ => None,
-        };
-        (next_t, left) = match suffix {
-            Some(suffix) => {
-                (self.lexer.next(), suffix)
-            },
-            None => (next_t, left),
-        };
 
         // infix parsing
         while precedence < self.token_precedence(&next_t) {
@@ -102,11 +82,8 @@ impl Parser<'_> {
             TokenKind::LessThan => 20,
             TokenKind::Equal => 20,
             TokenKind::Contains => 20,
-            TokenKind::Number => 100,
-            TokenKind::Unkown => 100,
-            TokenKind::Colon => 100,
-            TokenKind::Name => 100,
             TokenKind::Eol => 0,
+            _ => 100,
         }
     }
 }
@@ -145,10 +122,6 @@ mod test {
                 )),
             ),
             Parser::new("variable > 20 and 10 < 30").parse().unwrap()
-        );
-        assert_eq!(
-            Expr::Quantity(Box::new(Expr::Number(10)), QuantityUnit::Miles),
-            Parser::new("10m").parse().unwrap()
         );
     }
 }

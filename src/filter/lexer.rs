@@ -5,6 +5,8 @@
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum TokenKind {
+    True,
+    False,
     Number,
     Contains,
     Unkown,
@@ -115,6 +117,8 @@ impl Lexer<'_> {
         }
 
         match &self.expr[self.pos..self.pos + length] {
+            "true" => self.spawn_advance(TokenKind::True, length),
+            "false" => self.spawn_advance(TokenKind::False, length),
             "or" => self.spawn_advance(TokenKind::Or, length),
             "and" => self.spawn_advance(TokenKind::And, length),
             "OR" => self.spawn_advance(TokenKind::Or, length),
