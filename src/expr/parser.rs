@@ -1,3 +1,7 @@
+use std::str::FromStr;
+
+use chrono::NaiveDate;
+
 use super::lexer::{Lexer, Token, TokenKind};
 
 #[derive(PartialEq, Debug, Clone)]
@@ -7,6 +11,7 @@ pub enum Expr {
     Variable(String),
     Boolean(bool),
     String(String),
+    Date(NaiveDate),
 }
 
 pub struct Parser<'a> {
@@ -40,7 +45,14 @@ impl Parser<'_> {
                 let value = self.lexer.token_value(&token);
                 Ok(Expr::Variable(value.to_string()))
             }
-            _ => Err(format!("unknown left token: {:?} at {}", token.kind, token.start)),
+            TokenKind::Date => match NaiveDate::from_str(self.lexer.token_value(&token)) {
+                Ok(d) => Ok(Expr::Date(d)),
+                Err(_) => Err("Could not parse date".to_string()),
+            },
+            _ => Err(format!(
+                "unknown left token: {:?} at {}",
+                token.kind, token.start
+            )),
         }?;
 
         let mut next_t = self.lexer.next();
@@ -127,6 +139,11 @@ mod test {
                 )),
             ),
             Parser::new("variable > 20 and 10 < 30").parse().unwrap()
+        );
+        assert_eq!(Expr::Number(10.0), Parser::new("10").parse().unwrap());
+        assert_eq!(
+            Expr::Date(NaiveDate::from_ymd_opt(2024, 1, 1).unwrap()),
+            Parser::new("2024-01-01").parse().unwrap(),
         );
     }
 }

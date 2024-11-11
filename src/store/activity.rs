@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, fmt::Display};
 
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, NaiveDate};
 use crossterm::event::KeyCode;
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
@@ -216,6 +216,11 @@ impl Activities {
                 ("title".to_string(), Evalue::String(a.title.clone())),
                 ("elevation".to_string(), Evalue::Number(a.total_elevation_gain)),
                 ("time".to_string(), Evalue::Number(a.moving_time as f64)),
+                ("date".to_string(), Evalue::Date(
+                    a.start_date.unwrap_or(
+                        NaiveDateTime::default()
+                    ).try_into().unwrap()
+                )),
             ])) {
                 Ok(v) => v,
                 Err(_) => false,

@@ -7,6 +7,7 @@
 pub enum TokenKind {
     True,
     String,
+    Date,
     False,
     Number,
     Contains,
@@ -63,7 +64,7 @@ impl Lexer<'_> {
             '\0' => self.spawn_token(TokenKind::Eol, self.pos),
             _ => {
                 if is_number(c) {
-                    return self.parse_number();
+                    return self.parse_number_or_date();
                 }
 
                 if is_name(c) {
@@ -114,13 +115,24 @@ impl Lexer<'_> {
         }
     }
 
-    fn parse_number(&mut self) -> Token {
+    fn parse_number_or_date(&mut self) -> Token {
+        if self.peek(4) == '-' {
+            return self.parse_date();
+        }
         let start = self.pos;
-        while is_number(self.current()) {
+        while is_number(self.current()) || self.current() == '-' {
             self.advance()
         }
 
         self.spawn_token(TokenKind::Number, start)
+    }
+
+    fn parse_date(&mut self) -> Token {
+        let start = self.pos;
+        while is_number(self.current()) || self.current() == '-' {
+            self.advance()
+        }
+        self.spawn_token(TokenKind::Date, start)
     }
 
     fn parse_name(&mut self) -> Token {
@@ -250,6 +262,11 @@ mod test {
 
         // unterminated string
         assert_eq!(TokenKind::Unkown, Lexer::new("' ").next().kind);
+    }
+
+    #[test]
+    pub fn lex_date() {
+        assert_eq!(TokenKind::Date, Lexer::new("2024-01-01").next().kind);
     }
 
     #[test]

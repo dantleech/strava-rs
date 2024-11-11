@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use super::parser::{Expr, Parser};
+use chrono::NaiveDate;
+
+use super::{parser::{Expr, Parser}, lexer::TokenKind};
 
 pub type Vars = HashMap<String, Evalue>;
 
@@ -11,6 +13,7 @@ pub enum Evalue {
     String(String),
     Number(f64),
     Bool(bool),
+    Date(NaiveDate),
 }
 impl Evalue {
     fn to_bool(&self) -> bool {
@@ -18,11 +21,13 @@ impl Evalue {
             Evalue::String(v) => v != "" && v != "0",
             Evalue::Number(n) => *n != 0.0,
             Evalue::Bool(b) => *b,
+            Evalue::Date(_) => true,
         }
     }
 
     fn to_string(&self) -> String {
         match self {
+            Evalue::Date(d) => d.to_string(),
             Evalue::String(v) => v.clone(),
             Evalue::Number(n) => format!("{}", *n),
             Evalue::Bool(b) => match b {
@@ -49,7 +54,7 @@ impl Evaluator {
 
     pub fn evaluate(&self, expr: &Expr, vars: &Vars) -> Result<bool, String> {
         match self.evaluate_expr(&expr, vars)? {
-            Evalue::String(_) | Evalue::Number(_) => {
+            Evalue::Date(_) | Evalue::String(_) | Evalue::Number(_) => {
                 Err(format!("expression must evluate to a boolean, got: {:?}", expr).to_string())
             }
             Evalue::Bool(b) => Ok(b),
@@ -58,27 +63,28 @@ impl Evaluator {
 
     fn evaluate_expr(&self, expr: &super::parser::Expr, vars: &Vars) -> Result<Evalue, String> {
         match expr {
-            super::parser::Expr::Boolean(b) => Ok(Evalue::Bool(*b)),
-            super::parser::Expr::String(s) => Ok(Evalue::String(s.clone())),
-            super::parser::Expr::Binary(lexpr, op, rexpr) => {
+            Expr::Boolean(b) => Ok(Evalue::Bool(*b)),
+            Expr::String(s) => Ok(Evalue::String(s.clone())),
+            Expr::Date(s) => Ok(Evalue::Date(s.clone())),
+            Expr::Binary(lexpr, op, rexpr) => {
                 let lval = self.evaluate_expr(lexpr, vars)?;
                 let rval = self.evaluate_expr(rexpr, vars)?;
                 let eval = match op {
-                    super::lexer::TokenKind::GreaterThan => Ok(lval > rval),
-                    super::lexer::TokenKind::GreaterThanEqual => Ok(lval >= rval),
-                    super::lexer::TokenKind::LessThanEqual => Ok(lval <= rval),
-                    super::lexer::TokenKind::LessThan => Ok(lval < rval),
-                    super::lexer::TokenKind::Equal => Ok(lval == rval),
-                    super::lexer::TokenKind::FuzzyEqual => Ok(lval.to_string().contains(rval.to_string().as_str())),
-                    super::lexer::TokenKind::NotEqual => Ok(lval != rval),
-                    super::lexer::TokenKind::NotFuzzyEqual => Ok(!lval.to_string().contains(rval.to_string().as_str())),
-                    super::lexer::TokenKind::Or => Ok(lval.to_bool() || rval.to_bool()),
-                    super::lexer::TokenKind::And => Ok(lval.to_bool() && rval.to_bool()),
+                    TokenKind::GreaterThan => Ok(lval > rval),
+                    TokenKind::GreaterThanEqual => Ok(lval >= rval),
+                    TokenKind::LessThanEqual => Ok(lval <= rval),
+                    TokenKind::LessThan => Ok(lval < rval),
+                    TokenKind::Equal => Ok(lval == rval),
+                    TokenKind::FuzzyEqual => Ok(lval.to_string().contains(rval.to_string().as_str())),
+                    TokenKind::NotEqual => Ok(lval != rval),
+                    TokenKind::NotFuzzyEqual => Ok(!lval.to_string().contains(rval.to_string().as_str())),
+                    TokenKind::Or => Ok(lval.to_bool() || rval.to_bool()),
+                    TokenKind::And => Ok(lval.to_bool() && rval.to_bool()),
                     _ => Err(format!("unknown operator: {:?}", op)),
                 }?;
                 Ok(Evalue::Bool(eval))
             }
-            super::parser::Expr::Number(n) => Ok(Evalue::Number(*n)),
+            Expr::Number(n) => Ok(Evalue::Number(*n)),
             super::parser::Expr::Variable(v) => match vars.get(v) {
                 Some(v) => Ok(v.clone()),
                 None => Err(format!("Unknown variable `{}`", v)),
@@ -123,6 +129,10 @@ mod test {
         let result = Evaluator::new().parse_and_evaluate("type !~ 'Rup'", &map);
         assert_eq!(true, result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("type != 'Run'", &map);
+        assert_eq!(false, result.unwrap());
+        let result = Evaluator::new().parse_and_evaluate("2024-01-06 > 2020-01-06", &map);
+        assert_eq!(true, result.unwrap());
+        let result = Evaluator::new().parse_and_evaluate("2024-01-06 < 2020-01-06", &map);
         assert_eq!(false, result.unwrap());
     }
 }

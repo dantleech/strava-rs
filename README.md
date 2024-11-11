@@ -67,6 +67,7 @@ type = "Run" and title ~ "Park"
 - `title`: Activity title
 - `elevation`: Elevation (in meters)
 - `time`: Time (in seconds, 3600 = 1 hour)
+- `date`: Date (YYYY-MM-DD)
 
 ### Operators
 
