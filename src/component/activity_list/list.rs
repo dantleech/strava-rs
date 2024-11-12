@@ -46,7 +46,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
                 app.unit_formatter.pace(activity.moving_time, activity.distance),
             ),
             Cell::from(
-                app.unit_formatter.speed(activity.moving_time, activity.distance),
+                app.unit_formatter.speed(activity.meters_per_hour()),
             ),
             Cell::from(
                 activity

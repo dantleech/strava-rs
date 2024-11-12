@@ -221,6 +221,7 @@ impl Activities {
                         NaiveDateTime::default()
                     ).try_into().unwrap()
                 )),
+                ("speed".to_string(), Evalue::Number(a.meters_per_hour())),
             ])) {
                 Ok(v) => v,
                 Err(_) => false,

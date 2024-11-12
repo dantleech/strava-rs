@@ -68,6 +68,7 @@ type = "Run" and title ~ "Park"
 - `elevation`: Elevation (in meters)
 - `time`: Time (in seconds, 3600 = 1 hour)
 - `date`: Date (YYYY-MM-DD)
+- `speed`: Speed (meters per hour, 1000 = 1kmph)
 
 ### Operators
 
