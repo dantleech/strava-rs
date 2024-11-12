@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-## master
+## 0.0.6
 
 Bug fixes:
 
@@ -20,6 +20,10 @@ Features:
 - Log view
 - Filter DSL
 - Page up/down on activity list
+
+Refactoring:
+
+- Upgrade dependencies
 
 ## 0.0.5
 
