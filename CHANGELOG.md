@@ -11,10 +11,15 @@ Improvements:
 
 - Refactored views to use traits.
 - Show only shortcuts relevant to current view.
+- Show description
+- Offline support
+- Show speed
 
 Features:
 
 - Log view
+- Filter DSL
+- Page up/down on activity list
 
 ## 0.0.5
 
