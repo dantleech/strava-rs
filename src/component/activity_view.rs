@@ -78,7 +78,7 @@ impl View for ActivityView {
     fn draw(&mut self, app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
         let rows = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Length(4), Constraint::Length(2)].as_ref())
+            .constraints([Constraint::Length(4), Constraint::Min(2)].as_ref())
             .split(area);
 
         if let Some(activity) = &app.activity {
@@ -112,7 +112,7 @@ impl View for ActivityView {
         race_predictor::draw(
             app,
             f,
-            col1[0].inner(&Margin {
+            col1[0].inner(Margin {
                 vertical: 2,
                 horizontal: 2,
             }),
@@ -124,7 +124,7 @@ impl View for ActivityView {
         stats::draw(
             app,
             f,
-            col1[1].inner(&Margin {
+            col1[1].inner(Margin {
                 vertical: 1,
                 horizontal: 1,
             }),
@@ -135,7 +135,7 @@ impl View for ActivityView {
         polyline::draw(
             app,
             f,
-            cols[1].inner(&Margin {
+            cols[1].inner(Margin {
                 vertical: 1,
                 horizontal: 1,
             }),
@@ -145,7 +145,7 @@ impl View for ActivityView {
         splits::draw(
             app,
             f,
-            cols[2].inner(&Margin {
+            cols[2].inner(Margin {
                 vertical: 1,
                 horizontal: 1,
             }),

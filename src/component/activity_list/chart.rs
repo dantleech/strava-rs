@@ -1,11 +1,6 @@
 use chrono::NaiveDateTime;
 use tui::{
-    layout::Constraint,
-    style::{Color, Style},
-    symbols::Marker,
-    text::Span,
-    widgets::{Axis, Block, Borders, Chart, Dataset, GraphType, Widget},
-    prelude::Buffer,
+    layout::Constraint, prelude::Buffer, style::{Color, Style}, symbols::Marker, text::{Line, Span}, widgets::{Axis, Block, Borders, Chart, Dataset, GraphType, Widget}
 };
 
 use crate::{
@@ -92,12 +87,11 @@ pub fn draw(
                 .labels(
                     xaxis
                         .map(|p| {
-                            Span::from(match NaiveDateTime::from_timestamp_millis(p * 1000) {
+                            Line::from(match NaiveDateTime::from_timestamp_millis(p * 1000) {
                                 Some(t) => t.format("%Y-%m-%d").to_string(),
                                 None => "n/a".to_string(),
                             })
                         })
-                        .collect(),
                 ),
         )
         .y_axis(
@@ -111,7 +105,6 @@ pub fn draw(
                 .labels(
                     yaxis
                         .map(|p| Span::from(app.unit_formatter.pace(3600, p as f64)))
-                        .collect(),
                 ),
         );
     chart.render(area, f);

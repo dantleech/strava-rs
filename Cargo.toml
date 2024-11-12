@@ -24,9 +24,9 @@ polyline = "0.10.1"
 geo-types = "0.7.10"
 geoutils = "0.5.1"
 strum = { version = "0.25.0", features = ["derive"] }
-tui = { package = "ratatui", version = "0.25.0", features = ["all-widgets"]}
+tui = { package = "ratatui", version = "0.28", features = ["all-widgets"]}
 tui-input = "0.8.0"
 confy = "0.5.1"
 hyper-rustls = "0.24.1"
 sqlx = { version = "0.7.1", features = ["sqlx-sqlite", "sqlite", "runtime-tokio", "chrono"] }
-tui-logger = { version = "0.10.0", features = [] }
+tui-logger = { version = "0.13.0", features = [] }

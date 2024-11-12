@@ -7,9 +7,7 @@ use std::{
 use log::info;
 use tokio::sync::mpsc::{Receiver, Sender};
 use tui::{
-    backend::{Backend, CrosstermBackend},
-    widgets::TableState,
-    Terminal,
+    backend::{Backend, CrosstermBackend}, layout::Rect, widgets::TableState, Terminal
 };
 use tui_input::Input;
 use tui_logger::TuiWidgetState;
@@ -306,10 +304,10 @@ impl App<'_> {
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
         view: &mut dyn View,
     ) -> Result<(), anyhow::Error> {
-        let area = terminal.size().expect("Could not determine terminal size'");
+        let size = terminal.size().expect("Could not determine terminal size'");
         terminal.autoresize()?;
         let buffer = terminal.current_buffer_mut();
-        ui::draw(self, buffer, area, view);
+        ui::draw(self, buffer, Rect { x: 0, y: 0, width: size.width, height: size.height }, view);
 
         match view.cursor_position() {
             None => terminal.hide_cursor()?,

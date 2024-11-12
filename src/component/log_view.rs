@@ -33,9 +33,9 @@ impl View for LogView {
         match key.strava_event {
             StravaEvent::Quit => app.quit = true,
             StravaEvent::ToggleLogView => app.switch_to_previous(),
-            StravaEvent::Down => app.log_view_state.transition(&tui_logger::TuiWidgetEvent::NextPageKey),
-            StravaEvent::Up => app.log_view_state.transition(&tui_logger::TuiWidgetEvent::PrevPageKey),
-            StravaEvent::Enter => app.log_view_state.transition(&tui_logger::TuiWidgetEvent::EscapeKey),
+            StravaEvent::Down => app.log_view_state.transition(tui_logger::TuiWidgetEvent::NextPageKey),
+            StravaEvent::Up => app.log_view_state.transition(tui_logger::TuiWidgetEvent::PrevPageKey),
+            StravaEvent::Enter => app.log_view_state.transition(tui_logger::TuiWidgetEvent::EscapeKey),
             _ => (),
         }
     }
