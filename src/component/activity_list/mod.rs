@@ -161,7 +161,7 @@ impl View for ActivityList {
             );
 
             self.cursor_pos = Some((
-                1 + rect.x + ((app.activity_list.filter_text_area.visual_cursor() as u16).max(scroll) - scroll) as u16,
+                1 + rect.x + ((app.activity_list.filter_text_area.visual_cursor() as u16).max(scroll) - scroll),
                 rect.y + 1,
             ));
 

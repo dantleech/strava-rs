@@ -54,13 +54,14 @@ pub struct Lexer<'a> {
 }
 
 impl Lexer<'_> {
-    pub fn new<'a>(expr: &'a str) -> Lexer<'_> {
+    pub fn new(expr: &str) -> Lexer<'_> {
         Lexer { expr, pos: 0 }
     }
     pub fn next(&mut self) -> Token {
         self.skip_whitespace();
         let c = self.current();
-        let t = match c {
+        
+        match c {
             '\0' => self.spawn_token(TokenKind::Eol, self.pos),
             _ => {
                 if is_number(c) {
@@ -93,8 +94,7 @@ impl Lexer<'_> {
                     _ => self.spawn_advance(TokenKind::Unkown, 1),
                 }
             }
-        };
-        t
+        }
     }
 
     fn advance(&mut self) {
@@ -102,17 +102,11 @@ impl Lexer<'_> {
     }
 
     fn current(&self) -> char {
-        match self.expr.chars().nth(self.pos) {
-            Some(s) => s,
-            None => '\0',
-        }
+        self.expr.chars().nth(self.pos).unwrap_or('\0')
     }
 
     fn peek(&self, amount: usize) -> char {
-        match self.expr.chars().nth(self.pos + amount) {
-            Some(s) => s,
-            None => '\0',
-        }
+        self.expr.chars().nth(self.pos + amount).unwrap_or('\0')
     }
 
     fn parse_number_or_date(&mut self) -> Token {
@@ -196,7 +190,7 @@ impl Lexer<'_> {
             length,
         };
         self.pos += length;
-        return t;
+        t
     }
 
 }

@@ -21,7 +21,6 @@ pub fn draw(
     f: &mut Buffer,
     area: tui::layout::Rect,
 ) {
-    if app.activity.is_none() {}
     let activity = app.activity.clone().unwrap();
 
     if activity.summary_polyline.is_none() {

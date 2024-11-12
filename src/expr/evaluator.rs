@@ -18,7 +18,7 @@ pub enum Evalue {
 impl Evalue {
     fn to_bool(&self) -> bool {
         match self {
-            Evalue::String(v) => v != "" && v != "0",
+            Evalue::String(v) => !v.is_empty() && v != "0",
             Evalue::Number(n) => *n != 0.0,
             Evalue::Bool(b) => *b,
             Evalue::Date(_) => true,
@@ -38,6 +38,12 @@ impl Evalue {
     }
 }
 
+impl Default for Evaluator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Evaluator {
     pub fn new() -> Evaluator {
         Evaluator {}
@@ -53,7 +59,7 @@ impl Evaluator {
     }
 
     pub fn evaluate(&self, expr: &Expr, vars: &Vars) -> Result<bool, String> {
-        match self.evaluate_expr(&expr, vars)? {
+        match self.evaluate_expr(expr, vars)? {
             Evalue::Number(n) => {
                 Err(format!("expression must evaluate to a boolean, got {:?}: {:?}", expr, n).to_string())
             }
@@ -68,7 +74,7 @@ impl Evaluator {
         match expr {
             Expr::Boolean(b) => Ok(Evalue::Bool(*b)),
             Expr::String(s) => Ok(Evalue::String(s.clone())),
-            Expr::Date(s) => Ok(Evalue::Date(s.clone())),
+            Expr::Date(s) => Ok(Evalue::Date(*s)),
             Expr::Quantity(expr, unit) => {
                 let val = match self.evaluate_expr(expr, vars)? {
                     Evalue::Number(n) => Ok(n),
@@ -110,14 +116,14 @@ mod test {
     #[test]
     fn test_evaluate() {
         let result = Evaluator::new().parse_and_evaluate("false", &HashMap::new());
-        assert_eq!(false, result.unwrap());
+        assert!(!result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("20 > 10", &HashMap::new());
 
-        assert_eq!(true, result.unwrap());
+        assert!(result.unwrap());
 
         let result = Evaluator::new().parse_and_evaluate("20 > 10 and false", &HashMap::new());
 
-        assert_eq!(false, result.unwrap());
+        assert!(!result.unwrap());
     }
 
     #[test]
@@ -127,26 +133,26 @@ mod test {
             ("type".to_string(), Evalue::String("Run".to_string())),
         ]);
         let result = Evaluator::new().parse_and_evaluate("distance > 5", &map);
-        assert_eq!(true, result.unwrap());
+        assert!(result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("distance < 5", &map);
-        assert_eq!(false, result.unwrap());
+        assert!(!result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("distance = 10", &map);
-        assert_eq!(true, result.unwrap());
+        assert!(result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("type = 'Run'", &map);
-        assert_eq!(true, result.unwrap());
+        assert!(result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("type ~ 'Ru'", &map);
-        assert_eq!(true, result.unwrap());
+        assert!(result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("type !~ 'Rup'", &map);
-        assert_eq!(true, result.unwrap());
+        assert!(result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("type != 'Run'", &map);
-        assert_eq!(false, result.unwrap());
+        assert!(!result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("2024-01-06 > 2020-01-06", &map);
-        assert_eq!(true, result.unwrap());
+        assert!(result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("2024-01-06 < 2020-01-06", &map);
-        assert_eq!(false, result.unwrap());
+        assert!(!result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("1kmph = 1000", &map);
-        assert_eq!(true, result.unwrap());
+        assert!(result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("1mph > 1609 and 1mph < 1610", &map);
-        assert_eq!(true, result.unwrap());
+        assert!(result.unwrap());
     }
 }

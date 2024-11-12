@@ -48,7 +48,7 @@ pub struct Parser<'a> {
 }
 
 impl Parser<'_> {
-    pub fn new<'a>(expr: &'a str) -> Parser<'a> {
+    pub fn new(expr: &str) -> Parser<'_> {
         let lexer = Lexer::new(expr);
         Parser { lexer }
     }
@@ -91,7 +91,7 @@ impl Parser<'_> {
 
         // suffix
         if next_t.kind == TokenKind::Name {
-            left = Expr::Quantity(Box::new(left), QuantityUnit::try_from(self.lexer.token_value(&next_t)).unwrap());
+            left = Expr::Quantity(Box::new(left), QuantityUnit::from(self.lexer.token_value(&next_t)));
             next_t = self.lexer.next();
             if next_t.kind == TokenKind::Eol {
                 return Ok((left, next_t));

@@ -97,6 +97,12 @@ impl Iterator for Activities {
     }
 }
 
+impl Default for Activities {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Activities {
     pub fn new() -> Activities {
         Self {
@@ -209,7 +215,7 @@ impl Activities {
     pub(crate) fn by_expr(&self, evaluator: &Evaluator, expr: &Expr) -> Activities {
         self.activities.clone()
             .into_iter()
-            .filter(|a| match evaluator.evaluate(expr, &Vars::from([
+            .filter(|a| evaluator.evaluate(expr, &Vars::from([
                 ("distance".to_string(), Evalue::Number(a.distance)),
                 ("type".to_string(), Evalue::String(a.activity_type.to_string())),
                 ("heartrate".to_string(), Evalue::Number(a.average_heartrate.unwrap_or(0.0))),
@@ -217,15 +223,10 @@ impl Activities {
                 ("elevation".to_string(), Evalue::Number(a.total_elevation_gain)),
                 ("time".to_string(), Evalue::Number(a.moving_time as f64)),
                 ("date".to_string(), Evalue::Date(
-                    a.start_date.unwrap_or(
-                        NaiveDateTime::default()
-                    ).try_into().unwrap()
+                    a.start_date.unwrap_or_default().into()
                 )),
                 ("speed".to_string(), Evalue::Number(a.meters_per_hour())),
-            ])) {
-                Ok(v) => v,
-                Err(_) => false,
-            })
+            ])).unwrap_or_default())
             .collect()
     }
 }
