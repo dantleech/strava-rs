@@ -35,13 +35,16 @@ impl ActivityConverter<'_> {
             "#
         ).fetch_all(self.pool).await?;
 
+        self.logger.info(format!("Converting activities")).await;
+        let mut i = 0;
         for raw_activity in raw_activities {
             let listed: client::Activity =
                 serde_json::from_str(match &raw_activity.activity {
                     Some(a) => &a.as_str(),
                     None => raw_activity.listed.as_str()
                 }).expect("Could not decode JSON");
-            self.logger.info(format!("Converting activity {}", listed.name)).await;
+            if i % 10 == 0 { self.logger.info(format!("Converting activity {}", listed.name)).await;}
+            i = i + 1;
             let activity = Activity {
                 id: listed.id,
                 title: listed.name.clone(),

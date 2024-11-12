@@ -31,7 +31,7 @@ impl View for LogView {
     }
     fn handle(&mut self, app: &mut crate::app::App, key: crate::event::keymap::MappedKey) {
         match key.strava_event {
-            StravaEvent::Quit => app.quit = true,
+            StravaEvent::Quit => app.switch_to_previous(),
             StravaEvent::ToggleLogView => app.switch_to_previous(),
             StravaEvent::Down => app.log_view_state.transition(tui_logger::TuiWidgetEvent::NextPageKey),
             StravaEvent::Up => app.log_view_state.transition(tui_logger::TuiWidgetEvent::PrevPageKey),
