@@ -70,6 +70,11 @@ type = "Run" and title ~ "Park"
 - `date`: Date (YYYY-MM-DD)
 - `speed`: Speed (meters per hour, 1000 = 1kmph)
 
+### Values
+
+- `kmph`: Kilometers per hour e.g. `speed > 10kmph`
+- `mph`: Miles per hour e.g. `speed > 10mph`
+
 ### Operators
 
 - `>`, `<`: Greater than, Less than (e.g. `distance > 21000`)

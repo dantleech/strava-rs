@@ -54,6 +54,9 @@ impl Evaluator {
 
     pub fn evaluate(&self, expr: &Expr, vars: &Vars) -> Result<bool, String> {
         match self.evaluate_expr(&expr, vars)? {
+            Evalue::Number(n) => {
+                Err(format!("expression must evluate to a boolean, got {:?}: {:?}", expr, n).to_string())
+            }
             Evalue::Date(_) | Evalue::String(_) | Evalue::Number(_) => {
                 Err(format!("expression must evluate to a boolean, got: {:?}", expr).to_string())
             }
@@ -66,7 +69,13 @@ impl Evaluator {
             Expr::Boolean(b) => Ok(Evalue::Bool(*b)),
             Expr::String(s) => Ok(Evalue::String(s.clone())),
             Expr::Date(s) => Ok(Evalue::Date(s.clone())),
-            Expr::Quantity(q, u) => Ok(Evalue::Number(*q)),
+            Expr::Quantity(expr, unit) => {
+                let val = match self.evaluate_expr(expr, vars)? {
+                    Evalue::Number(n) => Ok(n),
+                    _ =>  Err("Value must be numeric"),
+                }?;
+                Ok(Evalue::Number(unit.convert(val)))
+            }
             Expr::Binary(lexpr, op, rexpr) => {
                 let lval = self.evaluate_expr(lexpr, vars)?;
                 let rval = self.evaluate_expr(rexpr, vars)?;
@@ -135,5 +144,9 @@ mod test {
         assert_eq!(true, result.unwrap());
         let result = Evaluator::new().parse_and_evaluate("2024-01-06 < 2020-01-06", &map);
         assert_eq!(false, result.unwrap());
+        let result = Evaluator::new().parse_and_evaluate("1kmph = 1000", &map);
+        assert_eq!(true, result.unwrap());
+        let result = Evaluator::new().parse_and_evaluate("1mph > 1609 and 1mph < 1610", &map);
+        assert_eq!(true, result.unwrap());
     }
 }

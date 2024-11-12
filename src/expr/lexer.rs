@@ -252,6 +252,7 @@ mod test {
         assert_eq!(TokenKind::And, Lexer::new("and").next().kind);
         assert_eq!(TokenKind::Or, Lexer::new("OR").next().kind);
         assert_eq!(TokenKind::And, Lexer::new("AND").next().kind);
+        assert_eq!(TokenKind::Name, Lexer::new("kmph").next().kind);
     }
 
     #[test]

@@ -12,13 +12,31 @@ pub enum Expr {
     Boolean(bool),
     String(String),
     Date(NaiveDate),
-    Quantity(f64, QuantityUnit),
+    Quantity(Box<Expr>, QuantityUnit),
 }
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum QuantityUnit {
     Kmph,
     Mph,
+}
+impl QuantityUnit {
+    pub(crate) fn convert(&self, val: f64) -> f64 {
+        match self {
+            QuantityUnit::Kmph => val * 1000.0,
+            QuantityUnit::Mph => (val * 1.609344) * 1000.0,
+        }
+    }
+}
+
+impl From<&str> for QuantityUnit {
+    fn from(value: &str) -> Self {
+        match value {
+            "mph" => Self::Mph,
+            "kmph" => Self::Kmph,
+            _ => Self::Kmph,
+        }
+    }
 }
 
 pub struct Parser<'a> {
@@ -66,6 +84,16 @@ impl Parser<'_> {
         if next_t.kind == TokenKind::Eol {
             return Ok((left, next_t));
         }
+
+        // suffix
+        if next_t.kind == TokenKind::Name {
+            left = Expr::Quantity(Box::new(left), QuantityUnit::try_from(self.lexer.token_value(&next_t)).unwrap());
+            next_t = self.lexer.next();
+            if next_t.kind == TokenKind::Eol {
+                return Ok((left, next_t));
+            }
+        }
+
 
         // infix parsing
         while precedence < self.token_precedence(&next_t) {
@@ -157,6 +185,9 @@ mod test {
 
     #[test]
     fn parse_expression_quantity() {
-        assert_eq!(Expr::Quantity(10.2, QuantityUnit::Kmph), Parser::new("10.2kmph").parse().unwrap());
+        assert_eq!(Expr::Quantity(
+            Box::new(Expr::Number(10.2)),
+            QuantityUnit::Kmph
+        ), Parser::new("10.2kmph").parse().unwrap());
     }
 }
