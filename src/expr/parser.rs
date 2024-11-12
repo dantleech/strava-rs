@@ -116,6 +116,7 @@ mod test {
             Parser::new("distance").parse().unwrap()
         );
         assert_eq!(Expr::Number(10.0), Parser::new("10").parse().unwrap());
+        assert_eq!(Expr::Number(10.2), Parser::new("10.2").parse().unwrap());
         assert_eq!(
             Expr::Binary(
                 Box::new(Expr::Number(10.0)),

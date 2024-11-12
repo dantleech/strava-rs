@@ -120,7 +120,7 @@ impl Lexer<'_> {
             return self.parse_date();
         }
         let start = self.pos;
-        while is_number(self.current()) || self.current() == '-' {
+        while is_number(self.current()) || self.current() == '.' {
             self.advance()
         }
 
@@ -206,10 +206,12 @@ mod test {
     use super::*;
 
     #[test]
-    pub fn lex_int() {
+    pub fn lex_number() {
         assert_eq!(TokenKind::Number, Lexer::new("10").next().kind);
         assert_eq!(2, Lexer::new("10").next().length);
         assert_eq!(0, Lexer::new("10").next().start);
+        assert_eq!(0, Lexer::new("10.1").next().start);
+        assert_eq!(4, Lexer::new("10.1").next().length);
     }
 
     #[test]
