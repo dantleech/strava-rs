@@ -94,10 +94,10 @@ impl UnitFormatter {
         let kmph = meters_per_hour / 1000.0;
         match self.system {
             UnitSystem::Metric => {
-                format!("{:.2}km/h", kmph)
+                format!("{:.2}kmph", kmph)
             }
             UnitSystem::Imperial => {
-                format!("{:.2}m/h", kmph * 0.621371)
+                format!("{:.2}mph", kmph * 0.621371)
             }
         }
     }
