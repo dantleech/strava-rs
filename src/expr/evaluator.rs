@@ -66,6 +66,7 @@ impl Evaluator {
             Expr::Boolean(b) => Ok(Evalue::Bool(*b)),
             Expr::String(s) => Ok(Evalue::String(s.clone())),
             Expr::Date(s) => Ok(Evalue::Date(s.clone())),
+            Expr::Quantity(q, u) => Ok(Evalue::Number(*q)),
             Expr::Binary(lexpr, op, rexpr) => {
                 let lval = self.evaluate_expr(lexpr, vars)?;
                 let rval = self.evaluate_expr(rexpr, vars)?;

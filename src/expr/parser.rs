@@ -12,6 +12,13 @@ pub enum Expr {
     Boolean(bool),
     String(String),
     Date(NaiveDate),
+    Quantity(f64, QuantityUnit),
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub enum QuantityUnit {
+    Kmph,
+    Mph,
 }
 
 pub struct Parser<'a> {
@@ -146,5 +153,10 @@ mod test {
             Expr::Date(NaiveDate::from_ymd_opt(2024, 1, 1).unwrap()),
             Parser::new("2024-01-01").parse().unwrap(),
         );
+    }
+
+    #[test]
+    fn parse_expression_quantity() {
+        assert_eq!(Expr::Quantity(10.2, QuantityUnit::Kmph), Parser::new("10.2kmph").parse().unwrap());
     }
 }
