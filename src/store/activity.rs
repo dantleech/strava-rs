@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, fmt::Display};
 
-use chrono::{NaiveDateTime, NaiveDate};
+use chrono::NaiveDateTime;
 use crossterm::event::KeyCode;
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};

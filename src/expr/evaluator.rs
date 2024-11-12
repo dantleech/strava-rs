@@ -57,7 +57,7 @@ impl Evaluator {
             Evalue::Number(n) => {
                 Err(format!("expression must evluate to a boolean, got {:?}: {:?}", expr, n).to_string())
             }
-            Evalue::Date(_) | Evalue::String(_) | Evalue::Number(_) => {
+            Evalue::Date(_) | Evalue::String(_) => {
                 Err(format!("expression must evluate to a boolean, got: {:?}", expr).to_string())
             }
             Evalue::Bool(b) => Ok(b),
