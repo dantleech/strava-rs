@@ -28,6 +28,8 @@ Features:
 - `q`: **Quit**: quit!
 - `k`: **Up** - select previous activity
 - `j`: **Down** - select next activity
+- `K`: **PageUp** - select previous activity
+- `J`: **PageDown** - select next activity
 - `n`: **Next** - (in activity view) next split
 - `p`: **Previous** - (in activity view) previous split
 - `o`: **ToggleSortOrder** - switch between ascending and descending order

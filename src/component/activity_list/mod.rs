@@ -86,8 +86,10 @@ impl View for ActivityList {
                 };
                 app.send(InputEvent::Reload);
             }
-            StravaEvent::Down => app.next_activity(),
             StravaEvent::Up => app.previous_activity(),
+            StravaEvent::Down => app.next_activity(),
+            StravaEvent::PageUp => app.page_up(),
+            StravaEvent::PageDown => app.page_down(),
             StravaEvent::Filter => toggle_filter(app),
             StravaEvent::Sort => toggle_sort(app),
             StravaEvent::Rank => toggle_rank(app),

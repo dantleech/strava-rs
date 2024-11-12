@@ -12,6 +12,8 @@ impl KeyMap {
         map.insert(KeyCode::Char('q'), StravaEvent::Quit);
         map.insert(KeyCode::Char('k'), StravaEvent::Up);
         map.insert(KeyCode::Char('j'), StravaEvent::Down);
+        map.insert(KeyCode::Char('K'), StravaEvent::PageUp);
+        map.insert(KeyCode::Char('J'), StravaEvent::PageDown);
         map.insert(KeyCode::Char('n'), StravaEvent::Next);
         map.insert(KeyCode::Char('p'), StravaEvent::Previous);
         map.insert(KeyCode::Char('o'), StravaEvent::ToggleSortOrder);
@@ -78,6 +80,8 @@ pub enum StravaEvent {
     Quit,
     Next,
     Previous,
+    PageDown,
+    PageUp,
 }
 impl StravaEvent {
     pub fn describe(se: &StravaEvent) -> &'static str {
@@ -92,6 +96,8 @@ impl StravaEvent {
             StravaEvent::Down => "down",
             StravaEvent::Up => "up",
             StravaEvent::Enter => "enter",
+            StravaEvent::PageUp => "page up",
+            StravaEvent::PageDown => "page down",
             StravaEvent::Escape => "back",
             StravaEvent::None => "none",
             StravaEvent::IncreaseTolerance => "tolerance++",

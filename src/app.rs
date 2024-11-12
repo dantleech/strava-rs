@@ -299,6 +299,26 @@ impl App<'_> {
         }
     }
 
+    pub(crate) fn page_up(&mut self) {
+        let state = self.activity_list.table_state();
+        state.select(Some(state.selected().unwrap_or(0).saturating_sub(10)));
+        if let Some(selected) = self.activity_list.table_state().selected() {
+            if let Some(a) = self.activities.get(selected) {
+                self.activity = Some(a.clone());
+            }
+        }
+    }
+
+    pub(crate) fn page_down(&mut self) {
+        let state = self.activity_list.table_state();
+        state.select(Some(state.selected().unwrap_or(0) + 10));
+        if let Some(selected) = self.activity_list.table_state().selected() {
+            if let Some(a) = self.activities.get(selected) {
+                self.activity = Some(a.clone());
+            }
+        }
+    }
+
     fn render(
         &mut self,
         terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
