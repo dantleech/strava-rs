@@ -61,18 +61,18 @@ pub fn draw(
             ]),
         );
     }
-    Table::new(rows)
+    Table::new(rows, &[
+            Constraint::Min(3),
+            Constraint::Percentage(33),
+            Constraint::Percentage(33),
+        ])
         .header(
             Row::new(header)
                 .height(1)
                 .bottom_margin(0)
                 .style(Style::default()),
 
-        ).widths(&[
-            Constraint::Min(3),
-            Constraint::Percentage(33),
-            Constraint::Percentage(33),
-        ])
+        )
         .highlight_style(Style::default().add_modifier(Modifier::BOLD))
         .highlight_symbol("")
         .render(area, f, &mut app.activity_view_state.pace_table_state);

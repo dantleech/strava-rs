@@ -16,8 +16,7 @@ pub struct LogView {
 }
 impl LogView {
     pub(crate) fn new() -> LogView {
-        LogView {
-        }
+        LogView {}
     }
 }
 

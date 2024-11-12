@@ -34,6 +34,10 @@ impl From<&str> for QuantityUnit {
         match value {
             "mph" => Self::Mph,
             "kmph" => Self::Kmph,
+            "m" => Self::Mph,
+            "mi" => Self::Mph,
+            "km" => Self::Kmph,
+            "k" => Self::Kmph,
             _ => Self::Kmph,
         }
     }

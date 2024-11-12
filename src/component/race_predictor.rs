@@ -57,14 +57,13 @@ pub fn draw(
         ]));
     }
 
-    let table = Table::new(rows)
+    let table = Table::new(rows, &[Constraint::Length(9), Constraint::Length(10)])
         .header(
             Row::new(headers)
                 .height(1)
                 .bottom_margin(1)
                 .style(Style::default()),
-        )
-        .widths(&[Constraint::Length(9), Constraint::Length(10)]);
+        );
 
     table.render(area, f);
 }

@@ -29,6 +29,7 @@ pub fn draw(app: &mut App, f: &mut Buffer, area: Rect, view: &mut dyn View) {
         .split(area);
 
     header(app, view.mapped_events(app)).render(rows[0], f);
+
     view.draw(app, f, rows[1]);
 
     status_bar(app).render(rows[2], f);

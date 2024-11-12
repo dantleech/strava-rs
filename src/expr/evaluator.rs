@@ -55,10 +55,10 @@ impl Evaluator {
     pub fn evaluate(&self, expr: &Expr, vars: &Vars) -> Result<bool, String> {
         match self.evaluate_expr(&expr, vars)? {
             Evalue::Number(n) => {
-                Err(format!("expression must evluate to a boolean, got {:?}: {:?}", expr, n).to_string())
+                Err(format!("expression must evaluate to a boolean, got {:?}: {:?}", expr, n).to_string())
             }
             Evalue::Date(_) | Evalue::String(_) => {
-                Err(format!("expression must evluate to a boolean, got: {:?}", expr).to_string())
+                Err(format!("expression must evaluate to a boolean, got: {:?}", expr).to_string())
             }
             Evalue::Bool(b) => Ok(b),
         }

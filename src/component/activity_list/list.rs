@@ -58,16 +58,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
         ]));
     }
 
-    Table::new(rows)
-        .header(
-            Row::new(headers)
-                .height(1)
-                .bottom_margin(1)
-                .style(Style::default()),
-        )
-        .highlight_style(Style::default().add_modifier(Modifier::BOLD))
-        .highlight_symbol("")
-        .widths(&[
+    Table::new(rows, &[
             Constraint::Min(10),
             Constraint::Min(2),
             Constraint::Percentage(20),
@@ -78,4 +69,12 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
             Constraint::Percentage(10),
             Constraint::Percentage(10),
         ])
+        .header(
+            Row::new(headers)
+                .height(1)
+                .bottom_margin(1)
+                .style(Style::default()),
+        )
+        .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+        .highlight_symbol("")
 }
