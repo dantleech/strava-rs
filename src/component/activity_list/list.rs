@@ -23,6 +23,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
         "Dst",
         "🕑 Time",
         "👣 Pace",
+        "󰓅  Speed",
         "💓 Avg. Heart",
         "🌄 Elevation",
         "🪜 Rank",
@@ -42,8 +43,10 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
             Cell::from(app.unit_formatter.distance(activity.distance)),
             Cell::from(app.unit_formatter.stopwatch_time(activity.moving_time)),
             Cell::from(
-                app.unit_formatter
-                    .pace(activity.moving_time, activity.distance),
+                app.unit_formatter.pace(activity.moving_time, activity.distance),
+            ),
+            Cell::from(
+                app.unit_formatter.speed(activity.moving_time, activity.distance),
             ),
             Cell::from(
                 activity
