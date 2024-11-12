@@ -217,7 +217,9 @@ impl App<'_> {
                         self.error_message = Some(Notification::new(message));
                     }
                     InputEvent::Tick => (),
-                    InputEvent::Reload => self.reload().await,
+                    InputEvent::Reload => {
+                        self.reload().await;
+                    }
                     InputEvent::Sync => self.sync_sender.send(true).await?,
                 }
             }
@@ -241,9 +243,11 @@ impl App<'_> {
         if let Some(anchored) = &self.activity_anchored {
             activities = activities.withing_distance_of(anchored, self.filters.anchor_tolerance);
         }
+        info!("Reloaded");
         self.activities = activities
             .rank(&self.ranking.rank_by, &self.ranking.rank_order)
             .sort(&self.filters.sort_by, &self.filters.sort_order)
+
     }
 
     pub fn activities(&self) -> Activities {

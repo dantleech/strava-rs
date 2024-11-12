@@ -19,6 +19,7 @@ use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
 use event::input;
 
+use log::info;
 use tokio::sync::mpsc::{self};
 use tui::{backend::CrosstermBackend, Terminal};
 use tui_logger::{init_logger, set_default_level};
@@ -102,8 +103,9 @@ async fn main() -> Result<(), anyhow::Error> {
         sync_sender,
     );
     app.send(input::InputEvent::Reload);
+    app.send(input::InputEvent::Reload);
     app.activity_type = config.activity_type;
-    app.send(input::InputEvent::Sync);
+    info!("Starting application");
     app.run(&mut terminal).await?;
     sync_task.abort();
 

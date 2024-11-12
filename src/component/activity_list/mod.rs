@@ -147,8 +147,10 @@ impl View for ActivityList {
         <Table as StatefulWidget>::render(table, rows[0], f, app.activity_list.table_state());
 
         if app.activity_list.filter_dialog {
+            let input = &app.activity_list.filter_text_area;
+            let scroll = input.visual_scroll(60) as u16;
             let rect = centered_rect_absolute(64, 3, area);
-            let p = Paragraph::new(app.activity_list.filter_text_area.value()).block(
+            let p = Paragraph::new(input.value()).scroll((0, scroll)).block(
                 Block::default()
                     .borders(Borders::ALL)
                     .title(Title::from("Filter"))
@@ -157,7 +159,7 @@ impl View for ActivityList {
             );
 
             self.cursor_pos = Some((
-                1 + rect.x + app.activity_list.filter_text_area.visual_cursor() as u16,
+                1 + rect.x + ((app.activity_list.filter_text_area.visual_cursor() as u16).max(scroll) - scroll) as u16,
                 rect.y + 1,
             ));
 

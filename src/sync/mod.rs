@@ -1,12 +1,18 @@
-
 use hyper::Client;
 use hyper_rustls::HttpsConnectorBuilder;
 use sqlx::SqlitePool;
-use tokio::{task, sync::mpsc::Receiver};
+use tokio::{sync::mpsc::Receiver, task};
 
-use crate::{authenticator::Authenticator, event::{input::EventSender, logger::Logger}, client::{StravaConfig, new_strava_client}};
+use crate::{
+    authenticator::Authenticator,
+    client::{new_strava_client, StravaConfig},
+    event::{input::EventSender, logger::Logger},
+};
 
-use self::{ingest_activities::IngestActivitiesTask, ingest_activity::IngestActivityTask, convert::ActivityConverter};
+use self::{
+    convert::ActivityConverter, ingest_activities::IngestActivitiesTask,
+    ingest_activity::IngestActivityTask,
+};
 
 pub mod convert;
 pub mod ingest_activities;
@@ -21,7 +27,11 @@ pub async fn spawn_sync<'a>(
     logger: Logger,
     mut sync_receiver: Receiver<bool>,
 ) -> task::JoinHandle<()> {
-    let connector = HttpsConnectorBuilder::new().with_native_roots().https_only().enable_http1().build();
+    let connector = HttpsConnectorBuilder::new()
+        .with_native_roots()
+        .https_only()
+        .enable_http1()
+        .build();
     let event_sender = event_sender;
 
     task::spawn(async move {
@@ -39,18 +49,18 @@ pub async fn spawn_sync<'a>(
                 access_token: authenticator.access_token().await.unwrap(),
             };
             let client = new_strava_client(api_config, logger.clone());
-                IngestActivitiesTask::new(&client, &pool, logger.clone())
-                    .execute()
-                    .await
-                    .unwrap();
-                IngestActivityTask::new(&client, &pool, logger.clone())
-                    .execute()
-                    .await
-                    .unwrap();
-                ActivityConverter::new(&pool, event_sender.clone(), logger.clone())
-                    .convert()
-                    .await
-                    .unwrap();
+            IngestActivitiesTask::new(&client, &pool, logger.clone())
+                .execute()
+                .await
+                .unwrap();
+            IngestActivityTask::new(&client, &pool, logger.clone())
+                .execute()
+                .await
+                .unwrap();
+            ActivityConverter::new(&pool, event_sender.clone(), logger.clone())
+                .convert()
+                .await
+                .unwrap();
             if sync_receiver.recv().await.is_some() {
                 continue;
             }
