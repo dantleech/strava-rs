@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use chrono::{NaiveDateTime};
 use sqlx::{SqlitePool};
 
@@ -61,7 +63,7 @@ INSERT INTO raw_activity (id, created_at, listed, synced) VALUES (?, ?, ?, false
                 ).bind(
                     match NaiveDateTime::parse_from_str(s_activity["start_date"].as_str().unwrap(), "%Y-%m-%dT%H:%M:%SZ") {
                             Ok(t) => t,
-                            Err(_err) => NaiveDateTime::from_timestamp_millis(0).unwrap(),
+                            Err(_err) => NaiveDateTime::from_str("0")?,
                     }
                 ).bind(
                     s_activity.to_string()

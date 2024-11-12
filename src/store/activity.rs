@@ -191,7 +191,7 @@ impl Activities {
     pub fn timestamps(&self) -> Vec<i64> {
         self.activities
             .iter()
-            .map(|a| a.start_date.unwrap().timestamp())
+            .map(|a| a.start_date.unwrap().and_utc().timestamp())
             .collect()
     }
 

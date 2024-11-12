@@ -1,17 +1,21 @@
 #![allow(dead_code)]
 
-use std::{fmt::Display};
+use std::fmt::Display;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use hyper::{client::HttpConnector, Body, Client, Method, Request, Response};
-use hyper_rustls::{HttpsConnectorBuilder, HttpsConnector};
+use hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::event::{logger::Logger};
+use crate::event::logger::Logger;
 
 pub fn new_strava_client(config: StravaConfig, logger: Logger) -> StravaClient {
-    let connector = HttpsConnectorBuilder::new().with_native_roots().https_only().enable_http1().build();
+    let connector = HttpsConnectorBuilder::new()
+        .with_native_roots()
+        .https_only()
+        .enable_http1()
+        .build();
     let client = Client::builder().build(connector);
 
     StravaClient {
@@ -57,7 +61,7 @@ pub struct Activity {
     pub location_city: Option<String>,
     pub athlete_count: i64,
     pub splits_metric: Option<Vec<Split>>,
-    pub splits_standard: Option<Vec<Split>>
+    pub splits_standard: Option<Vec<Split>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -102,11 +106,7 @@ impl StravaClient {
         let res: Response<Body> = self.client.request(req).await?;
 
         if res.status() != 200 {
-            let message = format!(
-                "Got {} response for URL {}",
-                res.status(),
-                &url
-            );
+            let message = format!("Got {} response for URL {}", res.status(), &url);
             self.logger.error(message.clone()).await;
             return Err(anyhow::Error::msg(message));
         }
@@ -131,7 +131,7 @@ impl StravaClient {
                     per_page,
                     page,
                     match after {
-                        Some(epoch) => epoch.timestamp().to_string(),
+                        Some(epoch) => epoch.and_utc().timestamp().to_string(),
                         None => "".to_string(),
                     }
                 ),

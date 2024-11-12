@@ -1,6 +1,11 @@
-use chrono::NaiveDateTime;
+use chrono::DateTime;
 use tui::{
-    layout::Constraint, prelude::Buffer, style::{Color, Style}, symbols::Marker, text::{Line, Span}, widgets::{Axis, Block, Borders, Chart, Dataset, GraphType, Widget}
+    layout::Constraint,
+    prelude::Buffer,
+    style::{Color, Style},
+    symbols::Marker,
+    text::{Line, Span},
+    widgets::{Axis, Block, Borders, Chart, Dataset, GraphType, Widget},
 };
 
 use crate::{
@@ -10,14 +15,8 @@ use crate::{
 };
 
 pub fn handle(_app: &mut App, _key: MappedKey) {}
-pub fn draw(
-    app: &mut App,
-    f: &mut Buffer,
-    area: tui::layout::Rect,
-) {
-    let activities = &app
-        .activities()
-        .sort(&SortBy::Date, &SortOrder::Asc);
+pub fn draw(app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
+    let activities = &app.activities().sort(&SortBy::Date, &SortOrder::Asc);
     let times: Vec<i64> = activities.timestamps();
     let paces: Vec<i64> = activities.meter_per_hours();
     let tmax = times.iter().max();
@@ -38,7 +37,7 @@ pub fn draw(
         .to_vec()
         .iter()
         .map(|a| {
-            let ts = a.start_date.unwrap().timestamp();
+            let ts = a.start_date.unwrap().and_utc().timestamp();
             (ts as f64, a.meters_per_hour())
         })
         .collect();
@@ -47,8 +46,14 @@ pub fn draw(
         let activities = app.activities();
         if let Some(a) = activities.get(selected) {
             if let Some(a) = activities.find(a.id) {
-                current.push((a.start_date.unwrap().timestamp() as f64, *pmin as f64));
-                current.push((a.start_date.unwrap().timestamp() as f64, *pmax as f64));
+                current.push((
+                    a.start_date.unwrap().and_utc().timestamp() as f64,
+                    *pmin as f64,
+                ));
+                current.push((
+                    a.start_date.unwrap().and_utc().timestamp() as f64,
+                    *pmax as f64,
+                ));
             }
         }
     }
@@ -84,15 +89,12 @@ pub fn draw(
                 .title(Span::styled("Date", Style::default().fg(Color::Red)))
                 .style(Style::default().fg(Color::White))
                 .bounds([*tmin.unwrap() as f64, *tmax.unwrap() as f64])
-                .labels(
-                    xaxis
-                        .map(|p| {
-                            Line::from(match NaiveDateTime::from_timestamp_millis(p * 1000) {
-                                Some(t) => t.format("%Y-%m-%d").to_string(),
-                                None => "n/a".to_string(),
-                            })
-                        })
-                ),
+                .labels(xaxis.map(|p| {
+                    Line::from(match DateTime::from_timestamp_millis(p * 1000) {
+                        Some(t) => t.format("%Y-%m-%d").to_string(),
+                        None => "n/a".to_string(),
+                    })
+                })),
         )
         .y_axis(
             Axis::default()
@@ -102,10 +104,7 @@ pub fn draw(
                     *pmin as f64,
                     *pmax as f64 + (pdiff as f64 / activities.len() as f64),
                 ])
-                .labels(
-                    yaxis
-                        .map(|p| Span::from(app.unit_formatter.pace(3600, p as f64)))
-                ),
+                .labels(yaxis.map(|p| Span::from(app.unit_formatter.pace(3600, p as f64)))),
         );
     chart.render(area, f);
 }

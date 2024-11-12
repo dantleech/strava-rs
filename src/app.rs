@@ -313,7 +313,7 @@ impl App<'_> {
             None => terminal.hide_cursor()?,
             Some((x, y)) => {
                 terminal.show_cursor()?;
-                terminal.set_cursor(x, y)?;
+                terminal.set_cursor_position((x, y))?;
             }
         }
         terminal.flush()?;
