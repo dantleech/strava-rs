@@ -17,14 +17,18 @@ pub enum Expr {
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum QuantityUnit {
-    Kmph,
-    Mph,
+    Meters,
+    Kilometers,
+    Miles,
+    Foot,
 }
 impl QuantityUnit {
     pub(crate) fn convert(&self, val: f64) -> f64 {
         match self {
-            QuantityUnit::Kmph => val * 1000.0,
-            QuantityUnit::Mph => (val * 1.609344) * 1000.0,
+            QuantityUnit::Meters => val,
+            QuantityUnit::Kilometers => val * 1000.0,
+            QuantityUnit::Miles => (val * 1.609344) * 1000.0,
+            QuantityUnit::Foot => val * 0.3048,
         }
     }
 }
@@ -32,13 +36,14 @@ impl QuantityUnit {
 impl From<&str> for QuantityUnit {
     fn from(value: &str) -> Self {
         match value {
-            "mph" => Self::Mph,
-            "kmph" => Self::Kmph,
-            "m" => Self::Mph,
-            "mi" => Self::Mph,
-            "km" => Self::Kmph,
-            "k" => Self::Kmph,
-            _ => Self::Kmph,
+            "mph" => Self::Miles,
+            "kmph" => Self::Kilometers,
+            "m" => Self::Meters,
+            "mi" => Self::Miles,
+            "km" => Self::Kilometers,
+            "k" => Self::Kilometers,
+            "ft" => Self::Foot,
+            _ => Self::Kilometers,
         }
     }
 }
@@ -191,7 +196,7 @@ mod test {
     fn parse_expression_quantity() {
         assert_eq!(Expr::Quantity(
             Box::new(Expr::Number(10.2)),
-            QuantityUnit::Kmph
+            QuantityUnit::Kilometers
         ), Parser::new("10.2kmph").parse().unwrap());
     }
 }

@@ -297,6 +297,10 @@ impl ActivitySplit {
     pub fn seconds_per_meter(&self) -> f64 {
         self.moving_time as f64 / self.distance
     }
+
+    pub(crate) fn meters_per_hour(&self) -> f64 {
+        self.distance / (self.moving_time as f64 / 3600.0)
+    }
 }
 
 pub struct ActivityStore<'a> {

@@ -41,7 +41,7 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
             Cell::from(activity.activity_type_icon()),
             Cell::from(activity.title.clone()),
             Cell::from(app.unit_formatter.distance(activity.distance)),
-            Cell::from(app.unit_formatter.stopwatch_time(activity.moving_time)),
+            Cell::from(app.unit_formatter.stopwatch_time(activity.elapsed_time)),
             Cell::from(
                 app.unit_formatter.pace(activity.moving_time, activity.distance),
             ),
@@ -59,15 +59,16 @@ pub fn activity_list_table<'a>(app: &App, activities: &'a Activities) -> Table<'
     }
 
     Table::new(rows, &[
-            Constraint::Min(10),
-            Constraint::Min(2),
+            Constraint::Length(10),
+            Constraint::Length(2),
             Constraint::Percentage(20),
-            Constraint::Percentage(10),
-            Constraint::Percentage(10),
-            Constraint::Percentage(10),
-            Constraint::Percentage(10),
-            Constraint::Percentage(10),
-            Constraint::Percentage(10),
+            Constraint::Min(8),
+            Constraint::Min(8),
+            Constraint::Min(8),
+            Constraint::Min(8),
+            Constraint::Min(8),
+            Constraint::Min(8),
+            Constraint::Min(8),
         ])
         .header(
             Row::new(headers)

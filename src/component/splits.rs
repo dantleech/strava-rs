@@ -10,6 +10,11 @@ use tui::{
 
 use crate::{app::App, ui::color::{gradient, Rgb}, store::activity::ActivitySplit};
 
+enum SportType {
+    Ride,
+    Run,
+}
+
 pub fn draw(
     app: &mut App,
     f: &mut Buffer,
@@ -38,9 +43,17 @@ pub fn draw(
     constraints.push(Constraint::Max(0));
 
     let mut rows = vec![];
+    let sport_type = match activity.sport_type.as_str() {
+        "Ride" => SportType::Ride,
+        _ => SportType::Run,
+    };
+    let speed_header = match sport_type {
+        SportType::Ride => "󰓅 Speed",
+        SportType::Run => "👣 Pace",
+    };
     let header = vec![
         "#",
-        "👣 Pace",
+        speed_header,
         "🌄",
     ];
 
@@ -56,7 +69,12 @@ pub fn draw(
         rows.push(
             Row::new([
                 Cell::from(format!("{}", count)).set_style(Style::default().bg(color)),
-                Cell::from(app.unit_formatter.pace(split.moving_time, split.distance)),
+                match sport_type {
+                    SportType::Ride => Cell::from(
+                        app.unit_formatter.speed(split.meters_per_hour()),
+                    ),
+                    _ => Cell::from(app.unit_formatter.pace(split.moving_time, split.distance))
+                },
                 Cell::from(app.unit_formatter.elevation(split.elevation_difference)),
             ]),
         );
