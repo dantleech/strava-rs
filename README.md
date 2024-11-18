@@ -74,8 +74,10 @@ type = "Run" and title ~ "Park"
 
 ### Values
 
-- `kmph`: Kilometers per hour e.g. `speed > 10kmph`
-- `mph`: Miles per hour e.g. `speed > 10mph`
+- `kmph`, `k`: Kilometers per hour e.g. `speed > 10kmph`, `distance > 10k`
+- `mph`, `mi`: Miles per hour e.g. `speed > 10mph`, `distance > 10mi`
+- `m`, `meters`: Meters per hour e.g. `elevation > 500m`
+- `f`, `foot`: Foot per hour e.g. `elevation > 1000ft`
 
 ### Operators
 

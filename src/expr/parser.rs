@@ -39,10 +39,14 @@ impl From<&str> for QuantityUnit {
             "mph" => Self::Miles,
             "kmph" => Self::Kilometers,
             "m" => Self::Meters,
+            "meters" => Self::Meters,
             "mi" => Self::Miles,
+            "miles" => Self::Miles,
             "km" => Self::Kilometers,
             "k" => Self::Kilometers,
+            "kilometers" => Self::Kilometers,
             "ft" => Self::Foot,
+            "foot" => Self::Foot,
             _ => Self::Kilometers,
         }
     }
