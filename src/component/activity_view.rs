@@ -71,6 +71,7 @@ impl View for ActivityView {
             StravaEvent::Previous,
             StravaEvent::Enter,
             StravaEvent::ToggleLogView,
+            StravaEvent::MovingElapsed,
             StravaEvent::Quit,
         ]
     }

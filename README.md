@@ -28,8 +28,8 @@ Features:
 - `q`: **Quit**: quit!
 - `k`: **Up** - select previous activity
 - `j`: **Down** - select next activity
-- `K`: **PageUp** - select previous activity
-- `J`: **PageDown** - select next activity
+- `K`: **PageUp** - select previous activity (`shift-K` to move 10 down)
+- `J`: **PageDown** - select next activity (`shift-J` to move 10 up)
 - `n`: **Next** - (in activity view) next split
 - `p`: **Previous** - (in activity view) previous split
 - `o`: **ToggleSortOrder** - switch between ascending and descending order

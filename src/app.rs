@@ -133,6 +133,7 @@ impl App<'_> {
                 filter_dialog: false,
                 sort_dialog: false,
                 rank_dialog: false,
+                use_moving_time: true,
             },
             activity_view_state: ActivityViewState {
                 pace_table_state: TableState::default(),

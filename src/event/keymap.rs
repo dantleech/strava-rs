@@ -16,6 +16,7 @@ impl KeyMap {
         map.insert(KeyCode::Char('J'), StravaEvent::PageDown);
         map.insert(KeyCode::Char('n'), StravaEvent::Next);
         map.insert(KeyCode::Char('p'), StravaEvent::Previous);
+        map.insert(KeyCode::Char('m'), StravaEvent::MovingElapsed);
         map.insert(KeyCode::Char('o'), StravaEvent::ToggleSortOrder);
         map.insert(KeyCode::Char('u'), StravaEvent::ToggleUnitSystem);
         map.insert(KeyCode::Char('s'), StravaEvent::Sort);
@@ -82,6 +83,7 @@ pub enum StravaEvent {
     Previous,
     PageDown,
     PageUp,
+    MovingElapsed,
 }
 impl StravaEvent {
     pub fn describe(se: &StravaEvent) -> &'static str {
@@ -106,6 +108,7 @@ impl StravaEvent {
             StravaEvent::Next => "next",
             StravaEvent::Previous => "prev",
             StravaEvent::ToggleLogView => "logs",
+            StravaEvent::MovingElapsed => "moving/elapsed",
         }
     }
 }

@@ -93,6 +93,7 @@ impl View for ActivityList {
             StravaEvent::Filter => toggle_filter(app),
             StravaEvent::Sort => toggle_sort(app),
             StravaEvent::Rank => toggle_rank(app),
+            StravaEvent::MovingElapsed => toggle_moving_elapsed(app),
             StravaEvent::Enter => table_status_select_current(app),
             StravaEvent::Refresh => app.send(InputEvent::Sync),
             StravaEvent::IncreaseTolerance => {
@@ -123,6 +124,7 @@ impl View for ActivityList {
             StravaEvent::Sort,
             StravaEvent::Rank,
             StravaEvent::Refresh,
+            StravaEvent::MovingElapsed,
         ];
         events.push(StravaEvent::Anchor);
         if app.activity_anchored.is_some() {
@@ -195,6 +197,7 @@ pub struct ActivityListState {
     pub filter_dialog: bool,
     pub sort_dialog: bool,
     pub rank_dialog: bool,
+    pub use_moving_time: bool,
 }
 
 pub struct ActivityViewState {
@@ -224,4 +227,7 @@ fn toggle_sort(app: &mut App) {
 }
 fn toggle_rank(app: &mut App) {
     app.activity_list.rank_dialog = !app.activity_list.rank_dialog;
+}
+fn toggle_moving_elapsed(app: &mut App) {
+    app.activity_list.use_moving_time = !app.activity_list.use_moving_time;
 }
