@@ -1,6 +1,3 @@
-
-
-
 use sqlx::SqlitePool;
 
 use crate::client;
@@ -8,7 +5,6 @@ use crate::event::input::EventSender;
 use crate::event::input::InputEvent;
 use crate::event::logger::Logger;
 use crate::store::activity::Activity;
-
 
 pub struct ActivityConverter<'a> {
     pool: &'a SqlitePool,
@@ -33,17 +29,23 @@ impl ActivityConverter<'_> {
             r#"
             SELECT activity, listed FROM raw_activity WHERE synced = false
             "#
-        ).fetch_all(self.pool).await?;
+        )
+        .fetch_all(self.pool)
+        .await?;
 
         self.logger.info("Converting activities".to_string()).await;
         let mut i = 0;
         for raw_activity in raw_activities {
-            let listed: client::Activity =
-                serde_json::from_str(match &raw_activity.activity {
-                    Some(a) => a.as_str(),
-                    None => raw_activity.listed.as_str()
-                }).expect("Could not decode JSON");
-            if i % 10 == 0 { self.logger.info(format!("Converting activity {}", listed.name)).await;}
+            let listed: client::Activity = serde_json::from_str(match &raw_activity.activity {
+                Some(a) => a.as_str(),
+                None => raw_activity.listed.as_str(),
+            })
+            .expect("Could not decode JSON");
+            if i % 10 == 0 {
+                self.logger
+                    .info(format!("Converting activity {}", listed.name))
+                    .await;
+            }
             i += 1;
             let activity = Activity {
                 id: listed.id,
@@ -95,7 +97,7 @@ impl ActivityConverter<'_> {
                     location_state,
                     location_city,
                     athletes
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
                 ON CONFLICT DO NOTHING
                 "#,
                 activity.id,
@@ -117,27 +119,116 @@ impl ActivityConverter<'_> {
                 activity.location_state,
                 activity.location_city,
                 activity.athletes,
-            ).execute(self.pool).await?;
+            )
+            .execute(self.pool)
+            .await?;
 
             if let Some(full_activity) = raw_activity.activity {
                 let activity: client::Activity =
                     serde_json::from_str(full_activity.as_str()).expect("Could not decode JSON");
 
-                if let Some(laps) = activity.splits_standard {
-                    let json = serde_json::to_string(&laps).unwrap();
+                if let Some(splits) = &activity.splits_standard {
+                    let json = serde_json::to_string(splits).unwrap();
                     sqlx::query!(
                         r#"
                         UPDATE activity SET activity_splits = ? WHERE id = ?
                         "#,
                         json,
                         activity.id
-                    ).execute(self.pool).await?;
+                    )
+                    .execute(self.pool)
+                    .await?;
+                }
+                if let Some(segment_efforts) = &activity.segment_efforts {
+                    self.update_segment_sefforts(&activity, segment_efforts)
+                        .await?;
                 }
             }
         }
         self.logger.info("Done converting".to_string()).await;
         self.event_sender.send(InputEvent::Reload).await?;
 
+        Ok(())
+    }
+
+    async fn update_segment_sefforts(
+        &mut self,
+        activity: &client::Activity,
+        segment_efforts: &Vec<client::SegmentEffort>,
+    ) -> Result<(), anyhow::Error> {
+        for segment_effort in segment_efforts {
+            let segment = &segment_effort.segment;
+            sqlx::query!(
+                r#"
+                INSERT INTO segment (
+                    id,
+                    name,
+                    distance,
+                    average_grade,
+                    maximum_grade,
+                    elevation_high,
+                    elevation_low,
+                    start_lat,
+                    start_long,
+                    end_lat,
+                    end_long,
+                    climb_category,
+                    city,
+                    state,
+                    country,
+                    activity_type,
+                    hazardous
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT DO NOTHING
+                "#,
+                segment.id,
+                segment.name,
+                segment.distance,
+                segment.average_grade,
+                segment.maximum_grade,
+                segment.elevation_high,
+                segment.elevation_low,
+                segment.start_latlng.0,
+                segment.start_latlng.1,
+                segment.end_latlng.0,
+                segment.end_latlng.1,
+                segment.climb_category,
+                segment.city,
+                segment.state,
+                segment.country,
+                activity.sport_type,
+                segment.hazardous,
+            )
+            .execute(self.pool)
+            .await?;
+            sqlx::query!(
+                r#"
+                INSERT INTO segment_effort (
+                    id,
+                    activity_id,
+                    moving_time,
+                    start_date,
+                    average_cadence,
+                    device_watts,
+                    average_watts,
+                    pr_rank,
+                    kom_rank
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT DO NOTHING
+                "#,
+                segment_effort.id,
+                activity.id,
+                segment_effort.moving_time,
+                activity.start_date,
+                segment_effort.average_cadence,
+                segment_effort.device_watts,
+                segment_effort.average_watts,
+                segment_effort.pr_rank,
+                segment_effort.kom_rank,
+            )
+            .execute(self.pool)
+            .await?;
+        }
         Ok(())
     }
 }

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                INSERT INTO segment (\n                    id,\n                    name,\n                    distance,\n                    average_grade,\n                    maximum_grade,\n                    elevation_high,\n                    elevation_low,\n                    start_lat,\n                    start_long,\n                    end_lat,\n                    end_long,\n                    climb_category,\n                    city,\n                    state,\n                    country,\n                    activity_type,\n                    hazardous\n                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n                ON CONFLICT DO NOTHING\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 17
+    },
+    "nullable": []
+  },
+  "hash": "578b0263964610d68dda1948116beff1130a3cc57033f3c7b6c7c13e52481c01"
+}
