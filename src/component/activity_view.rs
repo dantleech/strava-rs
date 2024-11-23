@@ -102,30 +102,30 @@ impl View for ActivityView {
             .split(rows[1]);
         let col1 = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+            .constraints([Constraint::Percentage(20), Constraint::Percentage(80)].as_ref())
             .split(cols[0]);
 
         let block = Block::default()
             .title("Race Predictions")
             .borders(Borders::ALL);
-        block.render(col1[0], f);
+        block.render(col1[1], f);
 
         race_predictor::draw(
             app,
             f,
-            col1[0].inner(Margin {
+            col1[1].inner(Margin {
                 vertical: 2,
                 horizontal: 2,
             }),
         );
 
         let block = Block::default().title("Stats").borders(Borders::ALL);
-        block.render(col1[1], f);
+        block.render(col1[0], f);
 
         stats::draw(
             app,
             f,
-            col1[1].inner(Margin {
+            col1[0].inner(Margin {
                 vertical: 1,
                 horizontal: 1,
             }),

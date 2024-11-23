@@ -46,5 +46,5 @@ pub fn draw(
     for (name, value) in stats {
         text.push_str(format!("{}: {}\n", name, value).as_str());
     }
-    Paragraph::new(Text::from(text)).render(area, f);
+    Paragraph::new(Text::from(text)).wrap(tui::widgets::Wrap{trim: false}).render(area, f);
 }
