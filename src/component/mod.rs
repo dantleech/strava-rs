@@ -8,6 +8,7 @@ pub mod activity_view;
 pub mod polyline;
 pub mod race_predictor;
 pub mod stats;
+pub mod segments;
 pub mod unit_formatter;
 pub mod log_view;
 

@@ -1,10 +1,14 @@
+use std::collections::HashMap;
+
 use sqlx::SqlitePool;
 
 use crate::client;
+use crate::client::Segment;
 use crate::event::input::EventSender;
 use crate::event::input::InputEvent;
 use crate::event::logger::Logger;
 use crate::store::activity::Activity;
+use crate::store::activity::ActivitySegmentEffort;
 
 pub struct ActivityConverter<'a> {
     pool: &'a SqlitePool,
@@ -33,6 +37,7 @@ impl ActivityConverter<'_> {
         .fetch_all(self.pool)
         .await?;
 
+        let segments: HashMap<String, Segment> = HashMap::new();
         self.logger.info("Converting activities".to_string()).await;
         let mut i = 0;
         for raw_activity in raw_activities {
@@ -127,22 +132,36 @@ impl ActivityConverter<'_> {
                 let activity: client::Activity =
                     serde_json::from_str(full_activity.as_str()).expect("Could not decode JSON");
 
-                if let Some(splits) = &activity.splits_standard {
-                    let json = serde_json::to_string(splits).unwrap();
-                    sqlx::query!(
-                        r#"
-                        UPDATE activity SET activity_splits = ? WHERE id = ?
-                        "#,
-                        json,
-                        activity.id
-                    )
-                    .execute(self.pool)
-                    .await?;
-                }
-                if let Some(segment_efforts) = &activity.segment_efforts {
-                    self.update_segment_sefforts(&activity, segment_efforts)
-                        .await?;
-                }
+                let efforts_json = match &activity.segment_efforts {
+                    Some(se) => {
+                        let a_se: Vec<ActivitySegmentEffort> = se.into_iter().map(|se| ActivitySegmentEffort {
+                            segment_id: se.id,
+                            elapsed_time: se.elapsed_time,
+                            moving_time: se.moving_time,
+                            pr_rank: se.pr_rank,
+                            kom_rank: se.kom_rank,
+                        }).collect();
+                        serde_json::to_string(&a_se).unwrap()
+                    },
+                    None => "[]".to_string(),
+                };
+                let splits_json = match &activity.splits_standard {
+                    Some(s) => {
+                        serde_json::to_string(s).unwrap()
+                    },
+                    None => "[]".to_string(),
+                };
+
+                sqlx::query!(
+                    r#"
+                    UPDATE activity SET activity_splits = ?, segment_efforts = ? WHERE id = ?
+                    "#,
+                    splits_json,
+                    efforts_json,
+                    activity.id
+                )
+                .execute(self.pool)
+                .await?;
             }
         }
         self.logger.info("Done converting".to_string()).await;

@@ -293,6 +293,15 @@ pub struct ActivitySplit {
     pub split: i64,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
+pub struct ActivitySegmentEffort {
+    pub segment_id: i64,
+    pub elapsed_time: i64,
+    pub moving_time: i64,
+    pub pr_rank: Option<u8>,
+    pub kom_rank: Option<u8>,
+}
+
 impl ActivitySplit {
     pub fn seconds_per_meter(&self) -> f64 {
         self.moving_time as f64 / self.distance
