@@ -2,13 +2,12 @@ use tui::{
     layout::Constraint,
     prelude::Buffer,
     style::{Modifier, Style, Styled},
-    text::Text,
-    widgets::{Cell, Paragraph, Row, Table, Widget},
+    widgets::{Cell, Row, Table, Widget},
 };
 
 use crate::{
     app::App,
-    store::activity::{ActivitySegmentEffort, Segment, SportType},
+    store::activity::{ActivitySegmentEffort},
 };
 
 pub fn draw(app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {

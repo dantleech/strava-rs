@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, collections::HashMap, env::consts::EXE_SUFFIX, fmt::Display};
+use std::{cmp::Ordering, collections::HashMap, fmt::Display};
 
 use chrono::NaiveDateTime;
 use crossterm::event::KeyCode;
@@ -7,12 +7,9 @@ use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, SqlitePool};
 use strum::EnumIter;
 
-use crate::{
-    client::SegmentEffort,
-    expr::{
-        evaluator::{Evaluator, Evalue, Vars},
-        parser::Expr,
-    },
+use crate::expr::{
+    evaluator::{Evaluator, Evalue, Vars},
+    parser::Expr,
 };
 
 use super::polyline_compare::compare;
@@ -321,7 +318,6 @@ pub struct ActivitySplit {
     pub split: i64,
 }
 
-
 #[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
 pub struct ActivitySegmentEffort {
     pub segment_id: i64,
@@ -357,21 +353,25 @@ impl ActivityStore<'_> {
     pub fn new(pool: &SqlitePool) -> ActivityStore<'_> {
         ActivityStore { pool }
     }
-    pub async fn segments(&mut self) -> HashMap<i64,Segment> {
+    pub async fn segments(&mut self) -> HashMap<i64, Segment> {
         let segments = sqlx::query!("SELECT id, name, distance, activity_type FROM segment")
-        .fetch_all(self.pool)
-        .await
-        .unwrap();
+            .fetch_all(self.pool)
+            .await
+            .unwrap();
         segments
             .iter()
             .map(|rec| {
-                (rec.id, Segment {
-                    id: rec.id,
-                    name: rec.name.clone(),
-                    distance: rec.distance,
-                    activity_type: rec.activity_type.clone(),
-                })
-            }).collect()
+                (
+                    rec.id,
+                    Segment {
+                        id: rec.id,
+                        name: rec.name.clone(),
+                        distance: rec.distance,
+                        activity_type: rec.activity_type.clone(),
+                    },
+                )
+            })
+            .collect()
     }
 
     pub async fn activities(&mut self) -> Activities {
