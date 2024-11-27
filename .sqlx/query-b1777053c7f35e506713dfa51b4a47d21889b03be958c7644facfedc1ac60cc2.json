@@ -107,6 +107,11 @@
         "name": "athletes",
         "ordinal": 20,
         "type_info": "Int64"
+      },
+      {
+        "name": "segment_efforts",
+        "ordinal": 21,
+        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -133,7 +138,8 @@
       true,
       true,
       true,
-      false
+      false,
+      true
     ]
   },
   "hash": "b1777053c7f35e506713dfa51b4a47d21889b03be958c7644facfedc1ac60cc2"

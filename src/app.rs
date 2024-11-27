@@ -1,7 +1,5 @@
 use std::{
-    fmt::Display,
-    io,
-    time::{Duration, SystemTime},
+    collections::HashMap, fmt::Display, io, time::{Duration, SystemTime}
 };
 
 use log::info;
@@ -13,11 +11,7 @@ use tui_input::Input;
 use tui_logger::TuiWidgetState;
 
 use crate::{
-    component::{activity_list, log_view::LogView, unit_formatter::UnitFormatter},
-    event::keymap::KeyMap,
-    expr::evaluator::Evaluator,
-    store::activity::Activity,
-    ui,
+    component::{activity_list, log_view::LogView, unit_formatter::UnitFormatter}, event::keymap::KeyMap, expr::evaluator::Evaluator, store::activity::{Activity, Segment}, ui
 };
 use crate::{
     component::{
@@ -90,6 +84,7 @@ pub struct App<'a> {
     pub activity: Option<Activity>,
     pub activity_anchored: Option<Activity>,
     pub activities: Activities,
+    pub segments: HashMap<i64,Segment>,
 
     pub log_view_state: TuiWidgetState,
 
@@ -97,7 +92,7 @@ pub struct App<'a> {
     pub error_message: Option<Notification>,
     pub key_map: KeyMap,
 
-    store: &'a mut ActivityStore<'a>,
+    pub store: &'a mut ActivityStore<'a>,
     event_receiver: Receiver<InputEvent>,
     event_sender: EventSender,
 
@@ -137,6 +132,7 @@ impl App<'_> {
             },
             activity_view_state: ActivityViewState {
                 pace_table_state: TableState::default(),
+                segment_efforts_state: TableState::default(),
                 selected_split: None,
             },
             log_view_state: TuiWidgetState::default()
@@ -154,6 +150,7 @@ impl App<'_> {
             activity: None,
             activity_anchored: None,
             activities: Activities::new(),
+            segments: HashMap::new(),
             store,
 
             activity_type: None,
@@ -229,6 +226,7 @@ impl App<'_> {
 
     pub async fn reload(&mut self) {
         let mut activities = self.store.activities().await;
+        self.segments = self.store.segments().await;
 
         let mut evaluator = Evaluator::new();
         activities = match evaluator.parse(self.filters.filter.as_str()) {

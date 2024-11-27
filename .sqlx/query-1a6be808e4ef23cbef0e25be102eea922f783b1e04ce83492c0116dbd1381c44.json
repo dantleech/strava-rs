@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                    UPDATE activity SET activity_splits = ?, segment_efforts = ? WHERE id = ?\n                    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "1a6be808e4ef23cbef0e25be102eea922f783b1e04ce83492c0116dbd1381c44"
+}

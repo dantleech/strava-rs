@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, fmt::Display};
+use std::{cmp::Ordering, collections::HashMap, env::consts::EXE_SUFFIX, fmt::Display};
 
 use chrono::NaiveDateTime;
 use crossterm::event::KeyCode;
@@ -7,7 +7,13 @@ use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, SqlitePool};
 use strum::EnumIter;
 
-use crate::expr::{parser::Expr, evaluator::{Evaluator, Vars, Evalue}};
+use crate::{
+    client::SegmentEffort,
+    expr::{
+        evaluator::{Evaluator, Evalue, Vars},
+        parser::Expr,
+    },
+};
 
 use super::polyline_compare::compare;
 
@@ -18,6 +24,10 @@ pub enum SortBy {
     Pace,
     HeartRate,
     Time,
+}
+pub enum SportType {
+    Ride,
+    Run,
 }
 
 impl Display for SortBy {
@@ -118,25 +128,28 @@ impl Activities {
     }
 
     pub fn find(&self, id: i64) -> Option<&Activity> {
-        self.activities.iter().find(|a|a.id == id)
+        self.activities.iter().find(|a| a.id == id)
     }
 
     pub fn where_title_contains(&self, pattern: &str) -> Activities {
-        self.activities.clone()
+        self.activities
+            .clone()
             .into_iter()
             .filter(|a| a.title.contains(pattern))
             .collect()
     }
 
     pub fn having_activity_type(&self, activity_type: String) -> Activities {
-        self.activities.clone()
+        self.activities
+            .clone()
             .into_iter()
             .filter(|a| a.activity_type == activity_type)
             .collect()
     }
 
     pub fn withing_distance_of(&self, anchored: &Activity, tolerant: f64) -> Activities {
-        self.activities.clone()
+        self.activities
+            .clone()
             .into_iter()
             .filter(|a| {
                 if anchored.polyline().is_err() || a.polyline().is_err() {
@@ -147,11 +160,7 @@ impl Activities {
             .collect()
     }
 
-    pub fn sort(
-        &self,
-        sort_by: &SortBy,
-        sort_order: &SortOrder,
-    ) -> Activities {
+    pub fn sort(&self, sort_by: &SortBy, sort_order: &SortOrder) -> Activities {
         let mut activities = self.activities.clone();
         activities.sort_by(|a, b| {
             let ordering = match sort_by {
@@ -182,8 +191,8 @@ impl Activities {
         let mut rank = 0;
 
         let s = s.iter().cloned().map(|a| {
-            let mut aa= a;
-            rank+=1;
+            let mut aa = a;
+            rank += 1;
             aa.rank = rank;
             aa
         });
@@ -213,20 +222,38 @@ impl Activities {
     }
 
     pub(crate) fn by_expr(&self, evaluator: &Evaluator, expr: &Expr) -> Activities {
-        self.activities.clone()
+        self.activities
+            .clone()
             .into_iter()
-            .filter(|a| evaluator.evaluate(expr, &Vars::from([
-                ("distance".to_string(), Evalue::Number(a.distance)),
-                ("type".to_string(), Evalue::String(a.activity_type.to_string())),
-                ("heartrate".to_string(), Evalue::Number(a.average_heartrate.unwrap_or(0.0))),
-                ("title".to_string(), Evalue::String(a.title.clone())),
-                ("elevation".to_string(), Evalue::Number(a.total_elevation_gain)),
-                ("time".to_string(), Evalue::Number(a.moving_time as f64)),
-                ("date".to_string(), Evalue::Date(
-                    a.start_date.unwrap_or_default().into()
-                )),
-                ("speed".to_string(), Evalue::Number(a.meters_per_hour())),
-            ])).unwrap_or_default())
+            .filter(|a| {
+                evaluator
+                    .evaluate(
+                        expr,
+                        &Vars::from([
+                            ("distance".to_string(), Evalue::Number(a.distance)),
+                            (
+                                "type".to_string(),
+                                Evalue::String(a.activity_type.to_string()),
+                            ),
+                            (
+                                "heartrate".to_string(),
+                                Evalue::Number(a.average_heartrate.unwrap_or(0.0)),
+                            ),
+                            ("title".to_string(), Evalue::String(a.title.clone())),
+                            (
+                                "elevation".to_string(),
+                                Evalue::Number(a.total_elevation_gain),
+                            ),
+                            ("time".to_string(), Evalue::Number(a.moving_time as f64)),
+                            (
+                                "date".to_string(),
+                                Evalue::Date(a.start_date.unwrap_or_default().into()),
+                            ),
+                            ("speed".to_string(), Evalue::Number(a.meters_per_hour())),
+                        ]),
+                    )
+                    .unwrap_or_default()
+            })
             .collect()
     }
 }
@@ -280,6 +307,7 @@ pub struct Activity {
     pub location_city: Option<String>,
     pub athletes: i64,
     pub splits: Vec<ActivitySplit>,
+    pub segment_efforts: Vec<ActivitySegmentEffort>,
     pub rank: i64,
 }
 
@@ -292,6 +320,7 @@ pub struct ActivitySplit {
     pub elevation_difference: f64,
     pub split: i64,
 }
+
 
 #[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
 pub struct ActivitySegmentEffort {
@@ -316,9 +345,33 @@ pub struct ActivityStore<'a> {
     pool: &'a SqlitePool,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, FromRow)]
+pub struct Segment {
+    pub id: i64,
+    pub name: String,
+    pub distance: f64,
+    pub activity_type: String,
+}
+
 impl ActivityStore<'_> {
     pub fn new(pool: &SqlitePool) -> ActivityStore<'_> {
         ActivityStore { pool }
+    }
+    pub async fn segments(&mut self) -> HashMap<i64,Segment> {
+        let segments = sqlx::query!("SELECT id, name, distance, activity_type FROM segment")
+        .fetch_all(self.pool)
+        .await
+        .unwrap();
+        segments
+            .iter()
+            .map(|rec| {
+                (rec.id, Segment {
+                    id: rec.id,
+                    name: rec.name.clone(),
+                    distance: rec.distance,
+                    activity_type: rec.activity_type.clone(),
+                })
+            }).collect()
     }
 
     pub async fn activities(&mut self) -> Activities {
@@ -339,6 +392,12 @@ impl ActivityStore<'_> {
                 } else {
                     vec![]
                 };
+                let efforts: Vec<ActivitySegmentEffort> =
+                    if let Some(efforts) = &rec.segment_efforts {
+                        serde_json::from_str(efforts).unwrap()
+                    } else {
+                        vec![]
+                    };
                 Activity {
                     id: rec.id,
                     title: rec.title.clone(),
@@ -359,6 +418,7 @@ impl ActivityStore<'_> {
                     location_country: rec.location_country.clone(),
                     location_state: rec.location_state.clone(),
                     location_city: rec.location_city.clone(),
+                    segment_efforts: efforts,
                     athletes: rec.athletes,
                     splits,
                     rank: 0,

@@ -65,7 +65,7 @@ pub struct Activity {
     pub segment_efforts: Option<Vec<SegmentEffort>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SegmentEffort {
     pub id: i64,
     pub moving_time: i64,

@@ -77,6 +77,7 @@ impl ActivityConverter<'_> {
                 location_city: listed.location_city.clone(),
                 athletes: listed.athlete_count,
                 splits: vec![],
+                segment_efforts: vec![],
                 rank: 0,
             };
 
@@ -138,7 +139,7 @@ impl ActivityConverter<'_> {
                             segments.entry(effort.segment.id.to_string()).or_insert(effort.segment.clone());
                         }
                         let a_se: Vec<ActivitySegmentEffort> = efforts.into_iter().map(|se| ActivitySegmentEffort {
-                            segment_id: se.id,
+                            segment_id: se.segment.id,
                             elapsed_time: se.elapsed_time,
                             moving_time: se.moving_time,
                             pr_rank: se.pr_rank,

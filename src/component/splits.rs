@@ -8,12 +8,7 @@ use tui::{
     widgets::{Row, Cell, Table, StatefulWidget}, prelude::Buffer,
 };
 
-use crate::{app::App, ui::color::{gradient, Rgb}, store::activity::ActivitySplit};
-
-enum SportType {
-    Ride,
-    Run,
-}
+use crate::{app::App, store::activity::{ActivitySplit, SportType}, ui::color::{gradient, Rgb}};
 
 pub fn draw(
     app: &mut App,

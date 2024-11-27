@@ -201,6 +201,7 @@ pub struct ActivityListState {
 }
 
 pub struct ActivityViewState {
+    pub segment_efforts_state: TableState,
     pub pace_table_state: TableState,
     pub selected_split: Option<i64>,
 }
