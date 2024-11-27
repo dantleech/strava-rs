@@ -138,7 +138,7 @@ impl ActivityConverter<'_> {
                         for effort in efforts.iter() {
                             segments.entry(effort.segment.id.to_string()).or_insert(effort.segment.clone());
                         }
-                        let a_se: Vec<ActivitySegmentEffort> = efforts.into_iter().map(|se| ActivitySegmentEffort {
+                        let a_se: Vec<ActivitySegmentEffort> = efforts.iter().map(|se| ActivitySegmentEffort {
                             segment_id: se.segment.id,
                             elapsed_time: se.elapsed_time,
                             moving_time: se.moving_time,

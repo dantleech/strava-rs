@@ -15,7 +15,7 @@ pub fn draw(app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
         return;
     }
     let activity = app.activity.clone().unwrap();
-    let efforts: &Vec<ActivitySegmentEffort> = &activity.segment_efforts.as_ref();
+    let efforts: &Vec<ActivitySegmentEffort> = activity.segment_efforts.as_ref();
     let mut constraints = vec![];
     constraints.push(Constraint::Max(1));
     constraints.push(Constraint::Max(0));
@@ -27,13 +27,13 @@ pub fn draw(app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
         match app.segments.get(&effort.segment_id) {
             Some(segment) => {
                 rows.push(Row::new([
-                    Cell::from(format!("{}", segment.name)).set_style(Style::default()),
-                    Cell::from(format!("{}", match effort.pr_rank {
+                    Cell::from(segment.name.to_string()).set_style(Style::default()),
+                    Cell::from((match effort.pr_rank {
                         Some(1) => "🥇",
                         Some(2) => "🥈",
                         Some(3) => "🥉",
                         _ => ""
-                    })),
+                    }).to_string()),
                 ]));
                 Some(())
             }
