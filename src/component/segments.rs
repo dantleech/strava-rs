@@ -22,25 +22,19 @@ pub fn draw(app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
     constraints.push(Constraint::Max(0));
 
     let mut rows = vec![];
-    let sport_type = match activity.sport_type.as_str() {
-        "Ride" => SportType::Ride,
-        _ => SportType::Run,
-    };
-    let speed_header = match sport_type {
-        SportType::Ride => "󰓅 Speed",
-        SportType::Run => "👣 Pace",
-    };
-    let header = vec!["#", speed_header, "🏅"];
+    let header = vec!["Name", ""];
 
     for effort in efforts {
         match app.segments.get(&effort.segment_id) {
             Some(segment) => {
                 rows.push(Row::new([
                     Cell::from(format!("{}", segment.name)).set_style(Style::default()),
-                    match sport_type {
-                        _ => Cell::from(app.unit_formatter.pace(effort.moving_time, 1000.0)),
-                    },
-                    Cell::from(format!("{:?}", effort.pr_rank.unwrap_or(0))),
+                    Cell::from(format!("{}", match effort.pr_rank {
+                        Some(1) => "🥇",
+                        Some(2) => "🥈",
+                        Some(3) => "🥉",
+                        _ => ""
+                    })),
                 ]));
                 Some(())
             }
@@ -48,9 +42,8 @@ pub fn draw(app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
         };
     }
     Table::new(rows, &[
-            Constraint::Percentage(50),
-            Constraint::Percentage(45),
-            Constraint::Percentage(5),
+            Constraint::Min(5),
+            Constraint::Length(2),
         ])
         .header(
             Row::new(header)
