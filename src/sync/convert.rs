@@ -37,7 +37,7 @@ impl ActivityConverter<'_> {
         .fetch_all(self.pool)
         .await?;
 
-        let segments: HashMap<String, Segment> = HashMap::new();
+        let mut segments: HashMap<String, Segment> = HashMap::new();
         self.logger.info("Converting activities".to_string()).await;
         let mut i = 0;
         for raw_activity in raw_activities {
@@ -133,8 +133,11 @@ impl ActivityConverter<'_> {
                     serde_json::from_str(full_activity.as_str()).expect("Could not decode JSON");
 
                 let efforts_json = match &activity.segment_efforts {
-                    Some(se) => {
-                        let a_se: Vec<ActivitySegmentEffort> = se.into_iter().map(|se| ActivitySegmentEffort {
+                    Some(efforts) => {
+                        for effort in efforts.iter() {
+                            segments.entry(effort.segment.id.to_string()).or_insert(effort.segment.clone());
+                        }
+                        let a_se: Vec<ActivitySegmentEffort> = efforts.into_iter().map(|se| ActivitySegmentEffort {
                             segment_id: se.id,
                             elapsed_time: se.elapsed_time,
                             moving_time: se.moving_time,
@@ -164,19 +167,19 @@ impl ActivityConverter<'_> {
                 .await?;
             }
         }
+        self.logger.info("Updating segments".to_string()).await;
+        self.update_segments(&segments).await.unwrap();
         self.logger.info("Done converting".to_string()).await;
         self.event_sender.send(InputEvent::Reload).await?;
 
         Ok(())
     }
 
-    async fn update_segment_sefforts(
+    async fn update_segments(
         &mut self,
-        activity: &client::Activity,
-        segment_efforts: &Vec<client::SegmentEffort>,
+        segments: &HashMap<String,Segment>,
     ) -> Result<(), anyhow::Error> {
-        for segment_effort in segment_efforts {
-            let segment = &segment_effort.segment;
+        for segment in segments.values() {
             sqlx::query!(
                 r#"
                 INSERT INTO segment (
@@ -215,35 +218,8 @@ impl ActivityConverter<'_> {
                 segment.city,
                 segment.state,
                 segment.country,
-                activity.sport_type,
+                segment.activity_type,
                 segment.hazardous,
-            )
-            .execute(self.pool)
-            .await?;
-            sqlx::query!(
-                r#"
-                INSERT INTO segment_effort (
-                    id,
-                    activity_id,
-                    moving_time,
-                    start_date,
-                    average_cadence,
-                    device_watts,
-                    average_watts,
-                    pr_rank,
-                    kom_rank
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT DO NOTHING
-                "#,
-                segment_effort.id,
-                activity.id,
-                segment_effort.moving_time,
-                activity.start_date,
-                segment_effort.average_cadence,
-                segment_effort.device_watts,
-                segment_effort.average_watts,
-                segment_effort.pr_rank,
-                segment_effort.kom_rank,
             )
             .execute(self.pool)
             .await?;

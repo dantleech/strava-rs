@@ -78,7 +78,7 @@ pub struct SegmentEffort {
     pub segment: Segment,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Segment {
     pub id: i64,
     pub name: String,
@@ -90,6 +90,7 @@ pub struct Segment {
     pub start_latlng: (f32,f32),
     pub end_latlng: (f32,f32),
     pub climb_category: u8,
+    pub activity_type: String,
     pub city: Option<String>,
     pub state: Option<String>,
     pub country: Option<String>,
