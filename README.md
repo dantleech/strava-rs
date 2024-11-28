@@ -11,6 +11,8 @@ Features:
 - Display the route
 - Show laps
 - Race predictions
+- Activity segments
+- Works offline
 - Filter by route similarity ("anchoring")
 
 ## Screenshots
