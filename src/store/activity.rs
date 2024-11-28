@@ -326,6 +326,11 @@ pub struct ActivitySegmentEffort {
     pub pr_rank: Option<u8>,
     pub kom_rank: Option<u8>,
 }
+impl ActivitySegmentEffort {
+    pub fn meters_per_hour(&self, distance: f64) -> f64 {
+        distance / (self.moving_time as f64 / 3600.0)
+    }
+}
 
 impl ActivitySplit {
     pub fn seconds_per_meter(&self) -> f64 {

@@ -5,6 +5,7 @@ use crate::{app::{ActivePage, App}, event::keymap::{MappedKey, StravaEvent}};
 pub mod splits;
 pub mod activity_list;
 pub mod activity_view;
+pub mod activity_segments;
 pub mod polyline;
 pub mod race_predictor;
 pub mod stats;

@@ -29,6 +29,7 @@ impl KeyMap {
         map.insert(KeyCode::Char('0'), StravaEvent::ToggleLogView);
         map.insert(KeyCode::Enter, StravaEvent::Enter);
         map.insert(KeyCode::Esc, StravaEvent::Escape);
+        map.insert(KeyCode::Char('e'), StravaEvent::ToggleSegmentEffortsView);
         KeyMap{map}
     }
 
@@ -84,6 +85,7 @@ pub enum StravaEvent {
     PageDown,
     PageUp,
     MovingElapsed,
+    ToggleSegmentEffortsView,
 }
 impl StravaEvent {
     pub fn describe(se: &StravaEvent) -> &'static str {
@@ -101,6 +103,7 @@ impl StravaEvent {
             StravaEvent::PageUp => "page up",
             StravaEvent::PageDown => "page down",
             StravaEvent::Escape => "back",
+            StravaEvent::ToggleSegmentEffortsView => "segments",
             StravaEvent::None => "none",
             StravaEvent::IncreaseTolerance => "tolerance++",
             StravaEvent::DecreaseTolerance => "tolerance--",

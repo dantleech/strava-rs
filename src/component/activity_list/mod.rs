@@ -229,6 +229,6 @@ fn toggle_sort(app: &mut App) {
 fn toggle_rank(app: &mut App) {
     app.activity_list.rank_dialog = !app.activity_list.rank_dialog;
 }
-fn toggle_moving_elapsed(app: &mut App) {
+pub fn toggle_moving_elapsed(app: &mut App) {
     app.activity_list.use_moving_time = !app.activity_list.use_moving_time;
 }

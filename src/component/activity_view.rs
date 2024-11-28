@@ -15,7 +15,7 @@ use crate::{
 };
 
 use super::{
-    activity_list::list::activity_list_table, polyline, race_predictor, segments, splits, stats, View
+    activity_list::list::activity_list_table, polyline, race_predictor, splits, stats, View
 };
 
 pub struct ActivityView {}
@@ -32,6 +32,7 @@ impl View for ActivityView {
                 app.unit_formatter = app.unit_formatter.toggle();
             }
             StravaEvent::Quit => app.switch_to(ActivePage::ActivityList),
+            StravaEvent::ToggleSegmentEffortsView => app.switch_to(ActivePage::ActivitySegments),
             StravaEvent::Enter => app.switch_to(ActivePage::ActivityList),
             StravaEvent::Down => {
                 app.next_activity();
@@ -72,6 +73,7 @@ impl View for ActivityView {
             StravaEvent::Enter,
             StravaEvent::ToggleLogView,
             StravaEvent::MovingElapsed,
+            StravaEvent::ToggleSegmentEffortsView,
             StravaEvent::Quit,
         ]
     }
@@ -102,7 +104,7 @@ impl View for ActivityView {
             .split(rows[1]);
         let col1 = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Percentage(20), Constraint::Percentage(40), Constraint::Percentage(40)].as_ref())
+            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
             .split(cols[0]);
 
         let block = Block::default()
@@ -114,19 +116,6 @@ impl View for ActivityView {
             app,
             f,
             col1[1].inner(Margin {
-                vertical: 2,
-                horizontal: 2,
-            }),
-        );
-        let block = Block::default()
-            .title("Segments")
-            .borders(Borders::ALL);
-        block.render(col1[2], f);
-
-        segments::draw(
-            app,
-            f,
-            col1[2].inner(Margin {
                 vertical: 2,
                 horizontal: 2,
             }),

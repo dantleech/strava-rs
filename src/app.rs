@@ -11,7 +11,7 @@ use tui_input::Input;
 use tui_logger::TuiWidgetState;
 
 use crate::{
-    component::{activity_list, log_view::LogView, unit_formatter::UnitFormatter}, event::keymap::KeyMap, expr::evaluator::Evaluator, store::activity::{Activity, Segment}, ui
+    component::{activity_list, activity_segments::ActivitySegments, log_view::LogView, unit_formatter::UnitFormatter}, event::keymap::KeyMap, expr::evaluator::Evaluator, store::activity::{Activity, Segment}, ui
 };
 use crate::{
     component::{
@@ -104,6 +104,7 @@ pub struct App<'a> {
 #[derive(Clone, Copy)]
 pub enum ActivePage {
     ActivityList,
+    ActivitySegments,
     Activity,
     LogView,
 }
@@ -175,6 +176,7 @@ impl App<'_> {
 
             let mut view: Box<dyn View> = match self.active_page {
                 ActivePage::ActivityList => Box::new(ActivityList::new()),
+                ActivePage::ActivitySegments => Box::new(ActivitySegments::new()),
                 ActivePage::Activity => Box::new(ActivityView {}),
                 ActivePage::LogView => Box::new(LogView::new()),
             };

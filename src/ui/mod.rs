@@ -37,12 +37,19 @@ fn header<'a>(app: &'a mut App, mapped_events: Vec<StravaEvent>) -> Paragraph<'a
     let mut hints: Vec<Span> = vec![];
     for event in mapped_events {
         match app.key_map.key(&event) {
-            Some(k) => if let KeyCode::Char(c) = k {
-                hints.push(Span::styled(
-                    format!("[{}]", c),
-                    Style::default().fg(strava),
-                ));
-                hints.push(Span::raw(format!("{} ", StravaEvent::describe(&event))));
+            Some(k) => match k {
+                KeyCode::Char(c) => {
+                    hints.push(Span::styled(
+                        format!("[{}]", c),
+                        Style::default().fg(strava),
+                    ));
+                    hints.push(Span::raw(format!("{} ", StravaEvent::describe(&event))));
+                }
+                KeyCode::Tab => {
+                    hints.push(Span::styled("[tab]", Style::default().fg(strava)));
+                    hints.push(Span::raw(format!("{} ", StravaEvent::describe(&event))));
+                }
+                _ => (),
             },
             None => continue,
         }
