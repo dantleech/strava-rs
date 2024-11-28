@@ -36,7 +36,7 @@ SELECT MAX(created_at) as epoch FROM raw_activity LIMIT 1
             page += 1;
             let s_activities = match self
                 .client
-                .athlete_activities(page, PAGE_SIZE, last.epoch)
+                .athlete_activities(page, PAGE_SIZE, last.epoch.as_ref().map(|s| NaiveDateTime::parse_from_str(s.as_str(), "%Y-%m-%d %H:%M:%S").unwrap()))
                 .await {
                     Ok(a) => a,
                     Err(e) => {

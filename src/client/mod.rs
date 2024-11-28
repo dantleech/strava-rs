@@ -62,6 +62,39 @@ pub struct Activity {
     pub athlete_count: i64,
     pub splits_metric: Option<Vec<Split>>,
     pub splits_standard: Option<Vec<Split>>,
+    pub segment_efforts: Option<Vec<SegmentEffort>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SegmentEffort {
+    pub id: i64,
+    pub moving_time: i64,
+    pub elapsed_time: i64,
+    pub average_cadence: Option<f64>,
+    pub device_watts: bool,
+    pub average_watts: Option<f64>,
+    pub pr_rank: Option<u8>,
+    pub kom_rank: Option<u8>,
+    pub segment: Segment,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Segment {
+    pub id: i64,
+    pub name: String,
+    pub distance: f64,
+    pub average_grade: f32,
+    pub maximum_grade: f32,
+    pub elevation_high: f64,
+    pub elevation_low: f64,
+    pub start_latlng: (f32,f32),
+    pub end_latlng: (f32,f32),
+    pub climb_category: u8,
+    pub activity_type: String,
+    pub city: Option<String>,
+    pub state: Option<String>,
+    pub country: Option<String>,
+    pub hazardous: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

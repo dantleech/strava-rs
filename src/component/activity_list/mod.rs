@@ -201,6 +201,7 @@ pub struct ActivityListState {
 }
 
 pub struct ActivityViewState {
+    pub segment_efforts_state: TableState,
     pub pace_table_state: TableState,
     pub selected_split: Option<i64>,
 }
@@ -228,6 +229,6 @@ fn toggle_sort(app: &mut App) {
 fn toggle_rank(app: &mut App) {
     app.activity_list.rank_dialog = !app.activity_list.rank_dialog;
 }
-fn toggle_moving_elapsed(app: &mut App) {
+pub fn toggle_moving_elapsed(app: &mut App) {
     app.activity_list.use_moving_time = !app.activity_list.use_moving_time;
 }
