@@ -23,6 +23,10 @@ Features:
 
 ![image](https://github.com/user-attachments/assets/88c9b34a-7cee-409d-9d01-39bd22ef8259)
 
+### Activity Segments
+
+![image](https://github.com/user-attachments/assets/d07cd433-b333-4bae-b931-d2e777a1eefb)
+
 ## Key Map
 
 - `q`: **Quit**: quit!

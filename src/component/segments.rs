@@ -1,8 +1,5 @@
 use tui::{
-    layout::Constraint,
-    prelude::Buffer,
-    style::{Modifier, Style, Styled},
-    widgets::{Cell, Row, StatefulWidget, Table},
+    layout::Constraint, prelude::Buffer, style::{Color, Modifier, Style, Styled}, text::Span, widgets::{Cell, Row, StatefulWidget, Table}
 };
 
 use crate::{app::App, store::activity::ActivitySegmentEffort};
@@ -15,7 +12,10 @@ pub fn draw(app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
     let efforts: &Vec<ActivitySegmentEffort> = activity.segment_efforts.as_ref();
 
     let mut rows = vec![];
-    let header = vec!["🏅", "Name", "Distance", "Time", "Pace", "Speed"];
+    let header = vec!["🏅", "Name", "Dst", "Time", "👣 Pace", "󰓅 Speed"];
+    let header = header
+        .iter()
+        .map(|header| Cell::from(Span::styled(*header, Style::default().fg(Color::DarkGray))));
 
     for effort in efforts {
         match app.segments.get(&effort.segment_id) {
@@ -56,11 +56,11 @@ pub fn draw(app: &mut App, f: &mut Buffer, area: tui::layout::Rect) {
     }
     Table::new(rows, &[
         Constraint::Max(3),
-        Constraint::Percentage(50),
-        Constraint::Length(8),
-        Constraint::Length(8),
-        Constraint::Length(8),
-        Constraint::Length(8),
+        Constraint::Percentage(40),
+        Constraint::Max(8),
+        Constraint::Max(8),
+        Constraint::Max(8),
+        Constraint::Max(8),
     ])
         .header(
             Row::new(header)
