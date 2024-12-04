@@ -168,10 +168,10 @@ impl ActivityConverter<'_> {
                 .await?;
             }
         }
+        self.event_sender.send(InputEvent::Reload).await?;
         self.logger.info("Updating segments".to_string()).await;
         self.update_segments(&segments).await.unwrap();
         self.logger.info("Done converting".to_string()).await;
-        self.event_sender.send(InputEvent::Reload).await?;
 
         Ok(())
     }
