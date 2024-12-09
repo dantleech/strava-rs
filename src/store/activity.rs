@@ -25,6 +25,7 @@ pub enum SortBy {
 pub enum SportType {
     Ride,
     Run,
+    Unknown,
 }
 
 impl Display for SortBy {
@@ -448,9 +449,21 @@ impl Activity {
         self.distance / (self.moving_time as f64 / 3600.0)
     }
 
+    pub fn activity_category(&self) -> SportType {
+        match self.activity_type.as_str() {
+            "Ride" => SportType::Ride,
+            "VirtualRide" => SportType::Ride,
+            "Run" => SportType::Run,
+            "VirtualRun" => SportType::Run,
+            "TrailRun" => SportType::Run,
+            _ => SportType::Unknown,
+        }
+    }
+
     pub fn activity_type_icon(&self) -> String {
         match self.activity_type.as_str() {
             "Ride" => "🚴".to_string(),
+            "VirtualRide" => "💻🚴".to_string(),
             "Run" => "🏃".to_string(),
             "TrailRun" => "🏃".to_string(),
             "Walk" => "🥾".to_string(),

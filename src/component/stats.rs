@@ -22,6 +22,8 @@ pub fn draw(
                 }
             ),
         ),
+        ("Activity Type".to_string(), format!("{}", activity.activity_type)),
+        ("Sport Type".to_string(), format!("{}", activity.sport_type)),
         ("Kudos".to_string(), format!("{}", activity.kudos)),
         (
             "Split".to_string(),

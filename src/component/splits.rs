@@ -38,13 +38,9 @@ pub fn draw(
     constraints.push(Constraint::Max(0));
 
     let mut rows = vec![];
-    let sport_type = match activity.sport_type.as_str() {
-        "Ride" => SportType::Ride,
-        _ => SportType::Run,
-    };
-    let speed_header = match sport_type {
+    let speed_header = match activity.activity_category() {
         SportType::Ride => "󰓅 Speed",
-        SportType::Run => "👣 Pace",
+        _ => "👣 Pace",
     };
     let header = vec![
         "#",
@@ -64,7 +60,7 @@ pub fn draw(
         rows.push(
             Row::new([
                 Cell::from(format!("{}", count)).set_style(Style::default().bg(color)),
-                match sport_type {
+                match activity.activity_category() {
                     SportType::Ride => Cell::from(
                         app.unit_formatter.speed(split.meters_per_hour()),
                     ),
